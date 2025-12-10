@@ -100,3 +100,68 @@ h1 {
     text-align: center;
     min-width: 200px;
 }
+/* --- Step 4 Styles --- */
+#diagnosis-results hr {
+    margin: 15px 0;
+    border-color: #eee;
+}
+
+#diagnosis-results h3 {
+    color: #007bff;
+}
+
+.score-result {
+    font-size: 1.1em;
+    padding-left: 10px;
+    margin: 5px 0;
+}
+
+.score-result strong {
+    color: #28a745;
+}
+
+/* 確保 Step 3 的圖片顯示良好 */
+#testing-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+/* --- Step 2 預覽區樣式 --- */
+#student-classification-review {
+    margin-bottom: 25px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.review-group {
+    margin-bottom: 15px;
+    padding: 10px;
+    border-bottom: 1px dashed #ccc;
+}
+
+.review-group h4 {
+    color: #007bff;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+.review-images-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    max-height: 150px; /* 限制高度，避免圖片過多佔用太多空間 */
+    overflow-y: auto;
+    padding: 5px;
+}
+
+.review-img {
+    width: 60px; /* 縮小預覽圖大小 */
+    height: 60px;
+    object-fit: cover;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+}

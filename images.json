@@ -5,5 +5,6 @@
 	{ "id": "img_04", "imageURL": "img/canine/wolf_1.png", "correctAnswer": "Canine (犬科)", "isTest": false },
 	{ "id": "img_05", "imageURL": "img/feline/panther_1.png", "correctAnswer": "feline (犬科)", "isTest": false },
 	{ "id": "img_06", "imageURL": "img/canine/fox_1.png", "correctAnswer": "Canine (犬科)", "isTest": false },
+	{ "id": "img_07", "imageURL": "img/canine/jackal_1.png", "correctAnswer": "Canine (犬科)", "isTest": false },
     { "id": "img_test", "imageURL": "img/feline/cheetah_1.png", "correctAnswer": "Feline (貓科)", "isTest": true }
 ]

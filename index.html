@@ -3,49 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 風格分類訓練師</title>
+    <title>AI 模型設計師：貓科 vs. 犬科</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <h1>🤖 AI 風格分類訓練師</h1>
+    <h1>🧠 AI 模型設計師：貓科 vs. 犬科</h1>
     
     <div id="step1" class="game-step active">
-        <h2>Step 1: Classification (分類)</h2>
-        <p>請將圖片拖曳到正確的設計風格分類框中，以訓練 AI。 (Please drag and drop the images for **classification**.)</p>
+        <h2>Step 1: Classification (分類) - 訓練你的 AI</h2>
+        <p>請將圖片拖曳到兩個分類框中。你現在是工程師，**你定義** 哪個類別是貓科/犬科。 (You are the engineer, define your **classification**.)</p>
         
-        <div id="image-pool" class="drag-container">
-            </div>
-
-        <div id="classification-targets" class="drop-container">
-            </div>
+        <div id="image-pool" class="drag-container"></div>
+        <div id="classification-targets" class="drop-container"></div>
         
         <button id="checkStep1Btn" onclick="checkStep1()">完成分類 (Finish Classification)</button>
         <p id="step1-message" class="message"></p>
     </div>
 
     <div id="step2" class="game-step">
-        <h2>Step 2: Feature Selection (特徵選擇)</h2>
-        <p>請選擇你用於分類的 3 個關鍵視覺 **Feature** (特徵)。(Select 3 key **features** you used for **classification**.)</p>
-        <div id="feature-options">
-            </div>
-        <button onclick="goToStep3()">完成特徵選擇 (Go to Testing)</button>
+        <h2>Step 2: Feature Selection (特徵選擇) - 建立 AI 規則</h2>
+        
+        <div id="student-classification-review"></div> 
+        
+        <p>你剛剛分類的依據是什麼？請選擇 3 個最重要的生物 **Feature** (特徵) 作為 AI 的判斷規則。 (Select 3 key **features** for AI rules.)</p>
+        
+        <div id="feature-options"></div>
+        <button onclick="goToStep3()">完成規則建立 (Go to Inference)</button>
         <p id="step2-message" class="message"></p>
     </div>
 
     <div id="step3" class="game-step">
-        <h2>Step 3: Prediction (預測)</h2>
-        <p>這是一張未分類圖片。你 **predict** (預測) AI 會將它分到哪一類？(A new image for **prediction**.)</p>
+        <h2>Step 3: Inference (推論) - 測試你的 AI 模型</h2>
+        <p>這是一張新的測試圖片。根據你剛剛建立的 3 個特徵規則，你**推論**它應該是哪個分類？</p>
         
         <div id="testing-area">
-            <img id="test-image" src="img/test_card_3.png" alt="Test Image" style="width:150px; border: 1px solid #ccc;">
-            <div class="prediction-prompt">
-                <p>💡 **教師引導:** 請學生口頭 **predict** (預測)！</p>
-                <button onclick="revealPrediction()">揭曉 AI 預測 (Reveal AI Prediction)</button>
-            </div>
-            <div id="prediction-results">
+            <img id="test-image" src="" alt="Test Image for Prediction" style="width:180px; height:180px; object-fit:cover; border: 3px solid #007bff;">
+            
+            <div id="step3-features" style="margin-top: 15px;">
                 </div>
+            
+            <div style="margin-top: 20px;">
+                <label><input type="radio" name="finalPrediction" value="Feline (貓科)"> Feline (貓科)</label>
+                <label><input type="radio" name="finalPrediction" value="Canine (犬科)"> Canine (犬科)</label>
+            </div>
         </div>
+        
+        <button onclick="revealPrediction()">揭曉 AI 模型的表現 (Reveal Model Performance)</button>
+    </div>
+    
+    <div id="step4" class="game-step">
+        <h2>Step 4: Diagnosis & Scoring (診斷與計分)</h2>
+        <div id="diagnosis-results">
+            </div>
     </div>
 
     <script src="script.js"></script>

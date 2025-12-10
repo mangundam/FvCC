@@ -20,10 +20,9 @@ const TRUE_FEATURE_MAPPINGS = {
 // 遊戲狀態追蹤
 let GAME_DATA = []; // 訓練集數據 (包含真實答案)
 let studentsFeatures = []; // 學生選擇的特徵
-let studentClassification = {}; // 學生 Step 1 的分類結果 { imgId: 'Feline (貓科)', ... }
+let studentClassification = {}; // 學生 Step 1 的分類結果 { imgId: 'img1': 'Feline (貓科)', ... }
 let testImage = null; // 測試圖片
 let studentTestPrediction = ''; // 學生在 Step 3 的最終判斷
-let finalDiagnosis = {}; // 最終診斷結果
 
 // --- 輔助函式：切換步驟 ---
 function showStep(stepId) {
@@ -34,51 +33,142 @@ function showStep(stepId) {
 }
 
 // --- 圖片資料模擬 (您需要替換為後端生成的 JSON 數據) ---
-async function loadImagesData() {
-    // *** ❗❗❗ 請將以下數據替換為您的實際圖片 JSON 數據 ❗❗❗ ***
-    const allImages = [
-        // 訓練圖片應包含真實答案，但 Step 1 不使用
-        { id: 'img1', imageURL: 'img/feline/cat_1.png', trueAnswer: 'Feline (貓科)' },
-        { id: 'img2', imageURL: 'img/canine/dog_1.png', trueAnswer: 'Canine (犬科)' },
-        { id: 'img3', imageURL: 'img/feline/tiger_1.png', trueAnswer: 'Feline (貓科)' },
-        { id: 'img4', imageURL: 'img/canine/wolf_1.png', trueAnswer: 'Canine (犬科)' },
-        { id: 'img5', imageURL: 'img/feline/panther_1.png', trueAnswer: 'Feline (貓科)' },
-        { id: 'img6', imageURL: 'img/canine/fox_1.png', trueAnswer: 'Canine (犬科)' },
-        { id: 'img7', imageURL: 'img/feline/cheetah_1.png', trueAnswer: 'Feline (貓科)' },
-        { id: 'img8', imageURL: 'img/canine/jackal_1.png', trueAnswer: 'Canine (犬科)' },
-    ];
+const FULL_IMAGE_DATABASE = [
+    // --- Feline (貓科) 圖片 ---
+    { id: 'f1', imageURL: 'img/feline/cat_1.png', trueAnswer: 'Feline (貓科)' },
+    { id: 'f2', imageURL: 'img/feline/lion_1.png', trueAnswer: 'Feline (貓科)' },
+    { id: 'f3', imageURL: 'img/feline/tiger_1.png', trueAnswer: 'Feline (貓科)' },
+    { id: 'f4', imageURL: 'img/feline/cheetah_1.png', trueAnswer: 'Feline (貓科)' },
+    { id: 'f5', imageURL: 'img/feline/cougar_1.png', trueAnswer: 'Feline (貓科)' },
+    { id: 'f6', imageURL: 'img/feline/lynx_1.png', trueAnswer: 'Feline (貓科)' },
+    // --- Canine (犬科) 圖片 ---
+    { id: 'c1', imageURL: 'img/canine/dog_1.png', trueAnswer: 'Canine (犬科)' },
+    { id: 'c2', imageURL: 'img/canine/wolf_1.png', trueAnswer: 'Canine (犬科)' },
+    { id: 'c3', imageURL: 'img/canine/fox_1.png', trueAnswer: 'Canine (犬科)' },
+    { id: 'c4', imageURL: 'img/canine/coyote_1.png', trueAnswer: 'Canine (犬科)' },
+    { id: 'c5', imageURL: 'img/canine/jackal_1.png', trueAnswer: 'Canine (犬科)' },
+    { id: 'c6', imageURL: 'img/canine/wilddog_1.png', trueAnswer: 'Canine (犬科)' },
+];
 
-    const testIndex = Math.floor(Math.random() * allImages.length);
-    testImage = allImages[testIndex];
-    GAME_DATA = allImages.filter((_, index) => index !== testIndex);
+// 核心函式：隨機抽取圖片
+function getRandomSubset(arr, count) {
+    const shuffled = arr.slice(0);
+    let i = arr.length;
+    let temp, index;
+    // Fisher-Yates 洗牌算法
+    while (i--) {
+        index = Math.floor((i + 1) * Math.random());
+        temp = shuffled[index];
+        shuffled[index] = shuffled[i];
+        shuffled[i] = temp;
+    }
+    return shuffled.slice(0, count);
+}
+
+async function loadImagesData() {
+    const felineImages = FULL_IMAGE_DATABASE.filter(img => img.trueAnswer === 'Feline (貓科)');
+    const canineImages = FULL_IMAGE_DATABASE.filter(img => img.trueAnswer === 'Canine (犬科)');
+
+    const totalFeline = felineImages.length;
+    const totalCanine = canineImages.length;
+
+    // 檢查基本數量要求
+    if (totalFeline < 4 || totalCanine < 4) {
+        alert("錯誤：圖庫中貓科或犬科圖片數量不足4張，無法滿足訓練集(各3張)和測試集(1張)的要求。");
+        return;
+    }
+
+    // --- 1. 抽取訓練集 (共 10 張，各至少 3 張) ---
+    const MIN_PER_CATEGORY = 3;
+    const TARGET_TRAINING_SIZE = 10;
+    
+    // 確保貓科和犬科各至少有 3 張
+    let trainingFeline = getRandomSubset(felineImages, MIN_PER_CATEGORY);
+    let trainingCanine = getRandomSubset(canineImages, MIN_PER_CATEGORY);
+    
+    // 將訓練集中已抽取的圖片從大圖庫中移除，得到剩餘的圖片列表
+    const remainingFeline = felineImages.filter(img => !trainingFeline.includes(img));
+    const remainingCanine = canineImages.filter(img => !trainingCanine.includes(img));
+    const remainingImages = remainingFeline.concat(remainingCanine);
+
+    // 計算還需要補足的圖片數量
+    const needed = TARGET_TRAINING_SIZE - (trainingFeline.length + trainingCanine.length);
+
+    // 從剩餘的圖片中隨機抽取所需數量來補足 10 張
+    const fillerImages = getRandomSubset(remainingImages, needed);
+
+    // 組成最終訓練集
+    const finalTrainingImages = trainingFeline.concat(trainingCanine, fillerImages);
+    GAME_DATA = finalTrainingImages;
+
+    // --- 2. 抽取測試集 (從未被抽出的圖片中選取 1 張) ---
+    
+    // 從剩餘圖片 (未在 finalTrainingImages 中) 再次排除已用作補足的圖片
+    const finalRemainingForTest = remainingImages.filter(img => !fillerImages.includes(img));
+
+    if (finalRemainingForTest.length === 0) {
+         // 極低概率發生：圖庫大小剛好是 10 張
+        alert("警告：訓練集已用盡所有圖片。無法找到獨立的測試圖片。");
+        testImage = GAME_DATA[0]; // 退而求其次，隨機選用訓練集中的一張
+    } else {
+        // 從剩下所有圖片中隨機選一張作為測試圖片
+        const testIndex = Math.floor(Math.random() * finalRemainingForTest.length);
+        testImage = finalRemainingForTest[testIndex];
+    }
 
     if (GAME_DATA.length < 1) {
-        alert("錯誤：訓練圖片數量不足。請確保 JSON 數據中至少有 2 張圖片。");
+        alert("錯誤：訓練圖片數量不足。");
     }
 }
 
 // --- Step 1 邏輯：學生自由分類 (模擬 AI 訓練數據準備) ---
-async function initStep1() {
-    await loadImagesData(); 
+async function initStep1(isOptimization = false) {
+    // 1. 初次載入數據 (優化模式下跳過，直接使用現有 GAME_DATA)
+    isOptimization = (isOptimization === true);
+
+    if (!isOptimization) {
+        await loadImagesData();
+    }
     
     const imagePool = document.getElementById('image-pool');
     const dropTargets = document.getElementById('classification-targets');
-    imagePool.innerHTML = '';
+    
+    // 2. 清空所有動態內容
     dropTargets.innerHTML = '';
-    studentClassification = {};
+    
+    // 3. 處理圖片歸位 (優化模式) 或初次載入 (清空所有圖片)
+    if (isOptimization) {
+        // 優化模式：將圖片從分類框移回 imagePool
+        document.querySelectorAll('.drop-target').forEach(target => {
+            target.querySelectorAll('.draggable-img').forEach(img => {
+                imagePool.appendChild(img);
+            });
+        });
+        studentClassification = {}; // 重置分類記錄
+    } else {
+        // 初次載入：清空 imagePool，準備重新繪製所有圖片
+        imagePool.innerHTML = '';
+        studentClassification = {}; 
+    }
 
-    // 載入訓練圖片
+    // 4. 創建或移動訓練圖片到 imagePool
     GAME_DATA.forEach(data => {
-        const img = document.createElement('img');
-        img.src = data.imageURL;
-        img.id = data.id;
-        img.className = 'draggable-img';
+        let img = document.getElementById(data.id);
+        
+        // 只有在初次載入時 (img不存在)，才創建新的 img 元素
+        if (!img) {
+            img = document.createElement('img');
+            img.src = data.imageURL;
+            img.id = data.id;
+            img.className = 'draggable-img';
+            img.addEventListener('dragstart', dragStart);
+        }
+        
         img.setAttribute('draggable', true);
-        img.addEventListener('dragstart', dragStart);
-        imagePool.appendChild(img);
+        imagePool.appendChild(img); // 確保圖片在 DOM 中
     });
 
-    // 載入分類框
+    // 5. 載入分類框
     STYLE_CATEGORIES.forEach(category => {
         const target = document.createElement('div');
         target.className = 'drop-target';
@@ -90,7 +180,11 @@ async function initStep1() {
         dropTargets.appendChild(target);
     });
     
+    // 6. 訊息提示
     document.getElementById('step1-message').textContent = '請根據你的直覺，將圖片分類到你設計的兩個類別中。';
+    if (isOptimization) {
+        document.getElementById('step1-message').textContent = '🔄 優化模式: 請檢視並修正你對訓練數據的分類標籤。';
+    }
 }
 
 function dragStart(e) {
@@ -114,18 +208,13 @@ function drop(e) {
     const id = e.dataTransfer.getData('text/plain');
     const draggable = document.getElementById(id);
     
-    // 允許圖片在分類框間移動
+    // 修正 Bug 2: 僅在目標是有效的分類框時，才更新 DOM 和記錄狀態
     if (e.currentTarget.classList.contains('drop-target')) {
         e.currentTarget.appendChild(draggable);
         draggable.style.opacity = '1';
         draggable.setAttribute('draggable', true); 
         // 記錄學生的分類結果
         studentClassification[id] = e.currentTarget.dataset.category; 
-    } else {
-        // [修正] 如果圖片被拖到非分類框 (例如 image-pool)，應清除記錄
-        // 但由於您的 drop 邏輯只處理 drop-target，我們需要一個機制處理移回
-        // 為了簡化，我們假設學生會將所有圖片分配到 drop-target
-        draggable.style.opacity = '1';
     }
 }
 
@@ -133,9 +222,14 @@ function checkStep1() {
     const totalImages = GAME_DATA.length;
     let classifiedCount = 0;
     
-    // [簡化] 重新計算已分配的圖片數量
+    // [優化] 計算已分配的圖片數量
     document.querySelectorAll('.drop-target').forEach(target => {
-        classifiedCount += target.querySelectorAll('.draggable-img').length;
+        target.querySelectorAll('.draggable-img').forEach(img => {
+             // 確保只有在 drop-target 內的圖片才算數
+             if (studentClassification[img.id]) {
+                 classifiedCount++;
+             }
+        });
     });
 
     if (classifiedCount === totalImages) {
@@ -146,7 +240,7 @@ function checkStep1() {
             initStep2();
         }, 1000);
     } else {
-        document.getElementById('step1-message').textContent = `請將所有 ${totalImages} 張圖片都分配到分類框中。`;
+        document.getElementById('step1-message').textContent = `請將所有 ${totalImages} 張圖片都分配到分類框中。 (目前已分配: ${classifiedCount}/${totalImages})`;
         document.getElementById('step1-message').classList.remove('success');
     }
 }
@@ -262,14 +356,14 @@ function revealPrediction() {
     finalScore(); 
 }
 
-// --- Step 4 邏輯：模型診斷與計分 ---
+// --- Step 4 邏輯：模型診斷與計分 (整合優化選項) ---
 function finalScore() {
     // 1. 訓練準確度 (與真實答案相比)
-    let ruleStabilityScore = 0; // 衡量學生規則與真實世界規則的相符度
+    let ruleStabilityScore = 0;
     GAME_DATA.forEach(data => {
         const studentCategory = studentClassification[data.id];
         if (studentCategory === data.trueAnswer) {
-            ruleStabilityScore++; // 分類結果與真實答案相同
+            ruleStabilityScore++;
         }
     });
     const ruleStabilityPercentage = (ruleStabilityScore / GAME_DATA.length) * 100;
@@ -278,10 +372,10 @@ function finalScore() {
     let featureEfficiencyScore = 0;
     studentsFeatures.forEach(fId => {
         if (TRUE_FEATURE_MAPPINGS['Feline (貓科)'].includes(fId) || TRUE_FEATURE_MAPPINGS['Canine (犬科)'].includes(fId)) {
-            featureEfficiencyScore += 1; // 選擇了任一類別的關鍵特徵，加分
+            featureEfficiencyScore += 1;
         }
     });
-    const featureEfficiencyPercentage = (featureEfficiencyScore / 3) * 100; // 3個特徵中選對幾個關鍵
+    const featureEfficiencyPercentage = (featureEfficiencyScore / 3) * 100;
 
     // 3. 最終預測準確度
     const finalPredictionCorrect = (studentTestPrediction === testImage.trueAnswer);
@@ -310,9 +404,38 @@ function finalScore() {
         <p class="score-result">🎯 測試圖片真實答案: <strong>${testImage.trueAnswer}</strong></p>
         <p class="score-result">你的最終判斷: <strong>${studentTestPrediction}</strong></p>
         <p style="font-size: 1.2em; color: ${finalPredictionCorrect ? 'green' : 'red'};"><strong>推論結果：${finalPredictionCorrect ? '正確！ (Correct!)' : '錯誤！ (Error!)'}</strong></p>
+        
+        <hr>
+
+        <h3 style="color:#007bff;">🔄 模型優化 (Model Optimization)</h3>
+        <p>AI 開發是一個不斷迭代的過程。根據上述診斷，你認為修正哪一步能讓你的 AI 表現更好？</p>
+        <div style="display: flex; gap: 15px; margin-top: 20px;">
+            <button onclick="goToOptimization(1)" style="background-color: #ffc107; color: #333; border: none; padding: 10px; cursor: pointer;">
+                選項 A: 重新檢視 Step 1 分類 (修正訓練數據)
+            </button>
+            <button onclick="goToOptimization(2)" style="background-color: #17a2b8; color: white; border: none; padding: 10px; cursor: pointer;">
+                選項 B: 重新選擇 Step 2 特徵 (修正 AI 規則)
+            </button>
+        </div>
     `;
     
-    // 結尾討論：引導學生思考是 Step 1 (數據標籤) 還是 Step 2 (特徵選擇) 造成了最終的錯誤。
+    // 不再跳轉到 Step 5，而是留在 Step 4 進行選擇
+}
+
+function goToOptimization(choice) {
+    if (choice === 1) {
+        alert("選擇 A: 修正訓練數據。你將回到 Step 1 重新分類，以提高模型的「規則穩定性」。");
+        // 重置 Step 1 相關狀態
+        studentClassification = {}; 
+        showStep('step1');
+        initStep1(true); // 傳遞 true
+    } else if (choice === 2) {
+        alert("選擇 B: 修正 AI 規則。你將回到 Step 2 重新選擇特徵，以提高模型的「特徵效率」。");
+        // 重置 Step 2 相關狀態
+        studentsFeatures = [];
+        showStep('step2');
+        initStep2(); 
+    }
 }
 
 // 啟動遊戲

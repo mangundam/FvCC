@@ -3,15 +3,26 @@ const STYLE_CATEGORIES = ['Feline (貓科)', 'Canine (犬科)'];
 
 // 特徵列表：聚焦於貓犬科的生物特徵
 const DESIGN_FEATURES = [ 
-    { id: 'F1', name: 'Snout Length (口鼻長度)' }, // 犬科特徵
-    { id: 'F2', name: 'Ear Shape (耳朵形狀)' },
-    { id: 'F3', name: 'Eye Shape/Pupil (眼睛形狀/瞳孔)' }, // 貓科特徵
-    { id: 'F4', name: 'Claws (爪子是否可伸縮)' }, // 貓科特徵
-    { id: 'F5', name: 'Body Posture (身體姿態/站姿)' }, // 犬科特徵
-    { id: 'F6', name: 'Tail Shape (尾巴形狀/動作)' } 
+    // === 關鍵且正確的特徵 (Key/Discriminative Features) ===
+    { id: 'F1', name: 'Snout Length (口鼻長度)' },        // [犬科] 明顯的吻部
+    { id: 'F3', name: 'Eye Shape/Pupil (眼睛形狀/瞳孔)' }, // [貓科] 垂直瞳孔（夜行性）
+    { id: 'F4', name: 'Claws (爪子是否可伸縮)' },         // [貓科] 可伸縮的爪子
+    { id: 'F5', name: 'Body Posture (身體姿態/站姿)' },   // [犬科] 站姿較直、爪子長期暴露
+
+    // === 有差異性但非決定性特徵 (Moderately Discriminative Features) ===
+    { id: 'F2', name: 'Ear Shape (耳朵形狀)' },           // [兩者皆有] 差異較小，但有參考價值
+    { id: 'F6', name: 'Tail Shape (尾巴形狀/動作)' },      // [兩者皆有] 動作與形態有差異
+
+    // === 錯誤/干擾項：通用或不具分類決定性的特徵 (Distractor Features) ===
+    { id: 'D1', name: 'Fur Color (皮毛顏色)' },           // [通用] 顏色變化太大，非決定性特徵
+    { id: 'D2', name: 'Number of Legs (腿的數量)' },      // [通用] 都是四條腿，無區分性
+    { id: 'D3', name: 'Average Weight (平均體重)' },      // [通用] 變化範圍太大（家貓到獅子，吉娃娃到狼）
+    { id: 'D4', name: 'Whiskers Length (鬍鬚長度)' },     // [通用] 都有鬍鬚，且長度差異不明顯
+    { id: 'D5', name: 'Habitat (棲息地)' },               // [通用] 家養到荒野都有，非主要視覺特徵
+    { id: 'D6', name: 'Teeth Count (牙齒數量)' }          // [通用] 無法透過圖片直接觀察，且數量相近
 ];
 
-// 真實的特徵與分類映射 (用於 Step 4 診斷)
+// 請確保 TRUE_FEATURE_MAPPINGS 保持使用 F1-F6 中的關鍵項目：
 const TRUE_FEATURE_MAPPINGS = {
     'Feline (貓科)': ['F3', 'F4', 'F2'], 
     'Canine (犬科)': ['F1', 'F5', 'F6']
@@ -368,9 +379,13 @@ function finalScore() {
 
     // 2. 特徵效率 (所選特徵的有效性)
     let featureEfficiencyScore = 0;
+	const allTrueFeatures = TRUE_FEATURE_MAPPINGS['Feline (貓科)'].concat(TRUE_FEATURE_MAPPINGS['Canine (犬科)']);
     studentsFeatures.forEach(fId => {
-        if (TRUE_FEATURE_MAPPINGS['Feline (貓科)'].includes(fId) || TRUE_FEATURE_MAPPINGS['Canine (犬科)'].includes(fId)) {
-            featureEfficiencyScore += 1;
+        if (allTrueFeatures.includes(fId)) {
+            featureEfficiencyScore += 1; // 選擇了有效特徵 (+1 分)
+        } else {
+            // 對於選中 D1-D6 干擾項，給予輕微懲罰或不加分 (已在邏輯中實現，這裡只是強調)
+            // 由於 featureEfficiencyScore / 3 計算，選錯干擾項自然導致分數降低。
         }
     });
     const featureEfficiencyPercentage = (featureEfficiencyScore / 3) * 100;
@@ -394,7 +409,7 @@ function finalScore() {
         <h3>2. 特徵效率 (Feature Efficiency)</h3>
         <p>這是你選取的 3 個特徵 (Features) 中，有多少是真正能區分貓/犬科的關鍵特徵。</p>
         <p class="score-result">關鍵特徵選取數量: <strong>${featureEfficiencyScore}/3</strong> (${featureEfficiencyPercentage.toFixed(0)}%)</p>
-        ${featureEfficiencyScore < 2 ? '<p style="color:red;">診斷: 你選擇的特徵太過籠統或不具區分性，導致 AI 無法提取關鍵差異！</p>' : ''}
+        ${featureEfficiencyScore < 3 ? '<p style="color:red;">診斷: 你選擇的特徵太過籠統或不具區分性，導致 AI 無法提取關鍵差異！</p>' : ''}
         <hr>
 
         <h3>3. 最終推論準確度 (Inference Accuracy)</h3>

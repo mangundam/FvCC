@@ -220,15 +220,15 @@ button[onclick*="goToOptimization"]:hover {
 }
 
 .judgment-scroll-area {
-    max-height: 450px; /* 限制高度並允許滾動 */
-    overflow-y: auto;
-    padding-right: 15px;
+    max-height: none; /* 移除高度限制 */
+    overflow-y: visible;
+    padding-right: 0;
 }
 
 .feature-judgment-item {
     border: 1px solid #ddd;
-    padding: 15px;
-    margin-bottom: 15px;
+    padding: 10px;
+    margin-bottom: 10px;
     border-radius: 6px;
     background-color: #f9f9f9;
 }
@@ -238,7 +238,11 @@ button[onclick*="goToOptimization"]:hover {
     margin-top: 0;
     font-size: 1.1em;
 }
-
+.feature-judgment-item p {
+    margin: 5px 0 10px 0;
+    font-size: 0.95em;
+    line-height: 1.2;
+}
 .feature-judgment-item label {
     display: block;
     margin: 5px 0;
@@ -257,7 +261,55 @@ button[onclick*="goToOptimization"]:hover {
 #score-display span {
     transition: font-weight 0.2s, color 0.2s;
 }
+/* 判斷按鈕樣式 */
+.judgment-buttons button {
+    padding: 8px 12px;
+    font-size: 0.9em;
+    border-radius: 5px;
+    margin: 0 5px;
+    background-color: #e0e0e0;
+    color: #333;
+    transition: all 0.2s;
+    box-shadow: none; /* 移除默認陰影，讓樣式更輕盈 */
+}
 
+.judgment-buttons button:hover {
+    background-color: #d1d1d1;
+    transform: none;
+}
+
+/* 選中狀態 (Feline - 紅色/橘色) */
+.judgment-buttons button.selected-feline,
+.final-buttons button.selected-feline {
+    background-color: #DC3545; /* 深紅 */
+    color: white;
+    border: 1px solid #DC3545;
+}
+
+/* 選中狀態 (Canine - 藍色) */
+.judgment-buttons button.selected-canine,
+.final-buttons button.selected-canine {
+    background-color: #2196F3; /* 深藍 */
+    color: white;
+    border: 1px solid #2196F3;
+}
+
+/* 最終結論按鈕樣式 */
+.final-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.final-prediction-btn {
+    padding: 12px 30px;
+    font-size: 1.2em;
+    border: 2px solid #ccc;
+    background-color: white;
+    color: #333;
+    transition: all 0.2s;
+}
 /* --- Step 4 Styles --- */
 .step4-layout {
     display: grid;

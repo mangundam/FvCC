@@ -5,23 +5,33 @@ const STYLE_CATEGORIES = ['Feline (貓科)', 'Canine (犬科)'];
 const DESIGN_FEATURES = [ 
     // === 關鍵且正確的特徵 (Key/Discriminative Features) ===
     { id: 'F1', name: 'Snout Length (口鼻長度)' },        // [犬科] 明顯的吻部
-    { id: 'F3', name: 'Eye Shape/Pupil (眼睛形狀/瞳孔)' }, // [貓科] 垂直瞳孔（夜行性）
+    { id: 'F3', name: 'Eye Shape/Pupil (眼睛形狀/瞳孔)' }, // [貓科] 垂直瞳孔
     { id: 'F4', name: 'Claws (爪子是否可伸縮)' },         // [貓科] 可伸縮的爪子
-    { id: 'F5', name: 'Body Posture (身體姿態/站姿)' },   // [犬科] 站姿較直、爪子長期暴露
+    { id: 'F5', name: 'Body Posture (身體姿態/站姿)' },   // [犬科] 站姿較直
 
     // === 有差異性但非決定性特徵 (Moderately Discriminative Features) ===
     { id: 'F2', name: 'Ear Shape (耳朵形狀)' },           // [兩者皆有] 差異較小，但有參考價值
     { id: 'F6', name: 'Tail Shape (尾巴形狀/動作)' },      // [兩者皆有] 動作與形態有差異
 
     // === 錯誤/干擾項：通用或不具分類決定性的特徵 (Distractor Features) ===
-    { id: 'D1', name: 'Fur Color (皮毛顏色)' },           // [通用] 顏色變化太大，非決定性特徵
-    { id: 'D2', name: 'Number of Legs (腿的數量)' },      // [通用] 都是四條腿，無區分性
-    { id: 'D3', name: 'Average Weight (平均體重)' },      // [通用] 變化範圍太大（家貓到獅子，吉娃娃到狼）
-    { id: 'D4', name: 'Whiskers Length (鬍鬚長度)' },     // [通用] 都有鬍鬚，且長度差異不明顯
-    { id: 'D5', name: 'Habitat (棲息地)' },               // [通用] 家養到荒野都有，非主要視覺特徵
-    { id: 'D6', name: 'Teeth Count (牙齒數量)' }          // [通用] 無法透過圖片直接觀察，且數量相近
+    { id: 'D1', name: 'Fur Color (皮毛顏色)' },           // [通用] 顏色變化太大
+    { id: 'D2', name: 'Number of Legs (腿的數量)' },      // [常識錯誤/嚴重干擾] 都是四條腿
+    { id: 'D3', name: 'Average Weight (平均體重)' },      // [通用] 變化範圍太大
+    { id: 'D4', name: 'Whiskers Length (鬍鬚長度)' },     // [通用] 都有鬍鬚
+    { id: 'D5', name: 'Habitat (棲息地)' },               // [通用] 棲地非視覺特徵
+    { id: 'D6', name: 'Teeth Count (牙齒數量)' }          // [通用] 無法透過圖片直接觀察
 ];
-
+const FEATURE_WEIGHTS = {
+    // 高分強效特徵 (+1.1)
+    'F1': 1.1, 'F3': 1.1, 'F4': 1.1, 'F5': 1.1,
+    // 低分中等特徵 (+0.6)
+    'F2': 0.6, 'F6': 0.6,
+    // 嚴重扣分 (-1.5)
+    'D2': -1.5,
+    // 輕微扣分 (-0.5)
+    'D1': -0.5, 'D3': -0.5, 'D4': -0.5, 'D5': -0.5, 'D6': -0.5
+};
+const MAX_POSSIBLE_SCORE = 5.0; // 5 個選擇，總分最高為 5.0
 // 請確保 TRUE_FEATURE_MAPPINGS 保持使用 F1-F6 中的關鍵項目：
 const TRUE_FEATURE_MAPPINGS = {
     'Feline (貓科)': ['F3', 'F4', 'F2'], 
@@ -311,9 +321,8 @@ function initStep2() {
 function handleFeatureSelection(e) {
     const checkbox = e.target;
     const message = document.getElementById('step2-message');
-    // *** 修正點 1: 特徵上限提升至 5 個 ***
-    const MAX_FEATURES = 5; 
-    
+    const MAX_FEATURES = 5; // 限制更改為 5
+
     if (checkbox.checked) {
         if (studentsFeatures.length < MAX_FEATURES) {
             studentsFeatures.push(checkbox.value);
@@ -326,6 +335,24 @@ function handleFeatureSelection(e) {
         studentsFeatures = studentsFeatures.filter(id => id !== checkbox.value);
         message.textContent = `已選擇 ${studentsFeatures.length}/${MAX_FEATURES} 個特徵。`;
     }
+}
+
+function handleFeatureJudgment(featureId, newCategory, element) {
+    // 移除同組其他按鈕的選中狀態 (模擬 radio button 的互斥性)
+    const container = element.closest('.feature-judgment-item');
+    container.querySelectorAll('button').forEach(btn => {
+        btn.classList.remove('selected-feline', 'selected-canine');
+    });
+
+    // 增加選中狀態
+    if (newCategory === 'Feline (貓科)') {
+        element.classList.add('selected-feline');
+    } else {
+        element.classList.add('selected-canine');
+    }
+
+    // 更新統計分數
+    updateJudgmentScore(featureId, newCategory);
 }
 let currentJudgmentScore = {
     'Feline (貓科)': 0,
@@ -344,38 +371,32 @@ function goToStep3() {
     testImgElement.src = testImage.imageURL;
     testImgElement.alt = `Test Image for Prediction`; 
     
-    // 重置即時分數
     currentJudgmentScore = {
         'Feline (貓科)': 0,
         'Canine (犬科)': 0
     };
+    featureJudgmentsMap = {}; 
     
     const judgmentArea = document.getElementById('feature-judgment-area');
     judgmentArea.innerHTML = ''; 
 
-    // 載入特徵判斷列表
+    // 載入特徵判斷列表 (Feature Judgment List)
     let featureJudgmentHTML = studentsFeatures.map(fId => {
         const feature = DESIGN_FEATURES.find(f => f.id === fId);
         return `
             <div class="feature-judgment-item" data-feature-id="${fId}">
-                <h4>${feature.name}</h4>
-                <p>這張圖片的 [${feature.name}] 讓你覺得它更像？</p>
-                <label>
-                    <input type="radio" name="judgment_${fId}" value="Feline (貓科)" required onclick="updateJudgmentScore('${fId}', 'Feline (貓科)')"> 
-                    像貓科 (Feline)
-                </label>
-                <label>
-                    <input type="radio" name="judgment_${fId}" value="Canine (犬科)" onclick="updateJudgmentScore('${fId}', 'Canine (犬科)')"> 
-                    像犬科 (Canine)
-                </label>
+                <p>這張圖片的 <strong>[${feature.name}]</strong> 讓你覺得它更像？</p>
+                <div class="judgment-buttons">
+                    <button type="button" onclick="handleFeatureJudgment('${fId}', 'Feline (貓科)', this)">貓科 (Feline)</button>
+                    <button type="button" onclick="handleFeatureJudgment('${fId}', 'Canine (犬科)', this)">犬科 (Canine)</button>
+                </div>
             </div>
         `;
     }).join('');
     
-    // 將列表加載到 judgmentArea
     judgmentArea.innerHTML = featureJudgmentHTML;
 
-    // 載入即時統計板 (Scoreboard)
+    // 載入即時統計板 (Scoreboard) - 保持不變
     document.getElementById('judgment-scoreboard').innerHTML = `
         <h3 style="margin-top: 0; color: #1a5690;">特徵傾向統計 (Feature Bias)</h3>
         <p>點選每個特徵後，會自動計算總傾向。</p>
@@ -384,23 +405,35 @@ function goToStep3() {
             <p>犬科總分: <span id="score-canine" style="font-size: 1.5em; color: #2196F3;">0</span></p>
         </div>
     `;
-
-    // 確保最終判斷按鈕在 DOM 中
-    document.getElementById('final-prediction-button').innerHTML = `
-        <hr style="margin-top: 25px;">
-        <h3>總結判斷 (Final Conclusion)</h3>
-        <p>所以覺得答案是?</p>
-        <div style="margin-top: 15px;">
-            <label><input type="radio" name="finalConclusion" value="Feline (貓科)" required> Feline (貓科)</label>
-            <label><input type="radio" name="finalConclusion" value="Canine (犬科)"> Canine (犬科)</label>
-        </div>
-    `;
-    
-    // 初始化顯示
     document.getElementById('score-feline').textContent = '0';
     document.getElementById('score-canine').textContent = '0';
-}
 
+
+    // 確保最終判斷按鈕在 DOM 中 - 修正為包含 Reveal 按鈕
+    document.getElementById('final-prediction-button').innerHTML = `
+        <hr style="margin-top: 25px;">
+        <h3>所以覺得答案是? (Final Conclusion)</h3>
+        <div class="final-buttons">
+            <button type="button" name="finalConclusion" value="Feline (貓科)" class="final-prediction-btn" onclick="selectFinalConclusion(this)">Feline (貓科)</button>
+            <button type="button" name="finalConclusion" value="Canine (犬科)" class="final-prediction-btn" onclick="selectFinalConclusion(this)">Canine (犬科)</button>
+        </div>
+        
+        <div style="text-align: center; margin-top: 20px;">
+            <button onclick="revealPrediction()">揭曉 AI 模型的表現 (Reveal Model Performance)</button>
+        </div>
+    `;
+}
+function selectFinalConclusion(element) {
+    document.querySelectorAll('.final-prediction-btn').forEach(btn => {
+        btn.classList.remove('selected-feline', 'selected-canine');
+    });
+    
+    if (element.value === 'Feline (貓科)') {
+        element.classList.add('selected-feline');
+    } else {
+        element.classList.add('selected-canine');
+    }
+}
 // *** 新增函式：即時更新統計分數 ***
 let featureJudgmentsMap = {}; // 追蹤每個特徵的判斷結果，用於處理切換選項時的加減分
 
@@ -431,24 +464,26 @@ function updateJudgmentScore(featureId, newCategory) {
 }
 
 function revealPrediction() {
-    // 檢查所有特徵的判斷是否完成
+    // *** 修正點 3: 正確計算所有特徵判斷的完成數量 ***
     const totalJudgments = studentsFeatures.length;
-    const completedJudgments = document.querySelectorAll('.feature-judgment-item input:checked').length;
+    
+    // 計算 featureJudgmentsMap 中有多少個項目 (代表學生完成了多少個特徵的判斷)
+    const completedJudgments = Object.keys(featureJudgmentsMap).length; 
     
     if (completedJudgments < totalJudgments) {
         alert(`請先完成所有 ${totalJudgments} 個特徵的單獨判斷！`);
         return;
     }
 
-    const finalConclusion = document.querySelector('input[name="finalConclusion"]:checked');
-    if (!finalConclusion) {
+    // 檢查最終結論按鈕是否被點選
+    const finalConclusionBtn = document.querySelector('.final-prediction-btn.selected-feline, .final-prediction-btn.selected-canine');
+    if (!finalConclusionBtn) {
         alert("請點選你的最終總結判斷 (Final Conclusion)!");
         return;
     }
 
-    studentTestPrediction = finalConclusion.value;
+    studentTestPrediction = finalConclusionBtn.value;
     
-    // 進入 Step 4 結算
     showStep('step4');
     finalScore(); 
 }
@@ -473,15 +508,13 @@ function finalScore() {
     let trueFeatureCount = 0; // 新增：計算正確特徵數量
     let distractorCount = 0; // 新增：計算錯誤特徵數量
     
-    const MAX_POSSIBLE_SCORE = 5; 
-    
     // 計算原始分數和計數
     studentsFeatures.forEach(fId => {
+		const weight = FEATURE_WEIGHTS[fId] || 0; 
+        rawFeatureScore += weight;
         if (allTrueFeatures.includes(fId)) {
-            rawFeatureScore += 1;
             trueFeatureCount += 1;
         } else if (allDistractorFeatures.includes(fId)) {
-            rawFeatureScore -= 0.3;
             distractorCount += 1;
         }
     });

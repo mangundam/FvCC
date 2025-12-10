@@ -1,10 +1,16 @@
 [
-    { "id": "img_01", "imageURL": "img/feline/cat_1.png", "correctAnswer": "Feline (貓科)", "isTest": false },
-    { "id": "img_02", "imageURL": "img/canine/dog_1.png", "correctAnswer": "Canine (犬科)", "isTest": false },
-	{ "id": "img_03", "imageURL": "img/feline/tiger_1.png", "correctAnswer": "feline (犬科)", "isTest": false },
-	{ "id": "img_04", "imageURL": "img/canine/wolf_1.png", "correctAnswer": "Canine (犬科)", "isTest": false },
-	{ "id": "img_05", "imageURL": "img/feline/panther_1.png", "correctAnswer": "feline (犬科)", "isTest": false },
-	{ "id": "img_06", "imageURL": "img/canine/fox_1.png", "correctAnswer": "Canine (犬科)", "isTest": false },
-	{ "id": "img_07", "imageURL": "img/canine/jackal_1.png", "correctAnswer": "Canine (犬科)", "isTest": false },
-    { "id": "img_test", "imageURL": "img/feline/cheetah_1.png", "correctAnswer": "Feline (貓科)", "isTest": true }
+    { "id": "f1", "imageURL": "img/feline/cat_1.png", "correctAnswer": "Feline (貓科)", "isTest": false },
+	{ "id": "f2", "imageURL": "img/feline/lion_1.png", "correctAnswer": "Feline (貓科)", "isTest": false },
+	{ "id": "f3", "imageURL": "img/feline/tiger_1.png", "correctAnswer": "Feline (貓科)", "isTest": false },
+	{ "id": "f4", "imageURL": "img/feline/cheetah_1.png", "correctAnswer": "Feline (貓科)", "isTest": false },
+	{ "id": "f5", "imageURL": "img/feline/cougar_1.png", "correctAnswer": "Feline (貓科)", "isTest": false },
+	{ "id": "f6", "imageURL": "img/feline/lynx_1.png", "correctAnswer": "Feline (貓科)", "isTest": false },
+	
+	{ "id": "c1", "imageURL": "img/canine/dog_1.png", "correctAnswer": "Canine (犬科)", "isTest": false },
+	{ "id": "c1", "imageURL": "img/canine/wolf_1.png", "correctAnswer": "Canine (犬科)", "isTest": false },
+	{ "id": "c1", "imageURL": "img/canine/fox_1.png", "correctAnswer": "Canine (犬科)", "isTest": false },
+	{ "id": "c1", "imageURL": "img/canine/coyote_1.png", "correctAnswer": "Canine (犬科)", "isTest": false },
+	{ "id": "c1", "imageURL": "img/canine/jackal_1.png", "correctAnswer": "Canine (犬科)", "isTest": false },
+	{ "id": "c1", "imageURL": "img/canine/wilddog_1.png", "correctAnswer": "Canine (犬科)", "isTest": false },
+
 ]

@@ -203,6 +203,7 @@ button[onclick*="goToOptimization"]:hover {
     min-width: 200px;
 }
 
+
 /* --- Step 4 Styles --- */
 #diagnosis-results h2 {
     color: #1a5690;

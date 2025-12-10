@@ -377,11 +377,11 @@ function goToStep3() {
 
     // 載入即時統計板 (Scoreboard)
     document.getElementById('judgment-scoreboard').innerHTML = `
-        <h3 style="margin-top: 0; color: #1a5690;">📊 特徵傾向統計 (Feature Bias)</h3>
+        <h3 style="margin-top: 0; color: #1a5690;">特徵傾向統計 (Feature Bias)</h3>
         <p>點選每個特徵後，會自動計算總傾向。</p>
         <div id="score-display">
-            <p>🐾 貓科總分: <span id="score-feline" style="font-size: 1.5em; color: #DC3545;">0</span></p>
-            <p>🐕 犬科總分: <span id="score-canine" style="font-size: 1.5em; color: #2196F3;">0</span></p>
+            <p>貓科總分: <span id="score-feline" style="font-size: 1.5em; color: #DC3545;">0</span></p>
+            <p>犬科總分: <span id="score-canine" style="font-size: 1.5em; color: #2196F3;">0</span></p>
         </div>
     `;
 

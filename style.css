@@ -202,9 +202,69 @@ button[onclick*="goToOptimization"]:hover {
     text-align: center;
     min-width: 200px;
 }
+.step3-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr; /* 圖片 1 份，判斷列表 1.5 份 */
+    gap: 30px;
+    margin-top: 25px;
+    align-items: flex-start; /* 頂部對齊 */
+}
 
+.image-focus-area {
+    display: flex;
+    flex-direction: column; /* 使圖片和計分板垂直堆疊 */
+    align-items: center;
+    padding: 10px;
+    background-color: #f7faff;
+    border-radius: 8px;
+}
+
+.judgment-scroll-area {
+    max-height: 450px; /* 限制高度並允許滾動 */
+    overflow-y: auto;
+    padding-right: 15px;
+}
+
+.feature-judgment-item {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+}
+
+.feature-judgment-item h4 {
+    color: #1a5690;
+    margin-top: 0;
+    font-size: 1.1em;
+}
+
+.feature-judgment-item label {
+    display: block;
+    margin: 5px 0;
+}
+#judgment-scoreboard {
+    width: 100%; /* 讓計分板與圖片區同寬 */
+    box-sizing: border-box;
+}
+#score-display {
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+    font-size: 1.1em;
+}
+
+#score-display span {
+    transition: font-weight 0.2s, color 0.2s;
+}
 
 /* --- Step 4 Styles --- */
+.step4-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr; /* 評分結果佔 2 份，圖片佔 1 份 */
+    gap: 30px;
+    align-items: flex-start;
+}
 #diagnosis-results h2 {
     color: #1a5690;
     border-bottom: 2px solid #ccc;
@@ -223,4 +283,40 @@ button[onclick*="goToOptimization"]:hover {
     color: #007bff;
     font-size: 1.2em;
 }
+.test-image-summary {
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 10px;
+    background-color: #f7faff;
+}
+.test-image-summary h3 {
+    color: #1a5690;
+}
 
+.step4-image-summary {
+    text-align: center;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #f7faff;
+}
+.step4-image-summary h3 {
+    color: #1a5690;
+    margin-top: 0;
+}
+
+.final-test-img {
+    width: 100%; /* 確保圖片填滿容器 */
+    max-width: 200px; /* 限制最大寬度 */
+    height: auto;
+    object-fit: cover;
+    border: 4px solid #007bff;
+    border-radius: 8px;
+}
+
+/* RWD 調整：當螢幕較窄時，切換回垂直堆疊 */
+@media (max-width: 800px) {
+    .step4-layout {
+        grid-template-columns: 1fr;
+    }
+}

@@ -311,19 +311,26 @@ function initStep2() {
 function handleFeatureSelection(e) {
     const checkbox = e.target;
     const message = document.getElementById('step2-message');
+    // *** 修正點 1: 特徵上限提升至 5 個 ***
+    const MAX_FEATURES = 5; 
+    
     if (checkbox.checked) {
-        if (studentsFeatures.length < 3) {
+        if (studentsFeatures.length < MAX_FEATURES) {
             studentsFeatures.push(checkbox.value);
-            message.textContent = `已選擇 ${studentsFeatures.length}/3 個特徵。`;
+            message.textContent = `已選擇 ${studentsFeatures.length}/${MAX_FEATURES} 個特徵。`;
         } else {
             checkbox.checked = false; 
-            message.textContent = '最多只能選擇 3 個特徵 (Max 3 Features).';
+            message.textContent = `最多只能選擇 ${MAX_FEATURES} 個特徵 (Max ${MAX_FEATURES} Features).`;
         }
     } else {
         studentsFeatures = studentsFeatures.filter(id => id !== checkbox.value);
-        message.textContent = `已選擇 ${studentsFeatures.length}/3 個特徵。`;
+        message.textContent = `已選擇 ${studentsFeatures.length}/${MAX_FEATURES} 個特徵。`;
     }
 }
+let currentJudgmentScore = {
+    'Feline (貓科)': 0,
+    'Canine (犬科)': 0
+};
 
 function goToStep3() {
     if (studentsFeatures.length === 0) {
@@ -331,34 +338,115 @@ function goToStep3() {
         return;
     }
     
-    // 設置 Step 3 的測試圖片
+    showStep('step3');
+
     const testImgElement = document.getElementById('test-image');
     testImgElement.src = testImage.imageURL;
     testImgElement.alt = `Test Image for Prediction`; 
     
-    // 載入 Step 3 特徵列表
-    const step3Features = document.getElementById('step3-features');
-    step3Features.innerHTML = `
-        <p>你選擇的 AI 判斷特徵:</p>
-        <ul>
-            ${studentsFeatures.map(fId => `<li>${DESIGN_FEATURES.find(f => f.id === fId).name}</li>`).join('')}
-        </ul>
+    // 重置即時分數
+    currentJudgmentScore = {
+        'Feline (貓科)': 0,
+        'Canine (犬科)': 0
+    };
+    
+    const judgmentArea = document.getElementById('feature-judgment-area');
+    judgmentArea.innerHTML = ''; 
+
+    // 載入特徵判斷列表
+    let featureJudgmentHTML = studentsFeatures.map(fId => {
+        const feature = DESIGN_FEATURES.find(f => f.id === fId);
+        return `
+            <div class="feature-judgment-item" data-feature-id="${fId}">
+                <h4>${feature.name}</h4>
+                <p>這張圖片的 [${feature.name}] 讓你覺得它更像？</p>
+                <label>
+                    <input type="radio" name="judgment_${fId}" value="Feline (貓科)" required onclick="updateJudgmentScore('${fId}', 'Feline (貓科)')"> 
+                    像貓科 (Feline)
+                </label>
+                <label>
+                    <input type="radio" name="judgment_${fId}" value="Canine (犬科)" onclick="updateJudgmentScore('${fId}', 'Canine (犬科)')"> 
+                    像犬科 (Canine)
+                </label>
+            </div>
+        `;
+    }).join('');
+    
+    // 將列表加載到 judgmentArea
+    judgmentArea.innerHTML = featureJudgmentHTML;
+
+    // 載入即時統計板 (Scoreboard)
+    document.getElementById('judgment-scoreboard').innerHTML = `
+        <h3 style="margin-top: 0; color: #1a5690;">📊 特徵傾向統計 (Feature Bias)</h3>
+        <p>點選每個特徵後，會自動計算總傾向。</p>
+        <div id="score-display">
+            <p>🐾 貓科總分: <span id="score-feline" style="font-size: 1.5em; color: #DC3545;">0</span></p>
+            <p>🐕 犬科總分: <span id="score-canine" style="font-size: 1.5em; color: #2196F3;">0</span></p>
+        </div>
+    `;
+
+    // 確保最終判斷按鈕在 DOM 中
+    document.getElementById('final-prediction-button').innerHTML = `
+        <hr style="margin-top: 25px;">
+        <h3>總結判斷 (Final Conclusion)</h3>
+        <p>所以覺得答案是?</p>
+        <div style="margin-top: 15px;">
+            <label><input type="radio" name="finalConclusion" value="Feline (貓科)" required> Feline (貓科)</label>
+            <label><input type="radio" name="finalConclusion" value="Canine (犬科)"> Canine (犬科)</label>
+        </div>
     `;
     
-    showStep('step3');
+    // 初始化顯示
+    document.getElementById('score-feline').textContent = '0';
+    document.getElementById('score-canine').textContent = '0';
 }
 
-// --- Step 3 邏輯：規則應用與推論 (模擬 AI 推論引擎) ---
-function revealPrediction() {
-    if (!testImage) return;
+// *** 新增函式：即時更新統計分數 ***
+let featureJudgmentsMap = {}; // 追蹤每個特徵的判斷結果，用於處理切換選項時的加減分
 
-    const selectedCategory = document.querySelector('input[name="finalPrediction"]:checked');
-    if (!selectedCategory) {
-        alert("請點選你的最終推論結果 (Final Inference Result)!");
+function updateJudgmentScore(featureId, newCategory) {
+    const oldCategory = featureJudgmentsMap[featureId];
+    
+    // 如果之前有選擇，則先減去舊分數
+    if (oldCategory) {
+        currentJudgmentScore[oldCategory] -= 1;
+    }
+    
+    // 加上新分數
+    currentJudgmentScore[newCategory] += 1;
+    
+    // 更新記錄
+    featureJudgmentsMap[featureId] = newCategory;
+    
+    // 更新 DOM 顯示
+    document.getElementById('score-feline').textContent = currentJudgmentScore['Feline (貓科)'];
+    document.getElementById('score-canine').textContent = currentJudgmentScore['Canine (犬科)'];
+    
+    // 視覺提示：突出高分者
+    const felineSpan = document.getElementById('score-feline');
+    const canineSpan = document.getElementById('score-canine');
+    
+    felineSpan.style.fontWeight = currentJudgmentScore['Feline (貓科)'] > currentJudgmentScore['Canine (犬科)'] ? 'bold' : 'normal';
+    canineSpan.style.fontWeight = currentJudgmentScore['Canine (犬科)'] > currentJudgmentScore['Feline (貓科)'] ? 'bold' : 'normal';
+}
+
+function revealPrediction() {
+    // 檢查所有特徵的判斷是否完成
+    const totalJudgments = studentsFeatures.length;
+    const completedJudgments = document.querySelectorAll('.feature-judgment-item input:checked').length;
+    
+    if (completedJudgments < totalJudgments) {
+        alert(`請先完成所有 ${totalJudgments} 個特徵的單獨判斷！`);
         return;
     }
 
-    studentTestPrediction = selectedCategory.value;
+    const finalConclusion = document.querySelector('input[name="finalConclusion"]:checked');
+    if (!finalConclusion) {
+        alert("請點選你的最終總結判斷 (Final Conclusion)!");
+        return;
+    }
+
+    studentTestPrediction = finalConclusion.value;
     
     // 進入 Step 4 結算
     showStep('step4');
@@ -367,7 +455,7 @@ function revealPrediction() {
 
 // --- Step 4 邏輯：模型診斷與計分 (整合優化選項) ---
 function finalScore() {
-    // 1. 訓練準確度 (與真實答案相比)
+    // 1. 訓練準確度 (與真實答案相比) - 保持不變
     let ruleStabilityScore = 0;
     GAME_DATA.forEach(data => {
         const studentCategory = studentClassification[data.id];
@@ -377,47 +465,71 @@ function finalScore() {
     });
     const ruleStabilityPercentage = (ruleStabilityScore / GAME_DATA.length) * 100;
 
-    // 2. 特徵效率 (所選特徵的有效性)
-    let featureEfficiencyScore = 0;
-	const allTrueFeatures = TRUE_FEATURE_MAPPINGS['Feline (貓科)'].concat(TRUE_FEATURE_MAPPINGS['Canine (犬科)']);
+    // 2. 特徵效率 (修正邏輯：懲罰計分)
+    const allDistractorFeatures = ['D1', 'D2', 'D3', 'D4', 'D5', 'D6'];
+    const allTrueFeatures = TRUE_FEATURE_MAPPINGS['Feline (貓科)'].concat(TRUE_FEATURE_MAPPINGS['Canine (犬科)']);
+    
+    let rawFeatureScore = 0;
+    const MAX_POSSIBLE_SCORE = 5; // 選擇 5 個特徵，滿分 5 分
+    
+    // 計算原始分數
     studentsFeatures.forEach(fId => {
         if (allTrueFeatures.includes(fId)) {
-            featureEfficiencyScore += 1; // 選擇了有效特徵 (+1 分)
-        } else {
-            // 對於選中 D1-D6 干擾項，給予輕微懲罰或不加分 (已在邏輯中實現，這裡只是強調)
-            // 由於 featureEfficiencyScore / 3 計算，選錯干擾項自然導致分數降低。
+            // 有效特徵 +1 分
+            rawFeatureScore += 1; 
+        } else if (allDistractorFeatures.includes(fId)) {
+            // 干擾項 -0.5 分
+            rawFeatureScore -= 0.5;
         }
     });
-    const featureEfficiencyPercentage = (featureEfficiencyScore / 3) * 100;
 
+    // 將分數限制在 0 到 5 分之間 (分數不能為負)
+    const normalizedScore = Math.max(0, rawFeatureScore);
+    
+    // 計算最終百分比
+    const featureEfficiencyPercentage = (normalizedScore / MAX_POSSIBLE_SCORE) * 100;
+    
     // 3. 最終預測準確度
     const finalPredictionCorrect = (studentTestPrediction === testImage.trueAnswer);
+    
+    // 4. 提取物種名稱
+    const fileName = testImage.imageURL.split('/').pop();
+    const speciesName = fileName.split('_')[0];
 
     // 輸出診斷結果
     const resultDiv = document.getElementById('diagnosis-results');
     resultDiv.innerHTML = `
-        <h2>模型診斷結果 (Model Diagnosis)</h2>
-        <p>你的目標：設計一個能準確分類貓科/犬科的 AI 模型。</p>
-        <hr>
-        
-        <h3>1. 規則穩定性 (Rule Stability)</h3>
-        <p>這是你訓練模型時，分類結果與真實世界答案的吻合度。</p>
-        <p class="score-result">訓練分類準確度: <strong>${ruleStabilityScore}/${GAME_DATA.length}</strong> (${ruleStabilityPercentage.toFixed(0)}%)</p>
-        ${ruleStabilityPercentage < 70 ? '<p style="color:red;">診斷: 你的初始分類 (訓練數據標籤) 本身可能就不夠穩定或準確，導致模型基礎不穩！</p>' : ''}
-        <hr>
+        <div class="step4-layout">
+            <div class="step4-scores">
+                <h2>模型診斷結果 (Model Diagnosis)</h2>
+                <p>你的目標：設計一個能準確分類貓科/犬科的 AI 模型。</p>
+                <hr>
+                
+                <h3>1. 規則穩定性 (Rule Stability)</h3>
+                <p>這是你訓練模型時，分類結果與真實世界答案的吻合度。</p>
+                <p class="score-result">訓練分類準確度: <strong>${ruleStabilityScore}/${GAME_DATA.length}</strong> (${ruleStabilityPercentage.toFixed(0)}%)</p>
+                ${ruleStabilityPercentage < 70 ? '<p style="color:red;">診斷: 你的初始分類 (訓練數據標籤) 本身可能就不夠穩定或準確，導致模型基礎不穩！</p>' : ''}
+                <hr>
 
-        <h3>2. 特徵效率 (Feature Efficiency)</h3>
-        <p>這是你選取的 3 個特徵 (Features) 中，有多少是真正能區分貓/犬科的關鍵特徵。</p>
-        <p class="score-result">關鍵特徵選取數量: <strong>${featureEfficiencyScore}/3</strong> (${featureEfficiencyPercentage.toFixed(0)}%)</p>
-        ${featureEfficiencyScore < 3 ? '<p style="color:red;">診斷: 你選擇的特徵太過籠統或不具區分性，導致 AI 無法提取關鍵差異！</p>' : ''}
-        <hr>
+                <h3>2. 特徵效率 (Feature Efficiency)</h3>
+                <p>這是你選取的 ${studentsFeatures.length} 個特徵的有效性分數 (有效特徵 +1, 干擾項 -0.5)。</p>
+                <p class="score-result">特徵選取準確度: <strong>${featureEfficiencyPercentage.toFixed(0)}%</strong></p>
+                ${normalizedScore < 3 ? `<p style="color:red;">診斷: 你的特徵分數為 ${normalizedScore.toFixed(1)}/${MAX_POSSIBLE_SCORE.toFixed(1)}，選到了過多不具區分性的干擾項，AI 規則雜亂！</p>` : `<p style="color:green;">診斷: 你的特徵分數為 ${normalizedScore.toFixed(1)}/${MAX_POSSIBLE_SCORE.toFixed(1)}，特徵選擇良好，AI 規則清晰！</p>`}
+                <hr>
 
-        <h3>3. 最終推論準確度 (Inference Accuracy)</h3>
-        <p>你的 AI 模型 (你的推論) 成功預測了新的圖片嗎？</p>
-        <p class="score-result">測試圖片真實答案: <strong>${testImage.trueAnswer}</strong></p>
-        <p class="score-result">你的最終判斷: <strong>${studentTestPrediction}</strong></p>
-        <p style="font-size: 1.2em; color: ${finalPredictionCorrect ? 'green' : 'red'};"><strong>推論結果：${finalPredictionCorrect ? '正確！ (Correct!)' : '錯誤！ (Error!)'}</strong></p>
-        
+                <h3>3. 最終推論準確度 (Inference Accuracy)</h3>
+                <p class="score-result">測試圖片真實答案: <strong>${testImage.trueAnswer}</strong></p>
+                <p class="score-result">你的最終判斷: <strong>${studentTestPrediction}</strong></p>
+                <p style="font-size: 1.2em; color: ${finalPredictionCorrect ? 'green' : 'red'};"><strong>推論結果：${finalPredictionCorrect ? '正確！ (Correct!)' : '錯誤！ (Error!)'}</strong></p>
+            </div>
+            
+            <div class="step4-image-summary">
+                <h3>測試圖片 (Test Image)</h3>
+                <img src="${testImage.imageURL}" alt="Final Test Image" class="final-test-img">
+                <p style="font-size: 1.5em; font-weight: bold; margin-top: 10px;">物種名稱: ${speciesName.toUpperCase()}</p>
+            </div>
+        </div>
+
         <hr>
 
         <h3 style="color:#007bff;">4. 模型優化 (Model Optimization)</h3>
@@ -431,10 +543,7 @@ function finalScore() {
             </button>
         </div>
     `;
-    
-    // 不再跳轉到 Step 5，而是留在 Step 4 進行選擇
 }
-
 function goToOptimization(choice) {
     if (choice === 1) {
         alert("選擇 A: 修正訓練數據。你將回到 Step 1 重新分類，以提高模型的「規則穩定性」。");

@@ -182,9 +182,7 @@ async function initStep1(isOptimization = false) {
     
     // 6. 訊息提示
     document.getElementById('step1-message').textContent = '請根據你的直覺，將圖片分類到你設計的兩個類別中。';
-    if (isOptimization) {
-        document.getElementById('step1-message').textContent = '🔄 優化模式: 請檢視並修正你對訓練數據的分類標籤。';
-    }
+
 }
 
 function dragStart(e) {
@@ -253,7 +251,7 @@ function initStep2() {
     reviewArea.innerHTML = ''; // 清空預覽區
     studentsFeatures = [];
 
-    document.getElementById('step2-message').textContent = '你剛剛的分類是根據哪些 **Feature** (特徵)？請選擇 3 個最重要的特徵。';
+    document.getElementById('step2-message').textContent = '你剛剛的分類是根據哪些 Feature (特徵)？請選擇 3 個最重要的特徵。';
 
     // 1. 視覺化學生 Step 1 的分類結果
     const classifiedGroups = {};
@@ -268,7 +266,7 @@ function initStep2() {
     });
 
     // 顯示分組結果
-    let reviewHTML = '<h3>你的訓練數據分類 (Your **Training Classification**)</h3>';
+    let reviewHTML = '<h3>你的訓練數據分類 (Your Training Classification)</h3>';
     STYLE_CATEGORIES.forEach(category => {
         const images = classifiedGroups[category];
         reviewHTML += `
@@ -308,7 +306,7 @@ function handleFeatureSelection(e) {
             message.textContent = `已選擇 ${studentsFeatures.length}/3 個特徵。`;
         } else {
             checkbox.checked = false; 
-            message.textContent = '最多只能選擇 3 個特徵 (Max 3 **Features**).';
+            message.textContent = '最多只能選擇 3 個特徵 (Max 3 Features).';
         }
     } else {
         studentsFeatures = studentsFeatures.filter(id => id !== checkbox.value);
@@ -318,7 +316,7 @@ function handleFeatureSelection(e) {
 
 function goToStep3() {
     if (studentsFeatures.length === 0) {
-        alert("請至少選擇一個 **Feature** (特徵)!");
+        alert("請至少選擇一個 Feature (特徵)!");
         return;
     }
     
@@ -345,7 +343,7 @@ function revealPrediction() {
 
     const selectedCategory = document.querySelector('input[name="finalPrediction"]:checked');
     if (!selectedCategory) {
-        alert("請點選你的最終推論結果 (Final **Inference** Result)!");
+        alert("請點選你的最終推論結果 (Final Inference Result)!");
         return;
     }
 
@@ -383,31 +381,31 @@ function finalScore() {
     // 輸出診斷結果
     const resultDiv = document.getElementById('diagnosis-results');
     resultDiv.innerHTML = `
-        <h2>📋 模型診斷結果 (Model Diagnosis)</h2>
+        <h2>模型診斷結果 (Model Diagnosis)</h2>
         <p>你的目標：設計一個能準確分類貓科/犬科的 AI 模型。</p>
         <hr>
         
         <h3>1. 規則穩定性 (Rule Stability)</h3>
         <p>這是你訓練模型時，分類結果與真實世界答案的吻合度。</p>
-        <p class="score-result">✅ 訓練分類準確度: <strong>${ruleStabilityScore}/${GAME_DATA.length}</strong> (${ruleStabilityPercentage.toFixed(0)}%)</p>
-        ${ruleStabilityPercentage < 70 ? '<p style="color:red;">**診斷:** 你的初始分類 (訓練數據標籤) 本身可能就不夠穩定或準確，導致模型基礎不穩！</p>' : ''}
+        <p class="score-result">訓練分類準確度: <strong>${ruleStabilityScore}/${GAME_DATA.length}</strong> (${ruleStabilityPercentage.toFixed(0)}%)</p>
+        ${ruleStabilityPercentage < 70 ? '<p style="color:red;">診斷: 你的初始分類 (訓練數據標籤) 本身可能就不夠穩定或準確，導致模型基礎不穩！</p>' : ''}
         <hr>
 
         <h3>2. 特徵效率 (Feature Efficiency)</h3>
         <p>這是你選取的 3 個特徵 (Features) 中，有多少是真正能區分貓/犬科的關鍵特徵。</p>
-        <p class="score-result">🔑 關鍵特徵選取數量: <strong>${featureEfficiencyScore}/3</strong> (${featureEfficiencyPercentage.toFixed(0)}%)</p>
-        ${featureEfficiencyScore < 2 ? '<p style="color:red;">**診斷:** 你選擇的特徵太過籠統或不具區分性，導致 AI 無法提取關鍵差異！</p>' : ''}
+        <p class="score-result">關鍵特徵選取數量: <strong>${featureEfficiencyScore}/3</strong> (${featureEfficiencyPercentage.toFixed(0)}%)</p>
+        ${featureEfficiencyScore < 2 ? '<p style="color:red;">診斷: 你選擇的特徵太過籠統或不具區分性，導致 AI 無法提取關鍵差異！</p>' : ''}
         <hr>
 
         <h3>3. 最終推論準確度 (Inference Accuracy)</h3>
         <p>你的 AI 模型 (你的推論) 成功預測了新的圖片嗎？</p>
-        <p class="score-result">🎯 測試圖片真實答案: <strong>${testImage.trueAnswer}</strong></p>
+        <p class="score-result">測試圖片真實答案: <strong>${testImage.trueAnswer}</strong></p>
         <p class="score-result">你的最終判斷: <strong>${studentTestPrediction}</strong></p>
         <p style="font-size: 1.2em; color: ${finalPredictionCorrect ? 'green' : 'red'};"><strong>推論結果：${finalPredictionCorrect ? '正確！ (Correct!)' : '錯誤！ (Error!)'}</strong></p>
         
         <hr>
 
-        <h3 style="color:#007bff;">🔄 模型優化 (Model Optimization)</h3>
+        <h3 style="color:#007bff;">4. 模型優化 (Model Optimization)</h3>
         <p>AI 開發是一個不斷迭代的過程。根據上述診斷，你認為修正哪一步能讓你的 AI 表現更好？</p>
         <div style="display: flex; gap: 15px; margin-top: 20px;">
             <button onclick="goToOptimization(1)" style="background-color: #ffc107; color: #333; border: none; padding: 10px; cursor: pointer;">

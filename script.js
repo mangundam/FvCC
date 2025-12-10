@@ -262,7 +262,7 @@ function initStep2() {
     reviewArea.innerHTML = ''; // 清空預覽區
     studentsFeatures = [];
 
-    document.getElementById('step2-message').textContent = '你剛剛的分類是根據哪些 Feature (特徵)？請選擇 3 個最重要的特徵。';
+    document.getElementById('step2-message').textContent = '你剛剛的分類是根據哪些 Feature (特徵)？請選擇 1~5 個最重要的特徵。';
 
     // 1. 視覺化學生 Step 1 的分類結果
     const classifiedGroups = {};
@@ -465,28 +465,28 @@ function finalScore() {
     });
     const ruleStabilityPercentage = (ruleStabilityScore / GAME_DATA.length) * 100;
 
-    // 2. 特徵效率 (修正邏輯：懲罰計分)
+    // 2. 特徵效率 (懲罰計分邏輯)
     const allDistractorFeatures = ['D1', 'D2', 'D3', 'D4', 'D5', 'D6'];
     const allTrueFeatures = TRUE_FEATURE_MAPPINGS['Feline (貓科)'].concat(TRUE_FEATURE_MAPPINGS['Canine (犬科)']);
     
     let rawFeatureScore = 0;
-    const MAX_POSSIBLE_SCORE = 5; // 選擇 5 個特徵，滿分 5 分
+    let trueFeatureCount = 0; // 新增：計算正確特徵數量
+    let distractorCount = 0; // 新增：計算錯誤特徵數量
     
-    // 計算原始分數
+    const MAX_POSSIBLE_SCORE = 5; 
+    
+    // 計算原始分數和計數
     studentsFeatures.forEach(fId => {
         if (allTrueFeatures.includes(fId)) {
-            // 有效特徵 +1 分
-            rawFeatureScore += 1; 
+            rawFeatureScore += 1;
+            trueFeatureCount += 1;
         } else if (allDistractorFeatures.includes(fId)) {
-            // 干擾項 -0.5 分
-            rawFeatureScore -= 0.5;
+            rawFeatureScore -= 0.3;
+            distractorCount += 1;
         }
     });
 
-    // 將分數限制在 0 到 5 分之間 (分數不能為負)
     const normalizedScore = Math.max(0, rawFeatureScore);
-    
-    // 計算最終百分比
     const featureEfficiencyPercentage = (normalizedScore / MAX_POSSIBLE_SCORE) * 100;
     
     // 3. 最終預測準確度
@@ -496,6 +496,26 @@ function finalScore() {
     const fileName = testImage.imageURL.split('/').pop();
     const speciesName = fileName.split('_')[0];
 
+    // --- 診斷敘述邏輯 ---
+    let featureDiagnosisMessage = '';
+    
+    if (featureEfficiencyPercentage >= 70) {
+        // 情境 1: 正確率達 70% 以上 (Normalized Score >= 3.5)
+        featureDiagnosisMessage = `<p style="color:green;">診斷: 恭喜！你的特徵選取非常成功，規則清晰且精準！</p>`;
+    } else if (trueFeatureCount < 3) {
+        // 情境 2: 選擇的正確特徵少於 3 個
+        featureDiagnosisMessage = `<p style="color:#FF8C00;">診斷: 你選擇到的正確特徵 (僅 ${trueFeatureCount} 個) 太少，缺乏有效的判斷基礎。</p>`;
+    } else if (distractorCount > 3) {
+        // 情境 3: 錯誤特徵多於 3 個 (雖然分數可能還不錯，但錯誤率高)
+        featureDiagnosisMessage = `<p style="color:#FFA500;">診斷: 你雖然選對了一些特徵，但錯誤特徵 ( ${distractorCount} 個) 過多，規則混亂且效率低落。</p>`;
+    } else if (normalizedScore < 0.1) {
+        // 情境 4: 分數接近零 (完全錯誤)
+        featureDiagnosisMessage = `<p style="color:red;">診斷: 你的特徵選擇與物種的決定性特徵幾乎完全不相關，模型無法工作！</p>`;
+    } else {
+         // 一般錯誤或混亂情況
+         featureDiagnosisMessage = `<p style="color:#DC3545;">診斷: 你的特徵選擇仍有進步空間。請嘗試找出更具區分性的關鍵特徵。</p>`;
+    }
+    
     // 輸出診斷結果
     const resultDiv = document.getElementById('diagnosis-results');
     resultDiv.innerHTML = `
@@ -512,9 +532,11 @@ function finalScore() {
                 <hr>
 
                 <h3>2. 特徵效率 (Feature Efficiency)</h3>
-                <p>這是你選取的 ${studentsFeatures.length} 個特徵的有效性分數 (有效特徵 +1, 干擾項 -0.5)。</p>
+                <p>這是你選取的 ${studentsFeatures.length} 個特徵的有效性分數。</p>
                 <p class="score-result">特徵選取準確度: <strong>${featureEfficiencyPercentage.toFixed(0)}%</strong></p>
-                ${normalizedScore < 3 ? `<p style="color:red;">診斷: 你的特徵分數為 ${normalizedScore.toFixed(1)}/${MAX_POSSIBLE_SCORE.toFixed(1)}，選到了過多不具區分性的干擾項，AI 規則雜亂！</p>` : `<p style="color:green;">診斷: 你的特徵分數為 ${normalizedScore.toFixed(1)}/${MAX_POSSIBLE_SCORE.toFixed(1)}，特徵選擇良好，AI 規則清晰！</p>`}
+                
+                ${featureDiagnosisMessage}
+                
                 <hr>
 
                 <h3>3. 最終推論準確度 (Inference Accuracy)</h3>
@@ -544,6 +566,7 @@ function finalScore() {
         </div>
     `;
 }
+
 function goToOptimization(choice) {
     if (choice === 1) {
         alert("選擇 A: 修正訓練數據。你將回到 Step 1 重新分類，以提高模型的「規則穩定性」。");

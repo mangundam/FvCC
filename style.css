@@ -121,23 +121,37 @@ button[onclick*="goToOptimization"]:hover {
 }
 
 /* --- Step 2 Styles --- */
-#feature-options {
+.step2-feature-layout {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* 更靈活的佈局 */
-    gap: 15px;
-    margin: 20px 0;
-    padding: 15px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+    grid-template-columns: 1fr 1.5fr 1fr; /* 左(貓) 中(特徵) 右(犬) */
+    gap: 20px;
+    margin-top: 20px;
+}
+#feature-options-center p {
+    text-align: center;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+}
+#feature-options {
+    /* 替換原本的 grid 佈局為 flex 垂直佈局 */
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* 減少間距 */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: white;
 }
 
 #feature-options label {
-    display: block;
+    display: flex; /* 確保 Checkbox 和文本在同一行 */
+    align-items: center;
     background-color: #f8f8f8;
-    padding: 10px;
-    border-radius: 6px;
-    cursor: pointer;
+    padding: 8px 10px;
+    border-radius: 4px;
     transition: background-color 0.2s;
+    white-space: nowrap; /* 防止選項文本換行 */
 }
 #feature-options label:hover {
     background-color: #e0f7fa;
@@ -146,6 +160,11 @@ button[onclick*="goToOptimization"]:hover {
 #feature-options input[type="checkbox"] {
     margin-right: 10px;
     transform: scale(1.2); /* 放大 Checkbox */
+}
+@media (max-width: 900px) {
+    .step2-feature-layout {
+        grid-template-columns: 1fr; /* 單欄堆疊 */
+    }
 }
 
 /* --- Step 2 預覽區樣式 --- */
@@ -156,7 +175,23 @@ button[onclick*="goToOptimization"]:hover {
     border-radius: 8px;
     background-color: #f9f9f9;
 }
+.review-panel h4 {
+    text-align: center;
+    color: #1a5690;
+    margin-top: 0;
+    border-bottom: 2px solid #a0c4ff;
+    padding-bottom: 5px;
+}
 
+.review-images-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; /* 圖片置中 */
+    gap: 5px;
+    max-height: 400px; /* 限制高度，避免圖片過多佔用太多空間 */
+    overflow-y: auto;
+    padding: 5px;
+}
 .review-group {
     margin-bottom: 15px;
     padding: 10px;
@@ -173,14 +208,14 @@ button[onclick*="goToOptimization"]:hover {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    max-height: 150px; /* 限制高度，避免圖片過多佔用太多空間 */
+    max-height: 480px; /* 限制高度，避免圖片過多佔用太多空間 */
     overflow-y: auto;
     padding: 5px;
 }
 
 .review-img {
-    width: 60px; /* 縮小預覽圖大小 */
-    height: 60px;
+    width: 115px; /* 縮小預覽圖大小 */
+    height: 115px;
     object-fit: cover;
     border: 1px solid #aaa;
     border-radius: 4px;

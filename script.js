@@ -267,18 +267,21 @@ function checkStep1() {
 // --- Step 2 邏輯：特徵定義 (模擬 AI 規則建立) ---
 function initStep2() {
     const featureOptions = document.getElementById('feature-options');
-    const reviewArea = document.getElementById('student-classification-review');
+    // 移除 reviewArea 的舊 ID，使用新的容器 ID
+    const reviewFeline = document.getElementById('review-feline');
+    const reviewCanine = document.getElementById('review-canine');
+    
     featureOptions.innerHTML = '';
-    reviewArea.innerHTML = ''; // 清空預覽區
+    reviewFeline.innerHTML = ''; 
+    reviewCanine.innerHTML = '';
     studentsFeatures = [];
 
-    document.getElementById('step2-message').textContent = '你剛剛的分類是根據哪些 Feature (特徵)？請選擇 1~5 個最重要的特徵。';
+    document.getElementById('step2-message').textContent = '你剛剛的分類是根據哪些 Feature (特徵)？請選擇 5 個最重要的特徵。';
 
     // 1. 視覺化學生 Step 1 的分類結果
     const classifiedGroups = {};
     STYLE_CATEGORIES.forEach(cat => classifiedGroups[cat] = []);
 
-    // 將圖片按照學生的分類結果分組
     GAME_DATA.forEach(data => {
         const studentCat = studentClassification[data.id];
         if (studentCat) {
@@ -286,26 +289,34 @@ function initStep2() {
         }
     });
 
-    // 顯示分組結果
-    let reviewHTML = '<h3>你的訓練數據分類 (Your Training Classification)</h3>';
-    STYLE_CATEGORIES.forEach(category => {
-        const images = classifiedGroups[category];
-        reviewHTML += `
-            <div class="review-group">
-                <h4>${category} (${images.length} 張)</h4>
-                <div class="review-images-container">
-                    ${images.map(data => 
-                        `<div class="review-img-wrapper">
-                            <img src="${data.imageURL}" alt="${data.id}" class="review-img">
-                        </div>`
-                    ).join('')}
-                </div>
-            </div>
-        `;
-    });
-    reviewArea.innerHTML = reviewHTML;
+    // 2. 載入貓科圖片預覽
+    const felineImages = classifiedGroups['Feline (貓科)'];
+    reviewFeline.innerHTML = `
+        <h4>Feline (貓科) 分類結果 (${felineImages.length} 張)</h4>
+        <div class="review-images-container">
+            ${felineImages.map(data => 
+                `<div class="review-img-wrapper">
+                    <img src="${data.imageURL}" alt="${data.id}" class="review-img">
+                </div>`
+            ).join('')}
+        </div>
+    `;
+    
+    // 3. 載入犬科圖片預覽
+    const canineImages = classifiedGroups['Canine (犬科)'];
+    reviewCanine.innerHTML = `
+        <h4>Canine (犬科) 分類結果 (${canineImages.length} 張)</h4>
+        <div class="review-images-container">
+            ${canineImages.map(data => 
+                `<div class="review-img-wrapper">
+                    <img src="${data.imageURL}" alt="${data.id}" class="review-img">
+                </div>`
+            ).join('')}
+        </div>
+    `;
 
-    // 2. 載入特徵選擇選項
+
+    // 4. 載入特徵選擇選項 (中間部分)
     DESIGN_FEATURES.forEach(feature => {
         const label = document.createElement('label');
         label.innerHTML = `<input type="checkbox" value="${feature.id}" name="feature">${feature.name}`;
@@ -315,7 +326,7 @@ function initStep2() {
     document.querySelectorAll('#feature-options input[type="checkbox"]').forEach(checkbox => {
         checkbox.addEventListener('change', handleFeatureSelection);
     });
-    document.getElementById('step2-message').classList.remove('success'); // 清除舊訊息
+    document.getElementById('step2-message').classList.remove('success');
 }
 
 function handleFeatureSelection(e) {

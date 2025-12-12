@@ -632,6 +632,7 @@ function finalScore() {
                 <hr>
 
                 <h3>2. 特徵效率 (Feature Efficiency)</h3>
+				<p>這是你選擇的特徵的辨識度。(滿分100分，正確加分、錯誤扣分)</p>
                 <p class="score-result">特徵選取準確度: <strong>${featureEfficiencyPercentage.toFixed(0)}</strong></p>
                 <p class="speech-example">${featureSentence}</p>
                 
@@ -643,7 +644,7 @@ function finalScore() {
                 <p class="score-result">測試圖片真實答案: <strong>${testImage.trueAnswer}</strong></p>
                 <p class="score-result">你的最終判斷: <strong>${studentTestPrediction}</strong></p>
                 <p style="font-size: 1.2em; color: ${finalPredictionCorrect ? 'green' : 'red'};">推論結果：${finalPredictionCorrect ? '正確！ (Correct!)' : '錯誤！ (Error!)'}</p>
-                
+				<p class="speech-example" style="margin-left: 20px;">${predictionActionSentence}, ${predictionResultSentence}</p>
                 <p style="font-style: italic; margin-top: 5px;"></p>
 
             </div>

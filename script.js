@@ -62,6 +62,16 @@ const FULL_IMAGE_DATABASE = [
     { id: 'f4', imageURL: 'img/feline/cheetah_1.png', trueAnswer: 'Feline (貓科)' },
     { id: 'f5', imageURL: 'img/feline/cougar_1.png', trueAnswer: 'Feline (貓科)' },
     { id: 'f6', imageURL: 'img/feline/lynx_1.png', trueAnswer: 'Feline (貓科)' },
+	{ id: 'f7', imageURL: 'img/feline/panther_1.png', trueAnswer: 'Feline (貓科)' },
+	{ id: 'f8', imageURL: 'img/feline/caracal_1.png', trueAnswer: 'Feline (貓科)' },
+	{ id: 'f9', imageURL: 'img/feline/cat_2.png', trueAnswer: 'Feline (貓科)' },
+    { id: 'f10', imageURL: 'img/feline/lion_2.png', trueAnswer: 'Feline (貓科)' },
+    { id: 'f11', imageURL: 'img/feline/tiger_2.png', trueAnswer: 'Feline (貓科)' },
+    { id: 'f12', imageURL: 'img/feline/cheetah_2.png', trueAnswer: 'Feline (貓科)' },
+    { id: 'f13', imageURL: 'img/feline/cougar_2.png', trueAnswer: 'Feline (貓科)' },
+    { id: 'f14', imageURL: 'img/feline/lynx_2.png', trueAnswer: 'Feline (貓科)' },
+	{ id: 'f15', imageURL: 'img/feline/panther_2.png', trueAnswer: 'Feline (貓科)' },
+	{ id: 'f16', imageURL: 'img/feline/caracal_2.png', trueAnswer: 'Feline (貓科)' },
     // --- Canine (犬科) 圖片 ---
     { id: 'c1', imageURL: 'img/canine/dog_1.png', trueAnswer: 'Canine (犬科)' },
     { id: 'c2', imageURL: 'img/canine/wolf_1.png', trueAnswer: 'Canine (犬科)' },
@@ -69,6 +79,14 @@ const FULL_IMAGE_DATABASE = [
     { id: 'c4', imageURL: 'img/canine/coyote_1.png', trueAnswer: 'Canine (犬科)' },
     { id: 'c5', imageURL: 'img/canine/jackal_1.png', trueAnswer: 'Canine (犬科)' },
     { id: 'c6', imageURL: 'img/canine/wilddog_1.png', trueAnswer: 'Canine (犬科)' },
+	{ id: 'c7', imageURL: 'img/canine/dingo_1.png', trueAnswer: 'Canine (犬科)' },
+	{ id: 'c8', imageURL: 'img/canine/dog_2.png', trueAnswer: 'Canine (犬科)' },
+    { id: 'c9', imageURL: 'img/canine/wolf_2.png', trueAnswer: 'Canine (犬科)' },
+    { id: 'c10', imageURL: 'img/canine/fox_2.png', trueAnswer: 'Canine (犬科)' },
+    { id: 'c11', imageURL: 'img/canine/coyote_2.png', trueAnswer: 'Canine (犬科)' },
+    { id: 'c12', imageURL: 'img/canine/jackal_2.png', trueAnswer: 'Canine (犬科)' },
+    { id: 'c13', imageURL: 'img/canine/wilddog_2.png', trueAnswer: 'Canine (犬科)' },
+	{ id: 'c14', imageURL: 'img/canine/dingo_2.png', trueAnswer: 'Canine (犬科)' },
 ];
 
 // 核心函式：隨機抽取圖片

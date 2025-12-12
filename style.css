@@ -1,3 +1,4 @@
+/* --- 基礎設定與配色優化 --- */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #e9eff5; /* 淺藍灰色背景 */
@@ -5,6 +6,7 @@ body {
     padding: 20px;
     margin: 0;
 }
+
 h1 {
     color: #1a5690; /* 深藍色標題 */
     text-align: center;
@@ -14,21 +16,25 @@ h1 {
 
 .game-step {
     background: white;
-    padding: 20px;
-    margin-bottom: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    display: none; /* 預設隱藏，由 JS 控制顯示 */
+    padding: 30px;
+    margin: 20px auto;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    display: none;
+    transition: transform 0.3s ease;
 }
 
 .game-step.active {
     display: block;
     animation: fadeIn 0.5s;
 }
+
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+/* --- 全域按鈕樣式 --- */
 button {
     padding: 12px 25px;
     font-size: 1.1em;
@@ -37,8 +43,10 @@ button {
     cursor: pointer;
     transition: background-color 0.3s, transform 0.1s, box-shadow 0.2s;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    margin-top: 15px; /* 增加按鈕間距 */
+    margin-top: 15px; 
 }
+
+/* 主要操作按鈕 (例如: 完成分類, 揭曉結果) */
 #checkStep1Btn, .game-step button:not([onclick*="goToOptimization"]) {
     background-color: #4CAF50; /* 綠色 */
     color: white;
@@ -68,14 +76,15 @@ button[onclick*="goToOptimization"]:hover {
     transform: translateY(-2px);
 }
 
-/* --- Step 1 Styles --- */
+
+/* --- Step 1 拖曳與分類區 --- */
 .drag-container {
     display: flex;
     justify-content: center;
     gap: 15px;
     margin-bottom: 25px;
     min-height: 120px;
-    border: 2px dashed #a0c4ff; /* 邊框更明顯 */
+    border: 2px dashed #a0c4ff;
     padding: 15px;
     border-radius: 8px;
     background-color: #f7faff;
@@ -83,7 +92,7 @@ button[onclick*="goToOptimization"]:hover {
 
 .drop-container {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* 使用網格佈局 */
+    grid-template-columns: repeat(2, 1fr);
     gap: 25px;
     margin-top: 25px;
 }
@@ -110,8 +119,8 @@ button[onclick*="goToOptimization"]:hover {
     border-color: #2196F3;
 }
 
-.draggable-img, #test-image {
-    width: 100px; /* 圖片放大 */
+.draggable-img {
+    width: 100px;
     height: 100px;
     margin: 8px;
     cursor: grab;
@@ -120,61 +129,22 @@ button[onclick*="goToOptimization"]:hover {
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
 }
 
-/* --- Step 2 Styles --- */
+/* --- Step 2 三欄佈局與特徵選擇 --- */
 .step2-feature-layout {
     display: grid;
-    grid-template-columns: 1fr 1.5fr 1fr; /* 左(貓) 中(特徵) 右(犬) */
+    grid-template-columns: 1fr 1.5fr 1fr; 
     gap: 20px;
     margin-top: 20px;
 }
-#feature-options-center p {
-    text-align: center;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 10px;
-}
-#feature-options {
-    /* 替換原本的 grid 佈局為 flex 垂直佈局 */
-    display: flex;
-    flex-direction: column;
-    gap: 8px; /* 減少間距 */
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    background-color: white;
-}
 
-#feature-options label {
-    display: flex; /* 確保 Checkbox 和文本在同一行 */
-    align-items: center;
-    background-color: #f8f8f8;
-    padding: 8px 10px;
-    border-radius: 4px;
-    transition: background-color 0.2s;
-    white-space: nowrap; /* 防止選項文本換行 */
-}
-#feature-options label:hover {
-    background-color: #e0f7fa;
-}
-
-#feature-options input[type="checkbox"] {
-    margin-right: 10px;
-    transform: scale(1.2); /* 放大 Checkbox */
-}
-@media (max-width: 900px) {
-    .step2-feature-layout {
-        grid-template-columns: 1fr; /* 單欄堆疊 */
-    }
-}
-
-/* --- Step 2 預覽區樣式 --- */
-#student-classification-review {
-    margin-bottom: 25px;
-    padding: 15px;
+.review-panel {
     border: 1px solid #ddd;
     border-radius: 8px;
-    background-color: #f9f9f9;
+    padding: 10px;
+    box-sizing: border-box;
+    background-color: #f0f8ff; 
 }
+
 .review-panel h4 {
     text-align: center;
     color: #1a5690;
@@ -183,109 +153,87 @@ button[onclick*="goToOptimization"]:hover {
     padding-bottom: 5px;
 }
 
+/* 預覽圖容器 */
 .review-images-container {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center; /* 圖片置中 */
+    justify-content: center;
     gap: 5px;
-    max-height: 400px; /* 限制高度，避免圖片過多佔用太多空間 */
-    overflow-y: auto;
-    padding: 5px;
-}
-.review-group {
-    margin-bottom: 15px;
-    padding: 10px;
-    border-bottom: 1px dashed #ccc;
-}
-
-.review-group h4 {
-    color: #007bff;
-    margin-top: 5px;
-    margin-bottom: 10px;
-}
-
-.review-images-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    max-height: 480px; /* 限制高度，避免圖片過多佔用太多空間 */
+    max-height: 450px; 
     overflow-y: auto;
     padding: 5px;
 }
 
 .review-img {
-    width: 115px; /* 縮小預覽圖大小 */
-    height: 115px;
+    width: 120px; /* 統一尺寸 */
+    height: 120px;
     object-fit: cover;
     border: 1px solid #aaa;
     border-radius: 4px;
 }
 
-/* --- Step 3 Styles --- */
-#testing-area {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 15px;
-    margin-top: 20px;
+/* 中間特徵選項 */
+#feature-options-center p {
+    text-align: center;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
 }
 
-#prediction-results {
-    border: 2px solid #ffc107;
-    padding: 15px;
+#feature-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px;
+    border: 1px solid #ccc;
     border-radius: 6px;
-    text-align: center;
-    min-width: 200px;
+    background-color: white;
 }
+
+#feature-options label {
+    display: flex;
+    align-items: center;
+    background-color: #f8f8f8;
+    padding: 8px 10px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    white-space: nowrap; 
+}
+
+#feature-options label:hover {
+    background-color: #e0f7fa;
+}
+
+#feature-options input[type="checkbox"] {
+    margin-right: 10px;
+    transform: scale(1.2);
+}
+
+/* --- Step 3 推論介面 --- */
 .step3-layout {
     display: grid;
-    grid-template-columns: 1fr 1.5fr; /* 圖片 1 份，判斷列表 1.5 份 */
+    grid-template-columns: 1fr 1.5fr; 
     gap: 30px;
     margin-top: 25px;
-    align-items: flex-start; /* 頂部對齊 */
+    align-items: flex-start;
 }
 
 .image-focus-area {
     display: flex;
-    flex-direction: column; /* 使圖片和計分板垂直堆疊 */
+    flex-direction: column;
     align-items: center;
     padding: 10px;
     background-color: #f7faff;
     border-radius: 8px;
 }
 
-.judgment-scroll-area {
-    max-height: none; /* 移除高度限制 */
-    overflow-y: visible;
-    padding-right: 0;
-}
-
-.feature-judgment-item {
-    border: 1px solid #ddd;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 6px;
-    background-color: #f9f9f9;
-}
-
-.feature-judgment-item h4 {
-    color: #1a5690;
-    margin-top: 0;
-    font-size: 1.1em;
-}
-.feature-judgment-item p {
-    margin: 5px 0 10px 0;
-    font-size: 0.95em;
-    line-height: 1.2;
-}
-.feature-judgment-item label {
-    display: block;
-    margin: 5px 0;
-}
 #judgment-scoreboard {
-    width: 100%; /* 讓計分板與圖片區同寬 */
+    width: 100%;
     box-sizing: border-box;
+    background: #fffbe6;
+    border-radius: 8px;
 }
+
 #score-display {
     display: flex;
     justify-content: space-around;
@@ -293,9 +241,6 @@ button[onclick*="goToOptimization"]:hover {
     font-size: 1.1em;
 }
 
-#score-display span {
-    transition: font-weight 0.2s, color 0.2s;
-}
 /* 判斷按鈕樣式 */
 .judgment-buttons button {
     padding: 8px 12px;
@@ -305,28 +250,16 @@ button[onclick*="goToOptimization"]:hover {
     background-color: #e0e0e0;
     color: #333;
     transition: all 0.2s;
-    box-shadow: none; /* 移除默認陰影，讓樣式更輕盈 */
+    box-shadow: none; 
 }
 
-.judgment-buttons button:hover {
-    background-color: #d1d1d1;
-    transform: none;
-}
-
-/* 選中狀態 (Feline - 紅色/橘色) */
-.judgment-buttons button.selected-feline,
-.final-buttons button.selected-feline {
-    background-color: #DC3545; /* 深紅 */
+.judgment-buttons button.selected-feline {
+    background-color: #DC3545;
     color: white;
-    border: 1px solid #DC3545;
 }
-
-/* 選中狀態 (Canine - 藍色) */
-.judgment-buttons button.selected-canine,
-.final-buttons button.selected-canine {
-    background-color: #2196F3; /* 深藍 */
+.judgment-buttons button.selected-canine {
+    background-color: #2196F3;
     color: white;
-    border: 1px solid #2196F3;
 }
 
 /* 最終結論按鈕樣式 */
@@ -345,91 +278,77 @@ button[onclick*="goToOptimization"]:hover {
     color: #333;
     transition: all 0.2s;
 }
-/* --- Step 4 Styles --- */
-.step4-layout {
+
+.judgment-buttons button.selected-feline,
+.final-buttons button.selected-feline { /* <-- 檢查這兩行是否包含 final-buttons */
+    background-color: #DC3545; /* 深紅 */
+    color: white;
+    border: 1px solid #DC3545;
+}
+
+/* 選中狀態 (Canine - 藍色) */
+.judgment-buttons button.selected-canine,
+.final-buttons button.selected-canine { /* <-- 檢查這兩行是否包含 final-buttons */
+    background-color: #2196F3; /* 深藍 */
+    color: white;
+    border: 1px solid #2196F3;
+}
+
+.final-buttons button.selected-feline {
+    background-color: #DC3545 !important; 
+    color: white !important;
+    border-color: #DC3545 !important; 
+    transform: scale(1.05); /* 增加點擊感 */
+}
+
+.final-buttons button.selected-canine {
+    background-color: #2196F3 !important; 
+    color: white !important;
+    border-color: #2196F3 !important;
+    transform: scale(1.05);
+}
+
+/* --- Step 4 診斷與回顧 --- */
+
+/* 核心三欄佈局 */
+.step4-final-layout {
     display: grid;
-    grid-template-columns: 2fr 1fr; /* 評分結果佔 2 份，圖片佔 1 份 */
+    grid-template-columns: 3fr 1.5fr; /* 診斷區寬於回顧區 */
     gap: 30px;
     align-items: flex-start;
 }
-#diagnosis-results h2 {
-    color: #1a5690;
-    border-bottom: 2px solid #ccc;
-    padding-bottom: 10px;
+
+/* 診斷評分區 */
+.step4-scores-column {
+    padding-right: 15px;
 }
 
+/* 回顧區 (右側) */
+.step4-review-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: sticky; 
+    top: 20px;
+}
+
+/* 數據展示區塊 */
 .score-result {
     padding: 8px 15px;
     background-color: #e8f5e9;
     border-radius: 5px;
     margin: 10px 0;
     border-left: 4px solid #4CAF50;
+    font-weight: bold;
+    color: #333;
 }
 
 .score-result strong {
     color: #007bff;
     font-size: 1.2em;
 }
-.test-image-summary {
-    border: 1px solid #ddd;
-    padding: 15px;
-    border-radius: 10px;
-    background-color: #f7faff;
-}
-.test-image-summary h3 {
-    color: #1a5690;
-}
 
-.step4-image-summary {
-    text-align: center;
-    padding: 15px;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    background-color: #f7faff;
-}
-.step4-image-summary h3 {
-    color: #1a5690;
-    margin-top: 0;
-}
-
-.final-test-img {
-    width: 100%; /* 確保圖片填滿容器 */
-    max-width: 200px; /* 限制最大寬度 */
-    height: auto;
-    object-fit: cover;
-    border: 4px solid #007bff;
-    border-radius: 8px;
-}
-.speech-example{
-	font-size:24px;
-	
-}
-
-/* RWD 調整：當螢幕較窄時，切換回垂直堆疊 */
-@media (max-width: 800px) {
-    .step4-layout {
-        grid-template-columns: 1fr;
-    }
-}
-.step4-final-layout {
-    display: grid;
-    grid-template-columns: 3fr 1fr; /* 診斷區佔 3 份，回顧區佔 1 份 */
-    gap: 30px;
-    align-items: flex-start;
-}
-
-.step4-scores-column {
-    padding-right: 15px; /* 避免文字太貼近右邊 */
-}
-
-.step4-review-column {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    position: sticky; /* 讓回顧欄在滾動時保持可見 (需要調整父元素) */
-    top: 20px;
-}
-
+/* 測試圖片總結 */
 .step4-image-summary {
     text-align: center;
     padding: 15px;
@@ -448,31 +367,28 @@ button[onclick*="goToOptimization"]:hover {
     border-radius: 8px;
 }
 
-/* --- 回顧區塊樣式 --- */
+/* 學生選擇回顧區 */
 .student-selection-review {
     padding: 15px;
     border: 1px solid #ddd;
     border-radius: 8px;
     background-color: #f9f9f9;
 }
-
 .review-img-row {
     display: flex;
     flex-wrap: wrap;
     gap: 5px;
     margin-bottom: 10px;
 }
-
 .review-img-final {
-    width: 40px; /* 縮小回顧圖片 */
+    width: 40px; 
     height: 40px;
     object-fit: cover;
     border-radius: 4px;
 }
-
 .feature-list-final {
-    list-style: none;
-    padding: 0;
+    list-style: disc; /* 改回圓點列表 */
+    padding-left: 20px;
     font-size: 0.9em;
 }
 
@@ -482,6 +398,15 @@ button[onclick*="goToOptimization"]:hover {
     color: #DC3545;
 }
 
+/* 語音例句樣式 */
+.speech-example {
+    font-size: 1.5em;
+    margin: 5px 0;
+    line-height: 1.3;
+	font-style: bold;
+}
+
+/* 優化控制按鈕群組 */
 .optimization-controls {
     display: flex;
     gap: 10px;
@@ -489,22 +414,22 @@ button[onclick*="goToOptimization"]:hover {
     flex-wrap: wrap;
 }
 
-/* RWD 調整：小螢幕切換回垂直堆疊 */
+/* 綜合評價區塊 */
+.final-strategy-advice-full {
+    padding: 15px;
+    border: 2px dashed #007bff;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+/* RWD 媒體查詢 */
 @media (max-width: 900px) {
+    .step2-feature-layout,
+    .step3-layout,
     .step4-final-layout {
         grid-template-columns: 1fr;
     }
     .step4-review-column {
         position: static;
     }
-}
-.game-step#step4, 
-.step4-scores-column, 
-.step4-review-column,
-.step4-image-summary,
-.student-selection-review,
-.final-strategy-advice-full {
-    background-color: white !important; /* 強制所有截圖組件為純白背景 */
-    box-shadow: none !important;        /* 臨時移除陰影，測試是否為陰影導致的邊界渲染問題 */
-    border: none !important;            /* 臨時移除邊框，測試是否為邊框導致的錯誤渲染 */
 }

@@ -519,7 +519,7 @@ function revealPrediction() {
 
 // --- Step 4 邏輯：模型診斷與計分 (整合優化選項) ---
 function finalScore() {
-    // 1. 訓練準確度 (與真實答案相比) - 保持不變
+    // 1. 訓練準確度 (與真實答案相比)
     let ruleStabilityScore = 0;
     GAME_DATA.forEach(data => {
         const studentCategory = studentClassification[data.id];
@@ -534,13 +534,15 @@ function finalScore() {
     const allTrueFeatures = TRUE_FEATURE_MAPPINGS['Feline (貓科)'].concat(TRUE_FEATURE_MAPPINGS['Canine (犬科)']);
     
     let rawFeatureScore = 0;
-    let trueFeatureCount = 0; // 新增：計算正確特徵數量
-    let distractorCount = 0; // 新增：計算錯誤特徵數量
+    let trueFeatureCount = 0; 
+    let distractorCount = 0; 
     
-    // 計算原始分數和計數
+    const MAX_POSSIBLE_SCORE = 5.0; 
+    
     studentsFeatures.forEach(fId => {
-		const weight = FEATURE_WEIGHTS[fId] || 0; 
+        const weight = FEATURE_WEIGHTS[fId] || 0; 
         rawFeatureScore += weight;
+
         if (allTrueFeatures.includes(fId)) {
             trueFeatureCount += 1;
         } else if (allDistractorFeatures.includes(fId)) {
@@ -562,22 +564,24 @@ function finalScore() {
     let featureDiagnosisMessage = '';
     
     if (featureEfficiencyPercentage >= 70) {
-        // 情境 1: 正確率達 70% 以上 (Normalized Score >= 3.5)
-        featureDiagnosisMessage = `<p style="color:green;">診斷: 恭喜！你的特徵選取非常成功，規則清晰且精準！</p>`;
+        featureDiagnosisMessage = '<p style="color:green;">✅ 診斷: 恭喜！你的特徵選取非常成功，AI 規則清晰且精準！</p>';
+    } else if (distractorCount >= 3) {
+        featureDiagnosisMessage = '<p style="color:red;">❌ 診斷: 你的特徵選擇中，錯誤特徵 ( '+distractorCount+' 個) 已經佔據主導地位，AI 規則完全混亂！</p>';
     } else if (trueFeatureCount < 3) {
-        // 情境 2: 選擇的正確特徵少於 3 個
-        featureDiagnosisMessage = `<p style="color:#FF8C00;">診斷: 你選擇到的正確特徵 (僅 ${trueFeatureCount} 個) 太少，缺乏有效的判斷基礎。</p>`;
-    } else if (distractorCount > 3) {
-        // 情境 3: 錯誤特徵多於 3 個 (雖然分數可能還不錯，但錯誤率高)
-        featureDiagnosisMessage = `<p style="color:#FFA500;">診斷: 你雖然選對了一些特徵，但錯誤特徵 ( ${distractorCount} 個) 過多，規則混亂且效率低落。</p>`;
+        featureDiagnosisMessage = '<p style="color:#FF8C00;">⚠️ 診斷: 你選擇的正確特徵 (僅 '+trueFeatureCount+' 個) 太少，AI 缺乏有效的判斷基礎。</p>';
     } else if (normalizedScore < 0.1) {
-        // 情境 4: 分數接近零 (完全錯誤)
-        featureDiagnosisMessage = `<p style="color:red;">診斷: 你的特徵選擇與物種的決定性特徵幾乎完全不相關，模型無法工作！</p>`;
+        featureDiagnosisMessage = '<p style="color:red;">❌ 診斷: 你的特徵選擇與物種的決定性特徵幾乎完全不相關，AI 模型無法工作！</p>';
     } else {
-         // 一般錯誤或混亂情況
-         featureDiagnosisMessage = `<p style="color:#DC3545;">診斷: 你的特徵選擇仍有進步空間。請嘗試找出更具區分性的關鍵特徵。</p>`;
+         featureDiagnosisMessage = '<p style="color:#FFA500;">🔔 診斷: 你的特徵有效性分數中等。請嘗試找出更具區分性的關鍵特徵來提高效率。</p>';
     }
     
+    // --- 根據表現生成英文例句 ---
+    const accuracySentence = `My classification score is ${ruleStabilityPercentage.toFixed(0)} percent.`;
+    const featureSentence = `The feature score is ${featureEfficiencyPercentage.toFixed(0)} percent, which is ${(featureEfficiencyPercentage >= 70 ? 'good' : 'low')}.`;
+    const predictionSentence = `I predict the result is ${finalPredictionCorrect ? 'correct' : 'wrong'}.`;
+    const adjustSentence = `We must adjust the model now.`;
+
+
     // 輸出診斷結果
     const resultDiv = document.getElementById('diagnosis-results');
     resultDiv.innerHTML = `
@@ -590,12 +594,14 @@ function finalScore() {
                 <h3>1. 規則穩定性 (Rule Stability)</h3>
                 <p>這是你訓練模型時，分類結果與真實世界答案的吻合度。</p>
                 <p class="score-result">訓練分類準確度: <strong>${ruleStabilityScore}/${GAME_DATA.length}</strong> (${ruleStabilityPercentage.toFixed(0)}%)</p>
+                <p style="margin-top: 5px; font-size:24px;">${accuracySentence}</p>
                 ${ruleStabilityPercentage < 70 ? '<p style="color:red;">診斷: 你的初始分類 (訓練數據標籤) 本身可能就不夠穩定或準確，導致模型基礎不穩！</p>' : ''}
                 <hr>
 
                 <h3>2. 特徵效率 (Feature Efficiency)</h3>
-                <p>這是你選取的 ${studentsFeatures.length} 個特徵的有效性分數。</p>
+                <p>這是你選取的 ${studentsFeatures.length} 個特徵的有效性分數 (有效特徵 +1.1~0.6, 干擾項 -0.5~-1.5)。</p>
                 <p class="score-result">特徵選取準確度: <strong>${featureEfficiencyPercentage.toFixed(0)}%</strong></p>
+                <p style="margin-top: 5px; font-size:24px;">${featureSentence}</p>
                 
                 ${featureDiagnosisMessage}
                 
@@ -604,7 +610,8 @@ function finalScore() {
                 <h3>3. 最終推論準確度 (Inference Accuracy)</h3>
                 <p class="score-result">測試圖片真實答案: <strong>${testImage.trueAnswer}</strong></p>
                 <p class="score-result">你的最終判斷: <strong>${studentTestPrediction}</strong></p>
-                <p style="font-size: 1.2em; color: ${finalPredictionCorrect ? 'green' : 'red'};"><strong>推論結果：${finalPredictionCorrect ? '正確！ (Correct!)' : '錯誤！ (Error!)'}</strong></p>
+                <p style="font-size: 1.2em; color: ${finalPredictionCorrect ? 'green' : 'red'};">推論結果：${finalPredictionCorrect ? '正確！ (Correct!)' : '錯誤！ (Error!)'}</p>
+                <p style="margin-top: 5px; font-size:24px;">${predictionSentence}</p>
             </div>
             
             <div class="step4-image-summary">
@@ -626,6 +633,7 @@ function finalScore() {
                 選項 B: 重新選擇 Step 2 特徵 (修正 AI 規則)
             </button>
         </div>
+        <p style="margin-top: 20px;">${adjustSentence}</p>
     `;
 }
 

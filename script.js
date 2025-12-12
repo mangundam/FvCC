@@ -176,17 +176,17 @@ async function initStep1(isOptimization = false) {
     GAME_DATA.forEach(data => {
         let img = document.getElementById(data.id);
         
-        // 只有在初次載入時 (img不存在)，才創建新的 img 元素
         if (!img) {
             img = document.createElement('img');
             img.src = data.imageURL;
             img.id = data.id;
             img.className = 'draggable-img';
-            img.addEventListener('dragstart', dragStart);
+            img.addEventListener('dragstart', dragStart); 
+            // *** 移除此處的 touchstart 註冊，改為統一在 initTouchEvents 執行 ***
         }
         
         img.setAttribute('draggable', true);
-        imagePool.appendChild(img); // 確保圖片在 DOM 中
+        imagePool.appendChild(img); 
     });
 
     // 5. 載入分類框
@@ -203,7 +203,7 @@ async function initStep1(isOptimization = false) {
     
     // 6. 訊息提示
     document.getElementById('step1-message').textContent = '請根據你的直覺，將圖片分類到你設計的兩個類別中。';
-
+	initTouchEvents();
 }
 
 function dragStart(e) {
@@ -626,6 +626,100 @@ function goToOptimization(choice) {
         initStep2(); 
     }
 }
+// --- 觸控兼容變數 ---
+let currentDraggingElement = null;
+let initialTouchX = 0;
+let initialTouchY = 0;
 
+// --- 觸控事件處理 ---
+
+// 1. touchStart (開始拖曳)
+function touchStart(e) {
+    // 檢查是否是可拖曳的圖片
+    if (!e.target.classList.contains('draggable-img')) return;
+    
+    // 阻止瀏覽器默認行為（如捲動或放大）
+    e.preventDefault(); 
+    
+    const img = e.target;
+    currentDraggingElement = img;
+    
+    // 獲取觸控位置
+    const touch = e.touches[0];
+    initialTouchX = touch.clientX - img.getBoundingClientRect().left;
+    initialTouchY = touch.clientY - img.getBoundingClientRect().top;
+    
+    // 設置圖片的樣式以進行拖曳視覺效果 (Positioning for drag)
+    img.style.position = 'absolute';
+    img.style.zIndex = 1000;
+    img.style.opacity = '0.7';
+
+    // 呼叫 touchMove 函式進行位置更新
+    document.addEventListener('touchmove', touchMove, { passive: false });
+    document.addEventListener('touchend', touchEnd);
+}
+
+// 2. touchMove (移動圖片)
+function touchMove(e) {
+    if (!currentDraggingElement) return;
+
+    e.preventDefault(); 
+    const touch = e.touches[0];
+    
+    // 更新圖片位置
+    currentDraggingElement.style.left = (touch.clientX - initialTouchX) + 'px';
+    currentDraggingElement.style.top = (touch.clientY - initialTouchY) + 'px';
+}
+
+// 3. touchEnd (放下圖片)
+function touchEnd(e) {
+    if (!currentDraggingElement) return;
+    
+    e.preventDefault(); 
+    const draggedImg = currentDraggingElement;
+    
+    // 移除移動和結束事件
+    document.removeEventListener('touchmove', touchMove);
+    document.removeEventListener('touchend', touchEnd);
+
+    draggedImg.style.position = ''; 
+    draggedImg.style.zIndex = '';
+    draggedImg.style.opacity = '1';
+
+    // 尋找目標放置區 (Find the drop target based on final position)
+    const touch = e.changedTouches[0];
+    const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
+    
+    // 如果找到有效的放置區，則觸發 drop 邏輯
+    if (dropTarget && dropTarget.classList.contains('drop-target')) {
+        // 觸發 drop 邏輯 (手動執行 drop 函式的主要步驟)
+        if (dropTarget.classList.contains('drop-target')) {
+            dropTarget.appendChild(draggedImg);
+            draggedImg.setAttribute('draggable', true); // 保持 draggable 屬性
+            draggedImg.style.left = ''; // 清除絕對定位
+            draggedImg.style.top = '';
+            
+            // 記錄學生的分類結果 (這是核心步驟)
+            studentClassification[draggedImg.id] = dropTarget.dataset.category;
+        }
+    } else {
+        // 如果未落在有效區域，將圖片放回原位 (重設定位)
+        draggedImg.style.left = '';
+        draggedImg.style.top = '';
+    }
+    
+    currentDraggingElement = null;
+}
+
+// 4. 初始化 touch 事件監聽器
+function initTouchEvents() {
+    // 將 touchstart 事件監聽器添加到所有可拖曳圖片上
+    document.querySelectorAll('.draggable-img').forEach(img => {
+        img.addEventListener('touchstart', touchStart, { passive: false });
+    });
+}
+
+// 5. 確保在 DOM 載入時初始化觸控事件 (同時兼容滑鼠和觸控)
+document.addEventListener('DOMContentLoaded', initTouchEvents);
 // 啟動遊戲
 document.addEventListener('DOMContentLoaded', initStep1);

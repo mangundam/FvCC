@@ -476,8 +476,6 @@ function finalScore() {
     let trueFeatureCount = 0; 
     let distractorCount = 0; 
     
-    const MAX_POSSIBLE_SCORE = 5.0; 
-    
     studentsFeatures.forEach(fId => {
         const weight = FEATURE_WEIGHTS[fId] || 0; 
         rawFeatureScore += weight;
@@ -514,6 +512,15 @@ function finalScore() {
          featureDiagnosisMessage = '<p style="color:#FFA500;">你的特徵有效性分數中等。請嘗試找出更具區分性的關鍵特徵來提高效率。</p>';
     }
     
+	let classificationEvaluation = '';
+    if (ruleStabilityPercentage >= 80) {
+        classificationEvaluation = `My classification score is ${ruleStabilityPercentage.toFixed(0)} percent. That is excellent.`;
+    } else if (ruleStabilityPercentage >= 60) {
+        classificationEvaluation = `My classification score is ${ruleStabilityPercentage.toFixed(0)} percent. That is acceptable.`;
+    } else {
+        classificationEvaluation = `My classification score is ${ruleStabilityPercentage.toFixed(0)} percent. That is too low.`;
+    }
+	
     // --- 5. 綜合評價邏輯 (新增) ---
     const RULE_THRESHOLD = 70;
     let finalStrategyMessage = '';
@@ -540,8 +547,7 @@ function finalScore() {
     }
 
     // --- 根據表現生成英文例句 ---
-    const accuracySentence = `My classification score is ${ruleStabilityPercentage.toFixed(0)} percent.`;
-    const featureSentence = `The feature score is ${featureEfficiencyPercentage.toFixed(0)} percent, which is ${(featureEfficiencyPercentage >= 70 ? 'good' : 'low')}.`;
+    const featureSentence = `The feature score is ${featureEfficiencyPercentage.toFixed(0)}, which is ${(featureEfficiencyPercentage >= 70 ? 'good' : 'low')}.`;
     const predictionContent = studentTestPrediction.split(' ')[0]; 
     const predictionActionSentence = `I predict ${predictionContent}.`;
     const predictionResultSentence = `My prediction is ${finalPredictionCorrect ? 'correct' : 'wrong'}.`;
@@ -560,13 +566,13 @@ function finalScore() {
                 <h3>1. 規則穩定性 (Rule Stability)</h3>
                 <p>這是你訓練模型時，分類結果與真實世界答案的吻合度。</p>
                 <p class="score-result">訓練分類準確度: <strong>${ruleStabilityScore}/${GAME_DATA.length}</strong> (${ruleStabilityPercentage.toFixed(0)}%)</p>
-                <p class="speech-example">${accuracySentence}</p>
+                <p class="speech-example">${classificationEvaluation}</p>
                 ${ruleStabilityPercentage < 70 ? '<p style="color:red;">診斷: 你的初始分類 (訓練數據標籤) 本身可能就不夠穩定或準確，導致模型基礎不穩！</p>' : ''}
                 <hr>
 
                 <h3>2. 特徵效率 (Feature Efficiency)</h3>
-                <p>這是你選取的 ${studentsFeatures.length} 個特徵的有效性分數 (有效特徵 +1.1~0.6, 干擾項 -0.5~-1.5)。</p>
-                <p class="score-result">特徵選取準確度: <strong>${featureEfficiencyPercentage.toFixed(0)}%</strong></p>
+                <p>這是你選取的 ${studentsFeatures.length} 個特徵的有效性分數 (有效特徵 +12~22, 干擾項 -6~-24)。</p>
+                <p class="score-result">特徵選取準確度: <strong>${featureEfficiencyPercentage.toFixed(0)}</strong></p>
                 <p class="speech-example">${featureSentence}</p>
                 
                 ${featureDiagnosisMessage}
@@ -596,7 +602,7 @@ function finalScore() {
         <div class="final-strategy-advice" style="padding: 15px; border: 2px dashed #007bff; border-radius: 8px;">
             <h3 style="color: #DC3545;">模型優化建議 (Strategy Advice)</h3>
             <p style="font-size: 1.1em; margin-bottom: 15px;">綜合評價: ${finalStrategyMessage}</p>
-            <p style="font-style: italic; font-size: 1.2em; color: #1a5690;">${strategySentence}</p>
+            <p style="font-size: 1.5em; color: #1a5690;">${strategySentence}</p>
         </div>
         <h3 style="color:#007bff; margin-top: 20px;">4. 模型優化 (Model Optimization)</h3>
         <p>AI 開發是一個不斷迭代的過程。根據上述診斷，你認為修正哪一步能讓你的 AI 表現更好？</p>

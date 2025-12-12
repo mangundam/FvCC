@@ -167,7 +167,7 @@ async function initStep1(isOptimization = false) {
             img.className = 'draggable-img';
             img.addEventListener('dragstart', dragStart);
         }
-        
+        //img.crossOrigin = 'anonymous';
         img.setAttribute('draggable', true);
         imagePool.appendChild(img);
     });
@@ -456,6 +456,63 @@ function revealPrediction() {
     finalScore(); 
 }
 
+function createReviewImagesHTML(imagesData) {
+    if (!imagesData || imagesData.length === 0) return '<p>無圖片</p>';
+    
+    return imagesData.map(data => 
+        `<img src="${data.imageURL}" alt="${data.id}" class="review-img-final">`
+    ).join('');
+}
+
+function downloadDiagnosisPNG() {
+    const step4Element = document.getElementById('step4');
+
+    // 臨時隱藏按鈕，避免按鈕出現在截圖中
+    const optimizationDiv = step4Element.querySelector('.optimization-controls');
+    if (optimizationDiv) {
+        optimizationDiv.style.display = 'none';
+    }
+    
+    // 臨時隱藏 h1
+    const originalH1 = document.querySelector('h1').style.display;
+    document.querySelector('h1').style.display = 'none';
+
+    if (typeof html2canvas !== 'undefined') {
+        html2canvas(step4Element, { 
+            scale: 2, 
+            useCORS: true, // 告訴 html2canvas 處理 CORS
+            allowTaint: false // 確保不被汙染
+        }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = 'AI_Model_Diagnosis_Result.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            
+            // 截圖完成後，恢復隱藏的元素
+            if (optimizationDiv) {
+                optimizationDiv.style.display = 'flex';
+            }
+            document.querySelector('h1').style.display = originalH1;
+
+        }).catch(error => {
+             // 捕獲並報告錯誤，確保元素恢復
+             console.error("PNG 截圖失敗，可能原因：跨域資源汙染。", error);
+             alert("錯誤：無法下載 PNG。可能原因：圖片路徑錯誤或跨域資源汙染。請確認圖片是否已正確上傳至 GitHub。");
+             if (optimizationDiv) {
+                optimizationDiv.style.display = 'flex';
+            }
+            document.querySelector('h1').style.display = originalH1;
+        });
+    } else {
+        alert("錯誤：未檢測到 html2canvas 庫。請先在 index.html 中導入該庫。");
+        // 恢復隱藏的元素
+         if (optimizationDiv) {
+            optimizationDiv.style.display = 'flex';
+        }
+        document.querySelector('h1').style.display = originalH1;
+    }
+}
+
 // --- Step 4 邏輯：模型診斷與計分 (修正懲罰計分) ---
 function finalScore() {
     // 1. 訓練準確度 (Rule Stability)
@@ -497,6 +554,7 @@ function finalScore() {
     const fileName = testImage.imageURL.split('/').pop();
     const speciesName = fileName.split('_')[0];
 
+	
     // --- 診斷敘述邏輯 ---
     let featureDiagnosisMessage = '';
     
@@ -553,12 +611,15 @@ function finalScore() {
     const predictionResultSentence = `my prediction is ${finalPredictionCorrect ? 'correct' : 'wrong'}.`;
     const adjustSentence = `We must adjust the model now.`;
 
-
+	const studentFelineData = GAME_DATA.filter(d => studentClassification[d.id] === 'Feline (貓科)');
+    const studentCanineData = GAME_DATA.filter(d => studentClassification[d.id] === 'Canine (犬科)');
+	
     // 輸出診斷結果
     const resultDiv = document.getElementById('diagnosis-results');
     resultDiv.innerHTML = `
-        <div class="step4-layout">
-            <div class="step4-scores">
+        <div class="step4-final-layout">
+            
+            <div class="step4-scores-column">
                 <h2>模型診斷結果 (Model Diagnosis)</h2>
                 <p>你的目標：設計一個能準確分類貓科/犬科的 AI 模型。</p>
                 <hr>
@@ -571,7 +632,6 @@ function finalScore() {
                 <hr>
 
                 <h3>2. 特徵效率 (Feature Efficiency)</h3>
-                <p>這是你選取的 ${studentsFeatures.length} 個特徵的有效性分數 (滿分100，有效特徵 +12~22、干擾項 -6~-24)。</p>
                 <p class="score-result">特徵選取準確度: <strong>${featureEfficiencyPercentage.toFixed(0)}</strong></p>
                 <p class="speech-example">${featureSentence}</p>
                 
@@ -585,14 +645,32 @@ function finalScore() {
                 <p style="font-size: 1.2em; color: ${finalPredictionCorrect ? 'green' : 'red'};">推論結果：${finalPredictionCorrect ? '正確！ (Correct!)' : '錯誤！ (Error!)'}</p>
                 
                 <p style="font-style: italic; margin-top: 5px;"></p>
-                <p class="speech-example" style="margin-left: 20px;">${predictionActionSentence}, ${predictionResultSentence}</p>
-                
+
             </div>
             
-            <div class="step4-image-summary">
-                <h3>測試圖片 (Test Image)</h3>
-                <img src="${testImage.imageURL}" alt="Final Test Image" class="final-test-img">
-                <p style="font-size: 1.5em; font-weight: bold; margin-top: 10px;">物種名稱: ${speciesName.toUpperCase()}</p>
+            <div class="step4-review-column">
+                <div class="student-selection-review">
+                    <h3>你的選擇</h3>
+                    
+                    <h4>Step 1: 你的數據分類標籤</h4>
+                    <div class="review-section">
+                        <p>Feline (${studentFelineData.length}張):</p>
+                        <div class="review-img-row">${createReviewImagesHTML(studentFelineData)}</div>
+                        <p>Canine (${studentCanineData.length}張):</p>
+                        <div class="review-img-row">${createReviewImagesHTML(studentCanineData)}</div>
+                    </div>
+                    
+                    <h4>Step 2: 你的特徵選擇 (規則)</h4>
+                    <ul class="feature-list-final">
+                        ${studentsFeatures.map(fId => `<li>${DESIGN_FEATURES.find(f => f.id === fId).name}</li>`).join('')}
+                    </ul>
+
+                    <h4>Step 3: 你的總結推論</h4>
+					<h3>測試圖片 (Test Image)</h3>
+					<img src="${testImage.imageURL}" alt="Final Test Image" class="final-test-img">
+					<p style="font-size: 1.5em; font-weight: bold; margin-top: 10px;">物種名稱: ${speciesName.toUpperCase()}</p>
+                    <p class="final-conclusion-display">${studentTestPrediction}</p>
+                </div>
             </div>
         </div>
 
@@ -612,6 +690,7 @@ function finalScore() {
             <button onclick="goToOptimization(2)" style="background-color: #17a2b8; color: white; border: none; padding: 10px; cursor: pointer;">
                 選項 B: 重新選擇 Step 2 特徵 (修正 AI 規則)
             </button>
+
         </div>
     `;
 }

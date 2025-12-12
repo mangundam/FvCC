@@ -549,8 +549,8 @@ function finalScore() {
     // --- 根據表現生成英文例句 ---
     const featureSentence = `The feature score is ${featureEfficiencyPercentage.toFixed(0)}, which is ${(featureEfficiencyPercentage >= 70 ? 'good' : 'low')}.`;
     const predictionContent = studentTestPrediction.split(' ')[0]; 
-    const predictionActionSentence = `I predict ${predictionContent}.`;
-    const predictionResultSentence = `My prediction is ${finalPredictionCorrect ? 'correct' : 'wrong'}.`;
+    const predictionActionSentence = `I predict ${predictionContent}`;
+    const predictionResultSentence = `my prediction is ${finalPredictionCorrect ? 'correct' : 'wrong'}.`;
     const adjustSentence = `We must adjust the model now.`;
 
 
@@ -571,7 +571,7 @@ function finalScore() {
                 <hr>
 
                 <h3>2. 特徵效率 (Feature Efficiency)</h3>
-                <p>這是你選取的 ${studentsFeatures.length} 個特徵的有效性分數 (有效特徵 +12~22, 干擾項 -6~-24)。</p>
+                <p>這是你選取的 ${studentsFeatures.length} 個特徵的有效性分數 (滿分100，有效特徵 +12~22、干擾項 -6~-24)。</p>
                 <p class="score-result">特徵選取準確度: <strong>${featureEfficiencyPercentage.toFixed(0)}</strong></p>
                 <p class="speech-example">${featureSentence}</p>
                 
@@ -585,9 +585,8 @@ function finalScore() {
                 <p style="font-size: 1.2em; color: ${finalPredictionCorrect ? 'green' : 'red'};">推論結果：${finalPredictionCorrect ? '正確！ (Correct!)' : '錯誤！ (Error!)'}</p>
                 
                 <p style="font-style: italic; margin-top: 5px;"></p>
-                <p class="speech-example" style="margin-left: 20px;">${predictionActionSentence}</p>
-                <p class="speech-example" style="margin-left: 20px;">${predictionResultSentence}</p>
-
+                <p class="speech-example" style="margin-left: 20px;">${predictionActionSentence}, ${predictionResultSentence}</p>
+                
             </div>
             
             <div class="step4-image-summary">

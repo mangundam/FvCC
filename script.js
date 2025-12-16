@@ -183,7 +183,7 @@ async function initStep1(isOptimization = false) {
         dropTargets.appendChild(target);
     });
     
-    document.getElementById('step1-message').textContent = '請根據你的直覺，將圖片分類到你設計的兩個類別中。';
+    //document.getElementById('step1-message').textContent = '請根據你的直覺，將圖片分類到你設計的兩個類別中。';
 
 }
 
@@ -557,7 +557,7 @@ function finalScore() {
 	
     // --- 診斷敘述邏輯 ---
     let featureDiagnosisMessage = '';
-    
+    /*
     if (featureEfficiencyPercentage >= 70) {
         featureDiagnosisMessage = '<p style="color:green;">恭喜！你的特徵選取非常成功，AI 規則清晰且精準！</p>';
     } else if (distractorCount >= 3) {
@@ -568,6 +568,13 @@ function finalScore() {
         featureDiagnosisMessage = '<p style="color:red;">你的特徵選擇與物種的決定性特徵幾乎完全不相關，AI 模型無法工作！</p>';
     } else {
          featureDiagnosisMessage = '<p style="color:#FFA500;">你的特徵有效性分數中等。請嘗試找出更具區分性的關鍵特徵來提高效率。</p>';
+    }*/
+	if (featureEfficiencyPercentage >= 90) {
+        featureDiagnosisMessage = '<p style="color:green;">恭喜！你的特徵選取非常成功，這些特徵非常容易分辨貓科及犬科！</p>';
+    }else if (featureEfficiencyPercentage >= 50) {
+        featureDiagnosisMessage = '<p style="color:green;">你的特徵選取還不夠好，這些特徵有時候無法正確分辨。</p>';
+    }else {
+        featureDiagnosisMessage = '<p style="color:green;">你的特徵選擇的不夠多，需要更多特徵才能正確分辨。</p>';
     }
     
 	let classificationEvaluation = '';
@@ -615,7 +622,8 @@ function finalScore() {
     const predictionContent = studentTestPrediction.split(' ')[0]; 
     //const predictionActionSentence = `I predict ${predictionContent}`;
 	const predictionActionSentence = `I predict it is _______(feline/canine)`;
-    const predictionResultSentence = `my prediction is ${finalPredictionCorrect ? 'correct' : 'wrong'}.`;
+    //const predictionResultSentence = `my prediction is ${finalPredictionCorrect ? 'correct' : 'wrong'}.`;
+	const predictionResultSentence = `my prediction is ${finalPredictionCorrect ? '_______(correct/wrong)' : '_______(correct/wrong)'}.`;
     const adjustSentence = `We must adjust the model now.`;
 
 	const studentFelineData = GAME_DATA.filter(d => studentClassification[d.id] === 'Feline (貓科)');
@@ -627,22 +635,23 @@ function finalScore() {
         <div class="step4-final-layout">
             
             <div class="step4-scores-column">
-                <h2>模型診斷結果 (Model Diagnosis)</h2>
-                <p>你的目標：設計一個能準確分類貓科/犬科的 AI 模型。</p>
+                <h2>AI電腦診斷結果 (Model Diagnosis)</h2>
+                <p>現在來看看你身為AI的表現如何。</p>
                 <hr>
                 
                 <h3>1. 規則穩定性 (Rule Stability)</h3>
-                <p>這是你訓練模型時，分類結果與真實世界答案的吻合度。</p>
+                <p>這是你身為AI工程師時，分類結果與真實世界答案的相似度。</p>
                 <p class="score-result">訓練分類準確度: <strong>${ruleStabilityScore}/${GAME_DATA.length}</strong> (${ruleStabilityPercentage.toFixed(0)}%)</p>
                 <p class="speech-example">${classificationEvaluation}</p>
-                ${ruleStabilityPercentage < 70 ? '<p style="color:red;">診斷: 你的初始分類 (訓練數據標籤) 本身可能就不夠穩定或準確，導致模型基礎不穩！</p>' : ''}
+                ${ruleStabilityPercentage < 70 ? '<p style="color:red;">診斷: 你的分類不夠準確，可能會導致AI學到錯誤的知識！</p>' : ''}
                 <hr>
 
                 <h3>2. 特徵效率 (Feature Efficiency)</h3>
-				<p>這是你選擇的特徵的辨識度。(滿分100分)</p>
+				<p>這是你身為AI電腦時選擇的特徵的辨識度。(滿分100分)</p>
                 <p class="score-result">特徵選取準確度: <strong>${featureEfficiencyPercentage.toFixed(0)}</strong></p>
                 <p class="speech-example">${featureSentence}</p>
-                
+                <table style="border-collapse:collapse;border-spacing:0" class="tg"><thead><tr><th style="border-color:#000000;border-style:solid;border-width:1px;color:#333333;font-family:Arial, sans-serif;font-size:14px;font-weight:normal;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:top;word-break:normal">Snout Length (口鼻長度)</th><th style="border-color:#000000;border-style:solid;border-width:1px;color:#333333;font-family:Arial, sans-serif;font-size:14px;font-weight:normal;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:top;word-break:normal">Claws (爪子)</th><th style="border-color:#000000;border-style:solid;border-width:1px;color:#333333;font-family:Arial, sans-serif;font-size:14px;font-weight:normal;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:top;word-break:normal">Eye Shape (眼睛形狀)</th></tr></thead>
+				<tbody><tr><td style="border-color:#000000;border-style:solid;border-width:1px;color:#333333;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:top;word-break:normal">Ear Shape (耳朵形狀)</td><td style="border-color:#000000;border-style:solid;border-width:1px;color:#333333;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:top;word-break:normal">Body Posture (身體姿態/站姿)</td><td style="border-color:#000000;border-style:solid;border-width:1px;color:#333333;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:top;word-break:normal">Tail Shape (尾巴形狀)</td></tr></tbody></table>
                 ${featureDiagnosisMessage}
                 
                 <hr>

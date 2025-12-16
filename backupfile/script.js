@@ -4,23 +4,23 @@ const STYLE_CATEGORIES = ['Feline (貓科)', 'Canine (犬科)'];
 // 特徵列表：聚焦於貓犬科的生物特徵
 const DESIGN_FEATURES = [ 
     { id: 'F1', name: 'Snout Length (口鼻長度)' },        // [犬科] 明顯的吻部
-	{ id: 'F2', name: 'Ear Shape (耳朵形狀)' },           // [兩者皆有] 差異較小，但有參考價值
-    { id: 'F3', name: 'Eye Shape (眼睛形狀)' }, // [貓科] 垂直瞳孔
-    { id: 'F4', name: 'Claws (爪子)' },         // [貓科] 可伸縮的爪子
+    { id: 'F3', name: 'Eye Shape/Pupil (眼睛形狀/瞳孔)' }, // [貓科] 垂直瞳孔
+    { id: 'F4', name: 'Claws (爪子是否可伸縮)' },         // [貓科] 可伸縮的爪子
     { id: 'F5', name: 'Body Posture (身體姿態/站姿)' },   // [犬科] 站姿較直
-    { id: 'F6', name: 'Tail Shape (尾巴形狀)' },      // [兩者皆有] 動作與形態有差異
-    //{ id: 'D1', name: 'Fur Color (皮毛顏色)' },           // [通用] 顏色變化太大
-    //{ id: 'D2', name: 'Number of Legs (腿的數量)' },      // [常識錯誤/嚴重干擾] 都是四條腿
-    //{ id: 'D3', name: 'Average Weight (平均體重)' },      // [通用] 變化範圍太大
-    //{ id: 'D4', name: 'Whiskers Length (鬍鬚長度)' },     // [通用] 都有鬍鬚
-    //{ id: 'D5', name: 'Habitat (棲息地)' },               // [通用] 棲地非視覺特徵
-    //{ id: 'D6', name: 'Teeth Count (牙齒數量)' }          // [通用] 無法透過圖片直接觀察
+    { id: 'F2', name: 'Ear Shape (耳朵形狀)' },           // [兩者皆有] 差異較小，但有參考價值
+    { id: 'F6', name: 'Tail Shape (尾巴形狀/動作)' },      // [兩者皆有] 動作與形態有差異
+    { id: 'D1', name: 'Fur Color (皮毛顏色)' },           // [通用] 顏色變化太大
+    { id: 'D2', name: 'Number of Legs (腿的數量)' },      // [常識錯誤/嚴重干擾] 都是四條腿
+    { id: 'D3', name: 'Average Weight (平均體重)' },      // [通用] 變化範圍太大
+    { id: 'D4', name: 'Whiskers Length (鬍鬚長度)' },     // [通用] 都有鬍鬚
+    { id: 'D5', name: 'Habitat (棲息地)' },               // [通用] 棲地非視覺特徵
+    { id: 'D6', name: 'Teeth Count (牙齒數量)' }          // [通用] 無法透過圖片直接觀察
 ];
 const FEATURE_WEIGHTS = {
-    'F1': 1.7, 'F2': 1.0, 'F3': 1.6, 'F4': 1.9, 'F5': 1.7,
-     'F6': 0.8,
-    //'D2': -1.2,
-    //'D1': -0.3, 'D3': -0.3, 'D4': -0.3, 'D5': -0.3, 'D6': -0.3
+    'F1': 1.1, 'F3': 1.1, 'F4': 1.1, 'F5': 1.1,
+    'F2': 0.6, 'F6': 0.6,
+    'D2': -1.2,
+    'D1': -0.3, 'D3': -0.3, 'D4': -0.3, 'D5': -0.3, 'D6': -0.3
 };
 const MAX_POSSIBLE_SCORE = 5.0; 
 const TRUE_FEATURE_MAPPINGS = {
@@ -252,7 +252,7 @@ function initStep2() {
     reviewCanine.innerHTML = '';
     studentsFeatures = [];
 
-    document.getElementById('step2-message').textContent = '你剛剛的分類是根據哪些 Feature (特徵)？請選擇 1~3 個最重要的特徵。';
+    document.getElementById('step2-message').textContent = '你剛剛的分類是根據哪些 Feature (特徵)？請選擇 5 個最重要的特徵。';
 
     // 1. 視覺化學生 Step 1 的分類結果
     const classifiedGroups = {};
@@ -308,7 +308,7 @@ function initStep2() {
 function handleFeatureSelection(e) {
     const checkbox = e.target;
     const message = document.getElementById('step2-message');
-    const MAX_FEATURES = 3; 
+    const MAX_FEATURES = 5; 
 
     if (checkbox.checked) {
         if (studentsFeatures.length < MAX_FEATURES) {
@@ -543,7 +543,7 @@ function finalScore() {
             distractorCount += 1;
         }
     });
-	if (rawFeatureScore>5.0){rawFeatureScore = 5.0;}
+
     const normalizedScore = Math.max(0, rawFeatureScore);
     const featureEfficiencyPercentage = (normalizedScore / MAX_POSSIBLE_SCORE) * 100;
     
@@ -571,19 +571,14 @@ function finalScore() {
     }
     
 	let classificationEvaluation = '';
-	/*
     if (ruleStabilityPercentage >= 80) {
-        classificationEvaluation = `My classification score is ${ruleStabilityPercentage.toFixed(0)}. That is excellent.`;
+        classificationEvaluation = `My classification score is ${ruleStabilityPercentage.toFixed(0)} percent. That is excellent.`;
     } else if (ruleStabilityPercentage >= 60) {
-        classificationEvaluation = `My classification score is ${ruleStabilityPercentage.toFixed(0)}. That is acceptable.`;
+        classificationEvaluation = `My classification score is ${ruleStabilityPercentage.toFixed(0)} percent. That is acceptable.`;
     } else {
-        classificationEvaluation = `My classification score is ${ruleStabilityPercentage.toFixed(0)}. That is too low.`;
-    }*/
-	classificationEvaluation = `My classification score is ______. That is __________.<br>
-		<table style="border-collapse:collapse;border-spacing:0" class="tg"><thead><tr><th style="border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:top;word-break:normal">score</th><th style="border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:top;word-break:normal">Level</th></tr></thead><tbody><tr><td style="border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:top;word-break:normal">100</td><td style="border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:top;word-break:normal">perfect</td></tr>
-		<tr><td style="border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:top;word-break:normal">80</td><td style="border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:top;word-break:normal">excellent</td></tr><tr><td style="border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:top;word-break:normal">60</td><td style="border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:top;word-break:normal">acceptable</td></tr>
-		<tr><td style="border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:top;word-break:normal">&lt;60</td><td style="border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:top;word-break:normal">low</td></tr></tbody></table>
-	`;
+        classificationEvaluation = `My classification score is ${ruleStabilityPercentage.toFixed(0)} percent. That is too low.`;
+    }
+	
     // --- 5. 綜合評價邏輯 (新增) ---
     const RULE_THRESHOLD = 70;
     let finalStrategyMessage = '';
@@ -610,11 +605,9 @@ function finalScore() {
     }
 
     // --- 根據表現生成英文例句 ---
-    //const featureSentence = `The feature score is ${featureEfficiencyPercentage.toFixed(0)}, which is ${(featureEfficiencyPercentage >= 70 ? 'good' : 'low')}.`;
-	const featureSentence = `I choose ______, _______ and _______ as features.`;
+    const featureSentence = `The feature score is ${featureEfficiencyPercentage.toFixed(0)}, which is ${(featureEfficiencyPercentage >= 70 ? 'good' : 'low')}.`;
     const predictionContent = studentTestPrediction.split(' ')[0]; 
-    //const predictionActionSentence = `I predict ${predictionContent}`;
-	const predictionActionSentence = `I predict it is _______(feline/canine)`;
+    const predictionActionSentence = `I predict ${predictionContent}`;
     const predictionResultSentence = `my prediction is ${finalPredictionCorrect ? 'correct' : 'wrong'}.`;
     const adjustSentence = `We must adjust the model now.`;
 
@@ -639,7 +632,7 @@ function finalScore() {
                 <hr>
 
                 <h3>2. 特徵效率 (Feature Efficiency)</h3>
-				<p>這是你選擇的特徵的辨識度。(滿分100分)</p>
+				<p>這是你選擇的特徵的辨識度。(滿分100分，正確加分、錯誤扣分)</p>
                 <p class="score-result">特徵選取準確度: <strong>${featureEfficiencyPercentage.toFixed(0)}</strong></p>
                 <p class="speech-example">${featureSentence}</p>
                 

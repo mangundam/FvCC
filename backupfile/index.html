@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 模型設計師：貓科 vs. 犬科</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <h1>AI 模型設計師：貓科 vs. 犬科</h1>
+    
+    <div id="step1" class="game-step active">
+        <h2>Step 1: Classification (分類) - 訓練你的 AI</h2>
+        <p>你現在是工程師，請你定義哪個類別是貓科/犬科。 (You are the engineer, define your classification.) <br>請將圖片拖曳到兩個分類框中。</p>
+        
+        <div id="image-pool" class="drag-container"></div>
+        <div id="classification-targets" class="drop-container"></div>
+        
+        <button id="checkStep1Btn" onclick="checkStep1()">完成分類 (Finish Classification)</button>
+        <p id="step1-message" class="message"></p>
+    </div>
+
+    <div id="step2" class="game-step">
+        <h2>Step 2: Feature Selection (特徵選擇) - 建立 AI 規則</h2>
+        <p>你剛剛分類的依據是什麼？請選擇 5 個最重要的生物 Feature (特徵) 作為 AI 的判斷規則。 (Select 5 key features for AI rules.)</p>
+        
+        <div class="step2-feature-layout">
+            
+            <div id="review-feline" class="review-panel">
+                </div>
+            
+            <div id="feature-options-center" class="feature-options-vertical">
+                <p>請選擇您的特徵：</p>
+                <div id="feature-options">
+                    </div>
+            </div>
+
+            <div id="review-canine" class="review-panel">
+                </div>
+        </div>
+        
+        <button onclick="goToStep3()">完成規則建立 (Go to Inference)</button>
+        <p id="step2-message" class="message"></p>
+    </div>
+
+    <div id="step3" class="game-step">
+        <h2>Step 3: Inference (推論) - 測試你的 AI 模型</h2>
+        <p>這模擬了 AI 如何綜合你選擇的特徵得出結論。請針對每個特徵做出判斷。</p> 
+        
+        <div class="step3-layout">
+            <div class="image-focus-area">
+                <img id="test-image" src="" alt="Test Image for Prediction" style="width: 100%; height: auto; border-radius: 8px;">
+                
+                <div hidden id="judgment-scoreboard" style="margin-top: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 8px; background: #fffbe6;">
+                </div>
+            </div>
+
+            <div id="feature-judgment-area" class="judgment-scroll-area">
+                </div>
+        </div>
+        
+        <div id="final-prediction-button">
+            </div>
+
+    </div>
+    
+    <div id="step4" class="game-step">
+        <h2>Step 4: Diagnosis & Scoring (診斷與計分)</h2>
+        <div id="diagnosis-results">
+            </div>
+    </div>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

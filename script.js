@@ -252,7 +252,7 @@ function initStep2() {
     reviewCanine.innerHTML = '';
     studentsFeatures = [];
 
-    document.getElementById('step2-message').textContent = '你剛剛的分類是根據哪些 Feature (特徵)？請選擇 1~3 個最重要的特徵。';
+    //document.getElementById('step2-message').textContent = '你剛剛的分類是根據哪些 Feature (特徵)？請選擇 1~3 個最重要的特徵。';
 
     // 1. 視覺化學生 Step 1 的分類結果
     const classifiedGroups = {};
@@ -302,25 +302,25 @@ function initStep2() {
     document.querySelectorAll('#feature-options input[type="checkbox"]').forEach(checkbox => {
         checkbox.addEventListener('change', handleFeatureSelection);
     });
-    document.getElementById('step2-message').classList.remove('success');
+    //document.getElementById('step2-message').classList.remove('success');
 }
 
 function handleFeatureSelection(e) {
     const checkbox = e.target;
-    const message = document.getElementById('step2-message');
+    //const message = document.getElementById('step2-message');
     const MAX_FEATURES = 3; 
 
     if (checkbox.checked) {
         if (studentsFeatures.length < MAX_FEATURES) {
             studentsFeatures.push(checkbox.value);
-            message.textContent = `已選擇 ${studentsFeatures.length}/${MAX_FEATURES} 個特徵。`;
+            //message.textContent = `已選擇 ${studentsFeatures.length}/${MAX_FEATURES} 個特徵。`;
         } else {
             checkbox.checked = false; 
-            message.textContent = `最多只能選擇 ${MAX_FEATURES} 個特徵 (Max ${MAX_FEATURES} Features).`;
+            //message.textContent = `最多只能選擇 ${MAX_FEATURES} 個特徵 (Max ${MAX_FEATURES} Features).`;
         }
     } else {
         studentsFeatures = studentsFeatures.filter(id => id !== checkbox.value);
-        message.textContent = `已選擇 ${studentsFeatures.length}/${MAX_FEATURES} 個特徵。`;
+        //message.textContent = `已選擇 ${studentsFeatures.length}/${MAX_FEATURES} 個特徵。`;
     }
 }
 
@@ -394,8 +394,14 @@ function goToStep3() {
         `;
     }).join('');
     
-    judgmentArea.innerHTML = featureJudgmentHTML;
-
+    judgmentArea.innerHTML = featureJudgmentHTML+`
+        <hr style="margin-top: 25px;">
+        <h3>所以覺得答案是? (Your prediction is...)</h3>
+        <div class="final-buttons">
+            <button type="button" name="finalConclusion" value="Feline (貓科)" class="final-prediction-btn" onclick="selectFinalConclusion(this)">Feline (貓科)</button>
+            <button type="button" name="finalConclusion" value="Canine (犬科)" class="final-prediction-btn" onclick="selectFinalConclusion(this)">Canine (犬科)</button>
+        </div>
+    `;
     document.getElementById('judgment-scoreboard').innerHTML = `
         <h3 style="margin-top: 0; color: #1a5690;">特徵傾向統計 (Feature Bias)</h3>
         <p>點選每個特徵後，會自動計算總傾向。</p>
@@ -407,7 +413,7 @@ function goToStep3() {
     document.getElementById('score-feline').textContent = '0';
     document.getElementById('score-canine').textContent = '0';
 
-
+	/*
     document.getElementById('final-prediction-button').innerHTML = `
         <hr style="margin-top: 25px;">
         <h3>所以覺得答案是? (Final Conclusion)</h3>
@@ -415,11 +421,7 @@ function goToStep3() {
             <button type="button" name="finalConclusion" value="Feline (貓科)" class="final-prediction-btn" onclick="selectFinalConclusion(this)">Feline (貓科)</button>
             <button type="button" name="finalConclusion" value="Canine (犬科)" class="final-prediction-btn" onclick="selectFinalConclusion(this)">Canine (犬科)</button>
         </div>
-        
-        <div style="text-align: center; margin-top: 20px;">
-            <button onclick="revealPrediction()">揭曉 AI 模型的表現 (Reveal Model Performance)</button>
-        </div>
-    `;
+    `;*/
 }
 
 function selectFinalConclusion(element) {
@@ -432,6 +434,24 @@ function selectFinalConclusion(element) {
     } else {
         element.classList.add('selected-canine');
     }
+	const totalJudgments = studentsFeatures.length;
+    const completedJudgments = Object.keys(featureJudgmentsMap).length; 
+    
+    if (completedJudgments < totalJudgments) {
+        alert(`請先完成所有 ${totalJudgments} 個特徵的單獨判斷！`);
+        return;
+    }
+
+    const finalConclusionBtn = document.querySelector('.final-prediction-btn.selected-feline, .final-prediction-btn.selected-canine');
+    if (!finalConclusionBtn) {
+        alert("請點選你的最終總結判斷 (Final Conclusion)!");
+        return;
+    }
+
+    studentTestPrediction = finalConclusionBtn.value;
+    
+    showStep('step4');
+    finalScore(); 
 }
 
 

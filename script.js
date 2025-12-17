@@ -661,7 +661,7 @@ function finalScore() {
                 
                 <h3>1. 規則穩定性 (Rule Stability)</h3>
                 <p>這是你身為AI工程師時，分類結果與真實世界答案的相似度。</p>
-                <p class="score-result">訓練分類準確度: <strong>${ruleStabilityScore}/${GAME_DATA.length}</strong> (${ruleStabilityPercentage.toFixed(0)}%)</p>
+                <p class="score-result">訓練分類準確度: <strong>${ruleStabilityPercentage.toFixed(0)}</strong>   (${ruleStabilityScore}/${GAME_DATA.length})</p>
                 <p class="speech-example">${classificationEvaluation}</p>
                 ${ruleStabilityPercentage < 70 ? '<p style="color:red;">診斷: 你的分類不夠準確，可能會導致AI學到錯誤的知識！</p>' : ''}
                 <hr>

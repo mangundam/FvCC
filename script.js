@@ -641,7 +641,7 @@ function finalScore() {
 	const featureSentence = `I choose ______, _______ and _______ as my features.`;
     const predictionContent = studentTestPrediction.split(' ')[0]; 
     //const predictionActionSentence = `I predict ${predictionContent}`;
-	const predictionActionSentence = `I predict it is a _______(feline/canine)`;
+	const predictionActionSentence = `I think it is a _______(feline/canine)`;
     //const predictionResultSentence = `my prediction is ${finalPredictionCorrect ? 'correct' : 'wrong'}.`;
 	const predictionResultSentence = `my prediction is ${finalPredictionCorrect ? '_______(correct/wrong)' : '_______(correct/wrong)'}.`;
     const adjustSentence = `We must adjust the model now.`;

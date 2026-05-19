@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 風格分類訓練師</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <h1>🤖 AI 風格分類訓練師</h1>
+    
+    <div id="step1" class="game-step active">
+        <h2>Step 1: Classification (分類)</h2>
+        <p>請將圖片拖曳到正確的設計風格分類框中，以訓練 AI。 (Please drag and drop the images for **classification**.)</p>
+        
+        <div id="image-pool" class="drag-container">
+            </div>
+
+        <div id="classification-targets" class="drop-container">
+            </div>
+        
+        <button id="checkStep1Btn" onclick="checkStep1()">完成分類 (Finish Classification)</button>
+        <p id="step1-message" class="message"></p>
+    </div>
+
+    <div id="step2" class="game-step">
+        <h2>Step 2: Feature Selection (特徵選擇)</h2>
+        <p>請選擇你用於分類的 3 個關鍵視覺 **Feature** (特徵)。(Select 3 key **features** you used for **classification**.)</p>
+        <div id="feature-options">
+            </div>
+        <button onclick="goToStep3()">完成特徵選擇 (Go to Testing)</button>
+        <p id="step2-message" class="message"></p>
+    </div>
+
+    <div id="step3" class="game-step">
+        <h2>Step 3: Prediction (預測)</h2>
+        <p>這是一張未分類圖片。你 **predict** (預測) AI 會將它分到哪一類？(A new image for **prediction**.)</p>
+        
+        <div id="testing-area">
+            <img id="test-image" src="img/test_card_3.png" alt="Test Image" style="width:150px; border: 1px solid #ccc;">
+            <div class="prediction-prompt">
+                <p>💡 **教師引導:** 請學生口頭 **predict** (預測)！</p>
+                <button onclick="revealPrediction()">揭曉 AI 預測 (Reveal AI Prediction)</button>
+            </div>
+            <div id="prediction-results">
+                </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

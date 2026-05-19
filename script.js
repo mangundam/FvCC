@@ -655,7 +655,6 @@ function finalScore() {
         <div class="step4-final-layout">
             
             <div class="step4-scores-column">
-                <h2>AI電腦診斷結果 (Model Diagnosis)</h2>
                 <p>現在來看看你身為AI的表現如何。</p>
                 <hr>
                 

@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Step 3: Make a Prediction & Summary | AI 模型設計師</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+    body {
+      font-family: 'Inter', 'Noto Sans TC', sans-serif;
+      background-color: #f4f7fb;
+      color: #1e293b;
+    }
+    .vote-btn {
+      transition: all 0.15s ease;
+    }
+    .vote-btn.active-edible {
+      background-color: #059669;
+      color: #ffffff;
+      border-color: #059669;
+      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+    }
+    .vote-btn.active-peel {
+      background-color: #d97706;
+      color: #ffffff;
+      border-color: #d97706;
+      box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25);
+    }
+    .scaffold-blank {
+      display: inline-block;
+      min-width: 110px;
+      padding: 2px 14px;
+      margin: 0 4px;
+      border-bottom: 3px solid #0f766e;
+      background-color: #ccfbf1;
+      color: #115e59;
+      font-weight: 800;
+      border-radius: 6px 6px 0 0;
+      text-align: center;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Top Header -->
+  <header class="bg-slate-900 text-white shadow-md">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <span class="px-3 py-1 rounded-full bg-teal-400 text-slate-950 text-xs font-extrabold tracking-wide uppercase">Step 3 of 3</span>
+        <h1 class="text-lg sm:text-xl font-extrabold tracking-tight">AI Model Designer: Prediction &amp; Final Report (比對預測與結算)</h1>
+      </div>
+      <div class="flex items-center gap-3">
+        <span id="syncModeBadge" class="text-xs px-3 py-1 rounded-full bg-amber-500/20 text-amber-200 border border-amber-400/40 font-semibold">
+          本機演示模式
+        </span>
+        <div class="flex items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+          <label for="seatInput" class="text-xs sm:text-sm font-semibold text-slate-300">座號 Seat No.</label>
+          <input id="seatInput" type="text" inputmode="numeric" maxlength="6" placeholder="例如 05"
+            class="w-20 px-2 py-1 text-center font-bold text-slate-900 bg-white rounded border border-slate-300 focus:outline-none focus:ring-2 focus:ring-teal-400" />
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Toast Banner -->
+  <div id="toastBox" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 hidden px-5 py-3 rounded-xl shadow-lg font-bold text-sm text-white bg-slate-900"></div>
+
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-5">
+
+    <!-- Entry Section -->
+    <section id="entrySection" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 max-w-2xl mx-auto mt-6">
+      <span class="inline-block px-3 py-1 rounded-full bg-teal-100 text-teal-800 text-xs font-extrabold mb-2">Final Test: Unseen Data</span>
+      <h2 class="text-2xl font-extrabold text-slate-900">Step 3: 載入你的特徵規則並預測新照片</h2>
+      <p class="text-slate-600 text-sm sm:text-base mt-2 leading-relaxed">
+        輸入你的座號後，系統會載入你在 Step 2 選出的特徵規則，並抽出一張<strong class="text-slate-800">題庫外沒看過的水果照片</strong>。請逐項比對特徵並做出最終預測，最後產生你的座號三類結算表！
+      </p>
+      <div class="mt-6">
+        <button id="startStep3Btn" type="button"
+          class="px-7 py-3.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-extrabold text-base shadow-sm transition">
+          開始特徵比對與預測 (Start Prediction)
+        </button>
+      </div>
+    </section>
+
+    <!-- Prediction Workspace -->
+    <section id="taskSection" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6">
+      <div class="flex flex-wrap items-start justify-between gap-3 mb-5">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">Step 3: Make a Prediction (比對特徵並預測)</h2>
+          <p class="text-slate-600 text-sm sm:text-base mt-1">
+            現在 AI 收到了一張沒看過的題庫外水果照片，請依照你在 Step 2 選出的特徵逐一判斷它偏向哪一類，再做出最終預測。
+          </p>
+        </div>
+        <span id="loadedFeatureNote" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold"></span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <!-- Left: Unseen Fruit Image -->
+        <div class="lg:col-span-5 rounded-2xl border-2 border-slate-200 bg-slate-50 p-5 flex flex-col items-center">
+          <span class="px-3 py-1 rounded-full bg-slate-800 text-white text-xs font-bold mb-3">
+            Unseen Test Image (題庫外測試照片)
+          </span>
+          <img id="testFruitImg" src="" alt="Unseen fruit test image"
+            class="w-full max-h-72 object-contain rounded-xl bg-white border border-slate-200 p-3 shadow-sm" />
+          <p class="text-xs text-slate-500 mt-3 text-center">
+            請仔細觀察果皮厚薄、表面質感與紋理，再點選右側判斷按鈕。
+          </p>
+        </div>
+
+        <!-- Right: Feature Matching & Final Prediction -->
+        <div class="lg:col-span-7 space-y-5">
+          <div id="featureQuestionsList" class="space-y-4"></div>
+
+          <div class="pt-4 border-t-2 border-slate-200">
+            <h3 class="text-lg font-extrabold text-slate-900 mb-3">
+              綜合以上特徵，你的最終預測是？ (Your final prediction is...)
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
+              <button id="finalEdibleBtn" type="button"
+                class="vote-btn py-4 px-5 rounded-xl border-2 border-emerald-500 bg-white text-emerald-800 font-extrabold text-base hover:bg-emerald-50">
+                Edible Skin (連皮吃)
+              </button>
+              <button id="finalPeelBtn" type="button"
+                class="vote-btn py-4 px-5 rounded-xl border-2 border-amber-500 bg-white text-amber-800 font-extrabold text-base hover:bg-amber-50">
+                Peel to Eat (去皮吃)
+              </button>
+            </div>
+
+            <button id="submitBtn" type="button" disabled
+              class="w-full py-4 rounded-xl bg-teal-600 hover:bg-teal-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-extrabold text-base shadow-sm transition">
+              送出預測並產生三類結算表 (Submit &amp; View Summary)
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Result: Step 3 Speaking Scaffold + 3-Category Seat Summary Table -->
+    <section id="resultSection" class="hidden space-y-6">
+
+      <!-- Card 1: Step 3 Result & Speaking Scaffold -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
+        <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-5 border-b border-slate-200">
+          <div>
+            <span class="inline-block px-3 py-1 rounded-full bg-teal-100 text-teal-800 text-xs font-extrabold mb-1">Step 3 Completed</span>
+            <h2 class="text-2xl font-extrabold text-slate-900">Step 3 預測結果與英文口說分享</h2>
+          </div>
+          <div class="flex items-center gap-3">
+            <span id="resultSeatBadge" class="px-4 py-2 rounded-xl bg-slate-900 text-white font-extrabold text-base"></span>
+            <span id="saveStatusBadge" class="px-3 py-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold"></span>
+          </div>
+        </div>
+
+        <!-- Revealed Fruit Info -->
+        <div class="flex flex-wrap items-center gap-5 p-4 rounded-xl bg-slate-50 border border-slate-200 mb-6">
+          <img id="revealFruitImg" src="" alt="Revealed fruit" class="w-24 h-24 object-contain rounded-xl bg-white border border-slate-200 p-2" />
+          <div class="flex-1 min-w-[200px]">
+            <div class="text-xs font-bold uppercase tracking-wider text-slate-500">Test Fruit Revealed (測試水果揭曉)</div>
+            <div id="revealFruitTitle" class="text-2xl font-black text-slate-900 mt-0.5"></div>
+            <div id="revealFruitNote" class="text-sm text-slate-600 mt-1"></div>
+          </div>
+          <div id="predictionVerdictBadge" class="px-5 py-3 rounded-xl font-black text-lg"></div>
+        </div>
+
+        <!-- Step 3 English Speaking Scaffold -->
+        <div class="rounded-2xl border-2 border-teal-600 bg-gradient-to-br from-teal-50/70 to-white p-6">
+          <div class="text-xs font-extrabold uppercase tracking-wider text-teal-700 mb-3">
+            English Speaking Scaffold (請練習用這句英文分享你的預測結果)
+          </div>
+          <p class="text-xl sm:text-2xl font-bold text-slate-900 leading-relaxed">
+            I think it is <span id="blankPred" class="scaffold-blank"></span>, and my prediction is <span id="blankOutcome" class="scaffold-blank"></span>.
+          </p>
+
+          <!-- Highlighted Options Below -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-5">
+            <div>
+              <div class="text-xs font-bold text-slate-500 uppercase mb-2">Category Options (你的分類預測)</div>
+              <div id="predCategoryPills" class="flex gap-2"></div>
+            </div>
+            <div>
+              <div class="text-xs font-bold text-slate-500 uppercase mb-2">Outcome Options (推論結果)</div>
+              <div id="predOutcomePills" class="flex gap-2"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2: Three-Category Seat Summary Table (座號三類結算表) -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+          <div>
+            <h2 class="text-2xl font-extrabold text-slate-900">個人 AI 模型三類結算表 (AI Diagnosis Summary)</h2>
+            <p class="text-sm text-slate-600 mt-0.5">彙整你在 Step 1、Step 2、Step 3 的三項表現指標與優化建議</p>
+          </div>
+          <button id="downloadPngBtn" type="button"
+            class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-sm shadow-sm transition">
+            下載座號結算圖卡 (.png)
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse rounded-xl overflow-hidden border border-slate-200">
+            <thead>
+              <tr class="bg-slate-100 text-slate-700 text-xs sm:text-sm uppercase">
+                <th class="py-3.5 px-4 font-extrabold border-b border-slate-200">評量類別 Category</th>
+                <th class="py-3.5 px-4 font-extrabold border-b border-slate-200">成績 / 結果 Result</th>
+                <th class="py-3.5 px-4 font-extrabold border-b border-slate-200">詳細紀錄與診斷 Details &amp; Diagnosis</th>
+              </tr>
+            </thead>
+            <tbody id="summaryTableBody" class="divide-y divide-slate-200 text-sm sm:text-base"></tbody>
+          </table>
+        </div>
+
+        <!-- Strategy Advice Box -->
+        <div class="mt-6 rounded-xl border-2 border-dashed border-blue-500 bg-blue-50/50 p-5">
+          <div class="text-xs font-extrabold uppercase tracking-wider text-rose-600 mb-1">
+            Strategy Advice (模型優化建議)
+          </div>
+          <p id="adviceZh" class="text-sm sm:text-base font-bold text-slate-800"></p>
+          <p id="adviceEn" class="text-lg sm:text-xl font-extrabold text-blue-800 mt-2"></p>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <script>
+    // =========================================================================
+    // [老師設定區] 請貼上與 step1.html、step2.html 相同的 Google Apps Script 網址
+    // =========================================================================
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbw7Xgo1vGvcgPz6Z9KgnEOdpdU7ngVIIEL0ZkDSP2YqguntUZ0g_FP0t_k7TWXR8P5M/exec';
+
+    const FEATURES = [
+      { id: 'skin_thickness',  nameEn: 'Skin Thickness',  nameZh: '果皮厚薄',       weight: 40 },
+      { id: 'surface_texture', nameEn: 'Surface Texture', nameZh: '表面質感',       weight: 35 },
+      { id: 'peel_pattern',    nameEn: 'Skin Pattern',    nameZh: '果皮紋理與孔洞', weight: 25 },
+      { id: 'shape',           nameEn: 'Fruit Shape',     nameZh: '水果形狀',       weight: 15 },
+      { id: 'size',            nameEn: 'Fruit Size',      nameZh: '水果大小',       weight: 10 },
+      { id: 'color',           nameEn: 'Fruit Color',     nameZh: '水果顏色',       weight: 10 }
+    ];
+
+    // 題庫外的新水果照片池（皆未出現在 Step 1 的 10 張訓練圖中）
+    const TEST_FRUITS = [
+      {
+        id: 'greenapple1',
+        nameEn: 'Green Apple',
+        nameZh: '青蘋果',
+        img: 'fruits/greenapple1.png',
+        truth: 'edible',
+        color: '#65a30d',
+        accent: '#ecfccb',
+        note: '果皮薄且光滑，雖是綠色但仍屬於連皮吃（破除只看顏色的迷思！）'
+      },
+      {
+        id: 'starfruit1',
+        nameEn: 'Starfruit',
+        nameZh: '楊桃',
+        img: 'fruits/starfruit1.png',
+        truth: 'edible',
+        color: '#ca8a04',
+        accent: '#fef9c3',
+        note: '形狀特殊呈星形，但果皮薄且光滑，洗淨切片即可連皮食用'
+      },
+      {
+        id: 'lychee1',
+        nameEn: 'Lychee',
+        nameZh: '荔枝',
+        img: 'fruits/lychee1.png',
+        truth: 'peel',
+        color: '#be123c',
+        accent: '#ffe4e6',
+        note: '雖與草莓、蓮霧一樣呈紅色小果，但外殼粗糙帶硬顆粒，必須去皮吃'
+      },
+      {
+        id: 'pineapple1',
+        nameEn: 'Pineapple',
+        nameZh: '鳳梨',
+        img: 'fruits/pineapple1.png',
+        truth: 'peel',
+        color: '#d97706',
+        accent: '#fef3c7',
+        note: '果皮厚實且具明顯尖刺鱗片紋理，屬於典型的去皮吃水果'
+      }
+    ];
+
+    const CATEGORY_LABELS = {
+      edible: { en: 'Edible Skin', zh: '連皮吃' },
+      peel:   { en: 'Peel to Eat', zh: '去皮吃' }
+    };
+
+    // State
+    let studentRecord = { seatNo: '', step1: null, step2: null };
+    let activeFeatures = [];
+    let currentTestFruit = null;
+    let featureVotes = {}; // { featureId: 'edible' | 'peel' }
+    let finalPrediction = null; // 'edible' | 'peel'
+    let lastReportData = null;
+
+    function makeFallbackSvg(fruit, hideName) {
+      const labelText = hideName ? fruit.img : `${fruit.nameEn} (${fruit.img})`;
+      const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 200">
+          <rect width="280" height="200" rx="18" fill="${fruit.accent}"/>
+          <circle cx="140" cy="88" r="46" fill="${fruit.color}" opacity="0.92"/>
+          <path d="M140 42 C152 24, 174 24, 168 40 C160 48, 148 46, 140 42 Z" fill="#15803d"/>
+          <text x="140" y="168" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" font-weight="700" fill="#1e293b">${labelText}</text>
+        </svg>`;
+      return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg.trim());
+    }
+
+    function showToast(msg, isError = false) {
+      const box = document.getElementById('toastBox');
+      box.textContent = msg;
+      box.className = 'fixed top-16 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-xl shadow-lg font-bold text-sm text-white ' +
+        (isError ? 'bg-rose-600' : 'bg-slate-900');
+      box.classList.remove('hidden');
+      clearTimeout(box._timer);
+      box._timer = setTimeout(() => box.classList.add('hidden'), 2800);
+    }
+
+    function getLocalStudentSummary(seatNo) {
+      let step1 = null;
+      let step2 = null;
+      try {
+        const s1 = JSON.parse(localStorage.getItem('ai_fruit_lab_step1') || '{}');
+        if (s1[seatNo]) step1 = s1[seatNo];
+      } catch (err) {}
+      try {
+        const s2 = JSON.parse(localStorage.getItem('ai_fruit_lab_step2') || '{}');
+        if (s2[seatNo]) step2 = s2[seatNo];
+      } catch (err) {}
+      return { seatNo, step1, step2 };
+    }
+
+    async function startStep3() {
+      const seatNo = document.getElementById('seatInput').value.trim();
+      if (!seatNo) {
+        showToast('請先在右上角輸入你的座號！', true);
+        document.getElementById('seatInput').focus();
+        return;
+      }
+
+      const btn = document.getElementById('startStep3Btn');
+      btn.disabled = true;
+      btn.textContent = '載入你的 Step 1 & Step 2 紀錄中...';
+
+      let fetched = null;
+      if (GAS_URL) {
+        try {
+          const url = `${GAS_URL}?action=getStudentSummary&seatNo=${encodeURIComponent(seatNo)}`;
+          const res = await fetch(url);
+          const json = await res.json();
+          if (json && json.ok) {
+            fetched = json;
+          }
+        } catch (err) {
+          fetched = null;
+        }
+      }
+
+      const local = getLocalStudentSummary(seatNo);
+      studentRecord = {
+        seatNo,
+        step1: (fetched && fetched.step1) ? fetched.step1 : local.step1,
+        step2: (fetched && fetched.step2) ? fetched.step2 : local.step2
+      };
+
+      try { localStorage.setItem('ai_fruit_lab_last_seat', seatNo); } catch (err) {}
+
+      // Determine active features from Step 2 (fallback to 3 default features if student skipped Step 2)
+      const featIds = (studentRecord.step2 && Array.isArray(studentRecord.step2.selectedFeatures) && studentRecord.step2.selectedFeatures.length > 0)
+        ? studentRecord.step2.selectedFeatures
+        : ['skin_thickness', 'surface_texture', 'color'];
+
+      activeFeatures = featIds.map(id => FEATURES.find(f => f.id === id)).filter(Boolean);
+      if (activeFeatures.length === 0) activeFeatures = FEATURES.slice(0, 3);
+
+      // Randomly draw 1 unseen test fruit
+      currentTestFruit = TEST_FRUITS[Math.floor(Math.random() * TEST_FRUITS.length)];
+      featureVotes = {};
+      finalPrediction = null;
+
+      btn.disabled = false;
+      btn.textContent = '開始特徵比對與預測 (Start Prediction)';
+
+      document.getElementById('entrySection').classList.add('hidden');
+      document.getElementById('resultSection').classList.add('hidden');
+      document.getElementById('taskSection').classList.remove('hidden');
+
+      renderPredictionWorkspace();
+    }
+
+    function renderPredictionWorkspace() {
+      const noteEl = document.getElementById('loadedFeatureNote');
+      noteEl.textContent = studentRecord.step2
+        ? `已載入座號 #${studentRecord.seatNo} 在 Step 2 選出的 ${activeFeatures.length} 個特徵`
+        : `未找到 Step 2 紀錄，暫以預設 ${activeFeatures.length} 個特徵進行測試`;
+
+      const img = document.getElementById('testFruitImg');
+      img.src = currentTestFruit.img;
+      img.onerror = function () {
+        this.onerror = null;
+        this.src = makeFallbackSvg(currentTestFruit, true);
+      };
+
+      const qList = document.getElementById('featureQuestionsList');
+      qList.innerHTML = '';
+
+      activeFeatures.forEach(feat => {
+        const currentVote = featureVotes[feat.id] || null;
+        const block = document.createElement('div');
+        block.className = 'p-4 rounded-xl border border-slate-200 bg-slate-50/70';
+
+        const title = document.createElement('div');
+        title.className = 'text-sm sm:text-base font-extrabold text-slate-800 mb-3';
+        title.innerHTML = `這張照片的 <span class="text-indigo-700">[ ${feat.nameEn} (${feat.nameZh}) ]</span> 讓你覺得它更像？`;
+
+        const btnRow = document.createElement('div');
+        btnRow.className = 'grid grid-cols-2 gap-3';
+
+        const btnEdible = document.createElement('button');
+        btnEdible.type = 'button';
+        btnEdible.className = 'vote-btn py-2.5 px-4 rounded-lg border-2 font-bold text-sm ' +
+          (currentVote === 'edible' ? 'active-edible' : 'border-emerald-300 bg-white text-emerald-800 hover:bg-emerald-50');
+        btnEdible.textContent = 'Edible Skin (連皮吃)';
+        btnEdible.addEventListener('click', () => {
+          featureVotes[feat.id] = 'edible';
+          renderPredictionWorkspace();
+        });
+
+        const btnPeel = document.createElement('button');
+        btnPeel.type = 'button';
+        btnPeel.className = 'vote-btn py-2.5 px-4 rounded-lg border-2 font-bold text-sm ' +
+          (currentVote === 'peel' ? 'active-peel' : 'border-amber-300 bg-white text-amber-800 hover:bg-amber-50');
+        btnPeel.textContent = 'Peel to Eat (去皮吃)';
+        btnPeel.addEventListener('click', () => {
+          featureVotes[feat.id] = 'peel';
+          renderPredictionWorkspace();
+        });
+
+        btnRow.appendChild(btnEdible);
+        btnRow.appendChild(btnPeel);
+        block.appendChild(title);
+        block.appendChild(btnRow);
+        qList.appendChild(block);
+      });
+
+      // Final prediction buttons
+      const fEdible = document.getElementById('finalEdibleBtn');
+      const fPeel = document.getElementById('finalPeelBtn');
+      fEdible.className = 'vote-btn py-4 px-5 rounded-xl border-2 font-extrabold text-base ' +
+        (finalPrediction === 'edible' ? 'active-edible' : 'border-emerald-500 bg-white text-emerald-800 hover:bg-emerald-50');
+      fPeel.className = 'vote-btn py-4 px-5 rounded-xl border-2 font-extrabold text-base ' +
+        (finalPrediction === 'peel' ? 'active-peel' : 'border-amber-500 bg-white text-amber-800 hover:bg-amber-50');
+
+      const allVoted = activeFeatures.every(f => Boolean(featureVotes[f.id]));
+      document.getElementById('submitBtn').disabled = !(allVoted && finalPrediction);
+    }
+
+    function buildAdvice(step1Score, step2Score, isCorrect) {
+      const s1Ok = step1Score !== null && step1Score >= 80;
+      const s2Ok = step2Score !== null && step2Score >= 75;
+      if (isCorrect && s1Ok && s2Ok) {
+        return {
+          zh: '綜合評價：資料分類準確、特徵有效，且成功預測未知水果，你的 AI 模型非常穩定！',
+          en: 'My prediction is correct, and my AI model is stable.'
+        };
+      }
+      if (isCorrect) {
+        return {
+          zh: '綜合評價：雖然這次預測正確，但前面步驟的分數偏低，建議優化分數較低的步驟以確保模型穩定。',
+          en: 'The result is correct, but I should optimize the low score part.'
+        };
+      }
+      return {
+        zh: '綜合評價：預測結果錯誤！請檢查是訓練資料標註有雜訊（Step 1），還是挑選的特徵不夠具代表性（Step 2）。',
+        en: 'My prediction is wrong, so I should improve my data or features.'
+      };
+    }
+
+    async function handleSubmit() {
+      const isCorrect = (finalPrediction === currentTestFruit.truth);
+      const step1Score = studentRecord.step1 ? Number(studentRecord.step1.score) : null;
+      const step2Score = studentRecord.step2 ? Number(studentRecord.step2.featureScore) : null;
+      const advice = buildAdvice(step1Score, step2Score, isCorrect);
+
+      const payload = {
+        action: 'saveStep3',
+        seatNo: studentRecord.seatNo,
+        testFruitId: currentTestFruit.id,
+        testFruitName: `${currentTestFruit.nameEn} (${currentTestFruit.nameZh})`,
+        trueLabel: CATEGORY_LABELS[currentTestFruit.truth].en,
+        studentPrediction: CATEGORY_LABELS[finalPrediction].en,
+        isCorrect,
+        featureVotes,
+        step1Score,
+        step2Score,
+        overallAdvice: advice.en
+      };
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = '資料上傳並產生結算表中...';
+
+      try {
+        const key = 'ai_fruit_lab_step3';
+        const store = JSON.parse(localStorage.getItem(key) || '{}');
+        store[payload.seatNo] = payload;
+        localStorage.setItem(key, JSON.stringify(store));
+      } catch (err) {}
+
+      let syncedCloud = false;
+      if (GAS_URL) {
+        try {
+          const res = await fetch(GAS_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          syncedCloud = Boolean(data && data.ok);
+        } catch (err) {
+          syncedCloud = false;
+        }
+      }
+
+      btn.textContent = '送出預測並產生三類結算表 (Submit & View Summary)';
+      lastReportData = { payload, advice, step1: studentRecord.step1, step2: studentRecord.step2, testFruit: currentTestFruit };
+      renderSummary(lastReportData, syncedCloud);
+    }
+
+    function renderSummary(report, syncedCloud) {
+      const { payload, advice, step1, step2, testFruit } = report;
+
+      document.getElementById('taskSection').classList.add('hidden');
+      document.getElementById('resultSection').classList.remove('hidden');
+
+      document.getElementById('resultSeatBadge').textContent = `座號 Seat #${payload.seatNo}`;
+      const saveBadge = document.getElementById('saveStatusBadge');
+      if (GAS_URL && syncedCloud) {
+        saveBadge.textContent = '已同步儲存至 Google Sheet';
+        saveBadge.className = 'px-3 py-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold';
+      } else if (GAS_URL && !syncedCloud) {
+        saveBadge.textContent = '雲端連線失敗（已暫存本機）';
+        saveBadge.className = 'px-3 py-2 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold';
+      } else {
+        saveBadge.textContent = '本機演示模式（已暫存瀏覽器）';
+        saveBadge.className = 'px-3 py-2 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold';
+      }
+
+      // Reveal fruit
+      const revImg = document.getElementById('revealFruitImg');
+      revImg.src = testFruit.img;
+      revImg.onerror = function () {
+        this.onerror = null;
+        this.src = makeFallbackSvg(testFruit, false);
+      };
+      document.getElementById('revealFruitTitle').textContent = `${testFruit.nameEn} (${testFruit.nameZh}) — ${CATEGORY_LABELS[testFruit.truth].en} (${CATEGORY_LABELS[testFruit.truth].zh})`;
+      document.getElementById('revealFruitNote').textContent = testFruit.note;
+
+      const verdict = document.getElementById('predictionVerdictBadge');
+      if (payload.isCorrect) {
+        verdict.textContent = '推論正確 (Correct!)';
+        verdict.className = 'px-5 py-3 rounded-xl font-black text-lg bg-emerald-600 text-white';
+      } else {
+        verdict.textContent = '推論錯誤 (Wrong)';
+        verdict.className = 'px-5 py-3 rounded-xl font-black text-lg bg-rose-600 text-white';
+      }
+
+      // Fill Step 3 Speaking Scaffold
+      document.getElementById('blankPred').textContent = payload.studentPrediction;
+      document.getElementById('blankOutcome').textContent = payload.isCorrect ? 'correct' : 'wrong';
+
+      // Highlighted Category Pills
+      const catPills = document.getElementById('predCategoryPills');
+      catPills.innerHTML = '';
+      ['edible', 'peel'].forEach(key => {
+        const hit = (finalPrediction === key);
+        const pill = document.createElement('span');
+        pill.className = hit
+          ? 'px-4 py-2 rounded-lg bg-teal-600 text-white font-extrabold text-sm shadow-sm'
+          : 'px-4 py-2 rounded-lg bg-slate-100 text-slate-400 font-bold text-sm';
+        pill.textContent = `${CATEGORY_LABELS[key].en} (${CATEGORY_LABELS[key].zh})`;
+        catPills.appendChild(pill);
+      });
+
+      // Highlighted Outcome Pills
+      const outPills = document.getElementById('predOutcomePills');
+      outPills.innerHTML = '';
+      [
+        { key: true,  label: 'correct (正確)', activeCls: 'bg-emerald-600 text-white' },
+        { key: false, label: 'wrong (錯誤)',   activeCls: 'bg-rose-600 text-white' }
+      ].forEach(item => {
+        const hit = (payload.isCorrect === item.key);
+        const pill = document.createElement('span');
+        pill.className = 'px-4 py-2 rounded-lg font-extrabold text-sm ' +
+          (hit ? item.activeCls + ' shadow-sm' : 'bg-slate-100 text-slate-400');
+        pill.textContent = item.label;
+        outPills.appendChild(pill);
+      });
+
+      // Build 3-Category Summary Table
+      const tbody = document.getElementById('summaryTableBody');
+      const s1ScoreText = step1 ? `${step1.score} 分 (${step1.level || ''})` : '尚無紀錄';
+      const s1Detail = step1
+        ? `答對 ${step1.correctCount ?? '-'} / ${step1.totalCount ?? 10} 張訓練圖片`
+        : '未在試算表找到此座號的 Step 1 紀錄';
+
+      const s2ScoreText = step2 ? `${step2.featureScore} 分 (${step2.level || ''})` : '尚無紀錄';
+      const s2Detail = step2
+        ? `選取特徵：${(step2.selectedLabels || activeFeatures.map(f => f.nameEn)).join('、')}`
+        : `使用預設特徵：${activeFeatures.map(f => f.nameEn).join('、')}`;
+
+      const s3ScoreText = payload.isCorrect ? '正確 (Correct)' : '錯誤 (Wrong)';
+      const s3Detail = `測試題：${testFruit.nameEn} (${testFruit.nameZh})｜你的預測：${payload.studentPrediction}｜真實答案：${payload.trueLabel}`;
+
+      tbody.innerHTML = `
+        <tr>
+          <td class="py-4 px-4 font-extrabold text-slate-900">1. 規則穩定性<div class="text-xs font-semibold text-slate-500">Rule Stability (Step 1)</div></td>
+          <td class="py-4 px-4 font-black text-blue-700">${s1ScoreText}</td>
+          <td class="py-4 px-4 text-slate-700">${s1Detail}</td>
+        </tr>
+        <tr>
+          <td class="py-4 px-4 font-extrabold text-slate-900">2. 特徵效率<div class="text-xs font-semibold text-slate-500">Feature Efficiency (Step 2)</div></td>
+          <td class="py-4 px-4 font-black text-indigo-700">${s2ScoreText}</td>
+          <td class="py-4 px-4 text-slate-700">${s2Detail}</td>
+        </tr>
+        <tr>
+          <td class="py-4 px-4 font-extrabold text-slate-900">3. 最終推論準確度<div class="text-xs font-semibold text-slate-500">Inference Accuracy (Step 3)</div></td>
+          <td class="py-4 px-4 font-black ${payload.isCorrect ? 'text-emerald-700' : 'text-rose-700'}">${s3ScoreText}</td>
+          <td class="py-4 px-4 text-slate-700">${s3Detail}</td>
+        </tr>
+      `;
+
+      document.getElementById('adviceZh').textContent = advice.zh;
+      document.getElementById('adviceEn').textContent = advice.en;
+    }
+
+    function downloadSummaryPng() {
+      if (!lastReportData) return;
+      const { payload, advice, step1, step2, testFruit } = lastReportData;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 1040;
+      canvas.height = 640;
+      const ctx = canvas.getContext('2d');
+
+      // Background
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Header bar
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, canvas.width, 96);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 30px Inter, "Noto Sans TC", sans-serif';
+      ctx.fillText('AI Model Designer: Fruit Lab Report', 40, 56);
+      ctx.fillStyle = '#5eead4';
+      ctx.font = 'bold 26px Inter, "Noto Sans TC", sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(`Seat #${payload.seatNo}`, 1000, 56);
+      ctx.textAlign = 'left';
+
+      // 3 Summary Cards
+      const rows = [
+        {
+          title: '1. Rule Stability (Step 1 分類準確度)',
+          val: step1 ? `${step1.score} / 100 (${step1.level || ''})` : 'N/A',
+          sub: step1 ? `Correct: ${step1.correctCount}/${step1.totalCount}` : 'No Step 1 record found',
+          color: '#1d4ed8'
+        },
+        {
+          title: '2. Feature Efficiency (Step 2 特徵效率)',
+          val: step2 ? `${step2.featureScore} / 100 (${step2.level || ''})` : 'N/A',
+          sub: `Features: ${activeFeatures.map(f => f.nameEn).join(', ')}`,
+          color: '#4338ca'
+        },
+        {
+          title: '3. Inference Accuracy (Step 3 預測結果)',
+          val: payload.isCorrect ? 'Correct (正確)' : 'Wrong (錯誤)',
+          sub: `Test: ${testFruit.nameEn} (${testFruit.nameZh}) | Predicted: ${payload.studentPrediction} | True: ${payload.trueLabel}`,
+          color: payload.isCorrect ? '#047857' : '#be123c'
+        }
+      ];
+
+      let y = 130;
+      rows.forEach(r => {
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(40, y, 960, 110, 14);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#0f172a';
+        ctx.font = 'bold 22px Inter, "Noto Sans TC", sans-serif';
+        ctx.fillText(r.title, 66, y + 40);
+
+        ctx.fillStyle = r.color;
+        ctx.font = 'bold 26px Inter, "Noto Sans TC", sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText(r.val, 974, y + 42);
+        ctx.textAlign = 'left';
+
+        ctx.fillStyle = '#475569';
+        ctx.font = '18px Inter, "Noto Sans TC", sans-serif';
+        ctx.fillText(r.sub, 66, y + 80);
+
+        y += 128;
+      });
+
+      // Advice box
+      ctx.fillStyle = '#eff6ff';
+      ctx.strokeStyle = '#3b82f6';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(40, 520, 960, 90, 14);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#1e3a8a';
+      ctx.font = 'bold 20px Inter, "Noto Sans TC", sans-serif';
+      ctx.fillText('Strategy Advice: ' + advice.en, 66, 560);
+      ctx.fillStyle = '#334155';
+      ctx.font = '16px Inter, "Noto Sans TC", sans-serif';
+      ctx.fillText(advice.zh, 66, 592);
+
+      const link = document.createElement('a');
+      link.download = `AI_Fruit_Report_Seat${payload.seatNo}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      if (GAS_URL) {
+        const badge = document.getElementById('syncModeBadge');
+        badge.textContent = 'Google Sheet 雲端連線中';
+        badge.className = 'text-xs px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-200 border border-emerald-400/40 font-semibold';
+      }
+      try {
+        const lastSeat = localStorage.getItem('ai_fruit_lab_last_seat');
+        if (lastSeat) document.getElementById('seatInput').value = lastSeat;
+      } catch (err) {}
+
+      document.getElementById('startStep3Btn').addEventListener('click', startStep3);
+      document.getElementById('finalEdibleBtn').addEventListener('click', () => {
+        finalPrediction = 'edible';
+        renderPredictionWorkspace();
+      });
+      document.getElementById('finalPeelBtn').addEventListener('click', () => {
+        finalPrediction = 'peel';
+        renderPredictionWorkspace();
+      });
+      document.getElementById('submitBtn').addEventListener('click', handleSubmit);
+      document.getElementById('downloadPngBtn').addEventListener('click', downloadSummaryPng);
+    });
+  </script>
+</body>
+</html>

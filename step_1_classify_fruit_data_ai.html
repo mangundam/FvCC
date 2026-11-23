@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Step 1: Classify Fruit Data | AI 模型設計師</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+    body {
+      font-family: 'Inter', 'Noto Sans TC', sans-serif;
+      background-color: #f4f7fb;
+      color: #1e293b;
+    }
+    .drop-zone {
+      transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.15s ease;
+    }
+    .drop-zone.drag-over {
+      background-color: #eff6ff;
+      border-color: #2563eb;
+      transform: scale(1.01);
+    }
+    .fruit-card {
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+      user-select: none;
+    }
+    .fruit-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.10);
+    }
+    .fruit-card.selected {
+      outline: 3px solid #2563eb;
+      outline-offset: 2px;
+      transform: translateY(-2px);
+    }
+    .scaffold-blank {
+      display: inline-block;
+      min-width: 96px;
+      padding: 2px 14px;
+      margin: 0 4px;
+      border-bottom: 3px solid #1d4ed8;
+      background-color: #dbeafe;
+      color: #1e3a8a;
+      font-weight: 800;
+      border-radius: 6px 6px 0 0;
+      text-align: center;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Top Header -->
+  <header class="bg-slate-900 text-white shadow-md">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <span class="px-3 py-1 rounded-full bg-emerald-500 text-slate-950 text-xs font-extrabold tracking-wide uppercase">Step 1 of 3</span>
+        <h1 class="text-lg sm:text-xl font-extrabold tracking-tight">AI Model Designer: Fruit Classification (水果分類)</h1>
+      </div>
+      <div class="flex items-center gap-3">
+        <span id="syncModeBadge" class="text-xs px-3 py-1 rounded-full bg-amber-500/20 text-amber-200 border border-amber-400/40 font-semibold">
+          本機演示模式
+        </span>
+        <div class="flex items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+          <label for="seatInput" class="text-xs sm:text-sm font-semibold text-slate-300">座號 Seat No.</label>
+          <input id="seatInput" type="text" inputmode="numeric" maxlength="6" placeholder="例如 05"
+            class="w-20 px-2 py-1 text-center font-bold text-slate-900 bg-white rounded border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Toast Banner -->
+  <div id="toastBox" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 hidden px-5 py-3 rounded-xl shadow-lg font-bold text-sm text-white bg-slate-900"></div>
+
+  <!-- Main Workspace -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-5">
+
+    <!-- Task Panel (Step 1 Interactive Area) -->
+    <section id="taskSection" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6">
+      <div class="flex flex-wrap items-start justify-between gap-4 mb-4">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">Step 1: Classify Data (訓練資料分類)</h2>
+          <p class="text-slate-600 text-sm sm:text-base mt-1">
+            你現在是 AI 工程師，請將下方 10 張水果照片分類到「連皮吃」或「去皮吃」。（可直接<strong class="text-slate-800">拖曳</strong>圖片，或<strong class="text-slate-800">點選圖片再點分類框</strong>）
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span id="progressPill" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 font-bold text-sm">
+            已分類：0 / 10
+          </span>
+          <button id="resetBtn" type="button"
+            class="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 text-sm font-semibold">
+            重新分類
+          </button>
+        </div>
+      </div>
+
+      <!-- Unclassified Fruit Pool -->
+      <div id="poolZone" data-zone="pool"
+        class="drop-zone min-h-[138px] p-4 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 mb-5">
+        <div class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
+          待分類水果圖片區 (Unclassified Fruits)
+        </div>
+        <div id="poolGrid" class="grid grid-cols-2 sm:grid-cols-5 gap-3"></div>
+      </div>
+
+      <!-- Two Classification Bins -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <!-- Category 1: Edible Skin -->
+        <div id="edibleZone" data-zone="edible"
+          class="drop-zone min-h-[210px] p-4 rounded-xl border-2 border-emerald-500 bg-emerald-50/40 cursor-pointer">
+          <div class="flex items-center justify-between pb-2 mb-3 border-b border-emerald-200">
+            <div>
+              <h3 class="text-lg font-extrabold text-emerald-800">Edible Skin (連皮吃)</h3>
+              <p class="text-xs text-emerald-700">Thin skin, usually washed and eaten directly</p>
+            </div>
+            <span id="edibleCount" class="px-2.5 py-1 rounded-full bg-emerald-600 text-white text-xs font-bold">0 張</span>
+          </div>
+          <div id="edibleGrid" class="grid grid-cols-3 sm:grid-cols-5 gap-2.5"></div>
+        </div>
+
+        <!-- Category 2: Peel to Eat -->
+        <div id="peelZone" data-zone="peel"
+          class="drop-zone min-h-[210px] p-4 rounded-xl border-2 border-amber-500 bg-amber-50/40 cursor-pointer">
+          <div class="flex items-center justify-between pb-2 mb-3 border-b border-amber-200">
+            <div>
+              <h3 class="text-lg font-extrabold text-amber-800">Peel to Eat (去皮吃)</h3>
+              <p class="text-xs text-amber-700">Thick or tough peel, usually removed before eating</p>
+            </div>
+            <span id="peelCount" class="px-2.5 py-1 rounded-full bg-amber-600 text-white text-xs font-bold">0 張</span>
+          </div>
+          <div id="peelGrid" class="grid grid-cols-3 sm:grid-cols-5 gap-2.5"></div>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <p class="text-xs text-slate-500">提示：請確認左上角已輸入正確座號，全部 10 張分類完成後即可送出。</p>
+        <button id="submitBtn" type="button"
+          class="px-7 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-extrabold text-base shadow-sm transition">
+          送出分類結果 (Send Classification to AI)
+        </button>
+      </div>
+    </section>
+
+    <!-- Result & Bilingual Speaking Scaffold Panel (Hidden until submitted) -->
+    <section id="resultSection" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
+      <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-6 border-b border-slate-200">
+        <div>
+          <span class="inline-block px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold mb-1">Step 1 Completed</span>
+          <h2 class="text-2xl font-extrabold text-slate-900">Step 1 分類結果與英文口說分享</h2>
+        </div>
+        <div class="flex items-center gap-3">
+          <span id="resultSeatBadge" class="px-4 py-2 rounded-xl bg-slate-900 text-white font-extrabold text-base"></span>
+          <span id="saveStatusBadge" class="px-3 py-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold"></span>
+        </div>
+      </div>
+
+      <!-- Score Banner -->
+      <div class="rounded-xl bg-blue-50 border border-blue-200 p-5 mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <div class="text-xs font-bold uppercase tracking-wider text-blue-700">Rule Stability (訓練資料分類準確度)</div>
+          <div id="scoreBigText" class="text-3xl sm:text-4xl font-black text-blue-900 mt-1"></div>
+        </div>
+        <div id="diagnosisText" class="text-sm sm:text-base font-bold px-4 py-2 rounded-lg"></div>
+      </div>
+
+      <!-- English Speaking Scaffold -->
+      <div class="rounded-2xl border-2 border-blue-600 bg-gradient-to-br from-blue-50/70 to-white p-6 mb-6">
+        <div class="text-xs font-extrabold uppercase tracking-wider text-blue-700 mb-3">
+          English Speaking Scaffold (請練習用這句英文分享你的結果)
+        </div>
+        <p class="text-2xl sm:text-3xl font-bold text-slate-900 leading-relaxed">
+          My classification score is <span id="blankScore" class="scaffold-blank"></span>.
+          That is <span id="blankLevel" class="scaffold-blank"></span>.
+        </p>
+
+        <!-- Highlighted Level Options Table -->
+        <div class="mt-6">
+          <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+            Score &amp; Level Options (下方已標示你的分數對應等級)
+          </div>
+          <div id="levelOptionsGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
+        </div>
+      </div>
+
+      <!-- Summary of Student's Classification -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div class="p-4 rounded-xl bg-emerald-50/60 border border-emerald-200">
+          <h3 class="font-extrabold text-emerald-800 text-sm mb-2">你分類為 Edible Skin (連皮吃)</h3>
+          <div id="summaryEdible" class="flex flex-wrap gap-2"></div>
+        </div>
+        <div class="p-4 rounded-xl bg-amber-50/60 border border-amber-200">
+          <h3 class="font-extrabold text-amber-800 text-sm mb-2">你分類為 Peel to Eat (去皮吃)</h3>
+          <div id="summaryPeel" class="flex flex-wrap gap-2"></div>
+        </div>
+      </div>
+
+      <!-- Pause Reminder for Teacher Pacing -->
+      <div class="rounded-xl bg-slate-900 text-white p-4 flex flex-wrap items-center justify-between gap-3">
+        <p class="text-sm sm:text-base font-semibold">
+          已完成 Step 1！請準備分享你的英文句子，並等待老師講解後再開啟 Step 2 網頁。
+        </p>
+        <button id="editAgainBtn" type="button"
+          class="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-xs font-bold text-slate-100">
+          修改分類重送
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // =========================================================================
+    // [老師設定區] 部署 Google Apps Script 後，請將網頁應用程式網址貼在下方引號內
+    // 若留空 ''，網頁會自動以「本機演示模式」運作（資料存於瀏覽器 localStorage）
+    // =========================================================================
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbw7Xgo1vGvcgPz6Z9KgnEOdpdU7ngVIIEL0ZkDSP2YqguntUZ0g_FP0t_k7TWXR8P5M/exec';
+
+    // 10 張水果題庫（路徑固定為 fruits/<水果>1.png）
+    const FRUITS = [
+      { id: 'apple1',       nameEn: 'Apple',        nameZh: '蘋果',   img: 'fruits/apple1.png',       truth: 'edible', color: '#dc2626', accent: '#fca5a5' },
+      { id: 'grape1',       nameEn: 'Grape',        nameZh: '葡萄',   img: 'fruits/grape1.png',       truth: 'edible', color: '#7c3aed', accent: '#ddd6fe' },
+      { id: 'strawberry1',  nameEn: 'Strawberry',   nameZh: '草莓',   img: 'fruits/strawberry1.png',  truth: 'edible', color: '#e11d48', accent: '#fecdd3' },
+      { id: 'waxapple1',    nameEn: 'Wax Apple',    nameZh: '蓮霧',   img: 'fruits/waxapple1.png',    truth: 'edible', color: '#be123c', accent: '#fda4af' },
+      { id: 'guava1',       nameEn: 'Guava',        nameZh: '芭樂',   img: 'fruits/guava1.png',       truth: 'edible', color: '#16a34a', accent: '#bbf7d0' },
+      { id: 'banana1',      nameEn: 'Banana',       nameZh: '香蕉',   img: 'fruits/banana1.png',      truth: 'peel',   color: '#eab308', accent: '#fef08a' },
+      { id: 'orange1',      nameEn: 'Orange',       nameZh: '橘子',   img: 'fruits/orange1.png',      truth: 'peel',   color: '#ea580c', accent: '#fed7aa' },
+      { id: 'mango1',       nameEn: 'Mango',        nameZh: '芒果',   img: 'fruits/mango1.png',       truth: 'peel',   color: '#f59e0b', accent: '#fde68a' },
+      { id: 'kiwi1',        nameEn: 'Kiwi',         nameZh: '奇異果', img: 'fruits/kiwi1.png',        truth: 'peel',   color: '#65a30d', accent: '#d9f99d' },
+      { id: 'dragonfruit1', nameEn: 'Dragon Fruit', nameZh: '火龍果', img: 'fruits/dragonfruit1.png', truth: 'peel',   color: '#db2777', accent: '#fbcfe8' }
+    ];
+
+    const LEVEL_RULES = [
+      { id: 'perfect',   rangeText: '100',     label: 'perfect',   check: (s) => s === 100 },
+      { id: 'excellent', rangeText: '80 - 90', label: 'excellent', check: (s) => s >= 80 && s < 100 },
+      { id: 'good',      rangeText: '60 - 70', label: 'good',      check: (s) => s >= 60 && s < 80 },
+      { id: 'low',       rangeText: '< 60',    label: 'low',       check: (s) => s < 60 }
+    ];
+
+    // State
+    let assignments = {}; // { fruitId: 'pool' | 'edible' | 'peel' }
+    let selectedFruitId = null;
+    let shuffledOrder = [];
+
+    function shuffle(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function makeFallbackSvg(fruit) {
+      const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120">
+          <rect width="160" height="120" rx="14" fill="${fruit.accent}"/>
+          <circle cx="80" cy="54" r="28" fill="${fruit.color}" opacity="0.92"/>
+          <path d="M80 26 C86 14, 100 14, 96 24 C92 30, 84 28, 80 26 Z" fill="#15803d"/>
+          <text x="80" y="102" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#1e293b">${fruit.img}</text>
+        </svg>`;
+      return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg.trim());
+    }
+
+    function showToast(msg, isError = false) {
+      const box = document.getElementById('toastBox');
+      box.textContent = msg;
+      box.className = 'fixed top-16 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-xl shadow-lg font-bold text-sm text-white ' +
+        (isError ? 'bg-rose-600' : 'bg-slate-900');
+      box.classList.remove('hidden');
+      clearTimeout(box._timer);
+      box._timer = setTimeout(() => box.classList.add('hidden'), 2800);
+    }
+
+    function initState() {
+      shuffledOrder = shuffle(FRUITS.map(f => f.id));
+      assignments = {};
+      shuffledOrder.forEach(id => { assignments[id] = 'pool'; });
+      selectedFruitId = null;
+      renderAll();
+    }
+
+    function createFruitCard(fruit, compact) {
+      const card = document.createElement('div');
+      card.className = 'fruit-card bg-white rounded-xl border border-slate-200 p-2 flex flex-col items-center cursor-grab active:cursor-grabbing' +
+        (selectedFruitId === fruit.id ? ' selected' : '');
+      card.draggable = true;
+      card.dataset.id = fruit.id;
+
+      const img = document.createElement('img');
+      img.src = fruit.img;
+      img.alt = fruit.nameEn;
+      img.className = (compact ? 'h-16' : 'h-20') + ' w-full object-contain rounded-lg bg-slate-50 pointer-events-none';
+      img.onerror = function () {
+        this.onerror = null;
+        this.src = makeFallbackSvg(fruit);
+      };
+
+      const labelEn = document.createElement('div');
+      labelEn.className = 'mt-1.5 text-xs sm:text-sm font-extrabold text-slate-800 text-center leading-tight';
+      labelEn.textContent = fruit.nameEn;
+
+      const labelZh = document.createElement('div');
+      labelZh.className = 'text-[11px] font-medium text-slate-500 text-center';
+      labelZh.textContent = fruit.nameZh;
+
+      card.appendChild(img);
+      card.appendChild(labelEn);
+      card.appendChild(labelZh);
+
+      // Drag events
+      card.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', fruit.id);
+        selectedFruitId = fruit.id;
+      });
+
+      // Click-to-select (for touchscreens / tablets)
+      card.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectedFruitId = (selectedFruitId === fruit.id) ? null : fruit.id;
+        renderAll();
+      });
+
+      return card;
+    }
+
+    function renderAll() {
+      const poolGrid = document.getElementById('poolGrid');
+      const edibleGrid = document.getElementById('edibleGrid');
+      const peelGrid = document.getElementById('peelGrid');
+      poolGrid.innerHTML = '';
+      edibleGrid.innerHTML = '';
+      peelGrid.innerHTML = '';
+
+      let edibleCnt = 0;
+      let peelCnt = 0;
+
+      shuffledOrder.forEach(id => {
+        const fruit = FRUITS.find(f => f.id === id);
+        const zone = assignments[id];
+        if (zone === 'pool') {
+          poolGrid.appendChild(createFruitCard(fruit, false));
+        } else if (zone === 'edible') {
+          edibleCnt++;
+          edibleGrid.appendChild(createFruitCard(fruit, true));
+        } else if (zone === 'peel') {
+          peelCnt++;
+          peelGrid.appendChild(createFruitCard(fruit, true));
+        }
+      });
+
+      const done = edibleCnt + peelCnt;
+      document.getElementById('edibleCount').textContent = edibleCnt + ' 張';
+      document.getElementById('peelCount').textContent = peelCnt + ' 張';
+      document.getElementById('progressPill').textContent = `已分類：${done} / ${FRUITS.length}`;
+      document.getElementById('submitBtn').disabled = (done < FRUITS.length);
+    }
+
+    function bindDropZones() {
+      ['poolZone', 'edibleZone', 'peelZone'].forEach(zoneDomId => {
+        const el = document.getElementById(zoneDomId);
+        const targetZone = el.dataset.zone;
+
+        el.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          el.classList.add('drag-over');
+        });
+        el.addEventListener('dragleave', () => {
+          el.classList.remove('drag-over');
+        });
+        el.addEventListener('drop', (e) => {
+          e.preventDefault();
+          el.classList.remove('drag-over');
+          const fruitId = e.dataTransfer.getData('text/plain');
+          if (fruitId && assignments[fruitId] !== undefined) {
+            assignments[fruitId] = targetZone;
+            selectedFruitId = null;
+            renderAll();
+          }
+        });
+        el.addEventListener('click', () => {
+          if (selectedFruitId && assignments[selectedFruitId] !== undefined) {
+            assignments[selectedFruitId] = targetZone;
+            selectedFruitId = null;
+            renderAll();
+          }
+        });
+      });
+    }
+
+    function getLevelObj(score) {
+      return LEVEL_RULES.find(r => r.check(score)) || LEVEL_RULES[3];
+    }
+
+    function getDiagnosis(score) {
+      if (score === 100) return { text: '診斷：分類非常準確，AI 能學到高品質規則！', cls: 'bg-emerald-100 text-emerald-800' };
+      if (score >= 80)   return { text: '診斷：分類相當不錯，只有少數水果需要再確認。', cls: 'bg-blue-100 text-blue-800' };
+      if (score >= 60)   return { text: '診斷：分類尚可，部分雜訊可能會讓 AI 混淆。', cls: 'bg-amber-100 text-amber-800' };
+      return { text: '診斷：分類準確度偏低，可能會讓 AI 學到錯誤規則！', cls: 'bg-rose-100 text-rose-800' };
+    }
+
+    function saveLocalStep1(payload) {
+      try {
+        const key = 'ai_fruit_lab_step1';
+        const store = JSON.parse(localStorage.getItem(key) || '{}');
+        store[payload.seatNo] = payload;
+        localStorage.setItem(key, JSON.stringify(store));
+        localStorage.setItem('ai_fruit_lab_last_seat', payload.seatNo);
+      } catch (err) {}
+    }
+
+    async function handleSubmit() {
+      const seatNo = document.getElementById('seatInput').value.trim();
+      if (!seatNo) {
+        showToast('請先在右上角輸入你的座號！', true);
+        document.getElementById('seatInput').focus();
+        return;
+      }
+
+      const edible = [];
+      const peel = [];
+      let correctCount = 0;
+
+      FRUITS.forEach(f => {
+        const choice = assignments[f.id];
+        if (choice === 'edible') edible.push(f.id);
+        if (choice === 'peel') peel.push(f.id);
+        if (choice === f.truth) correctCount++;
+      });
+
+      const score = Math.round((correctCount / FRUITS.length) * 100);
+      const levelObj = getLevelObj(score);
+
+      const payload = {
+        action: 'saveStep1',
+        seatNo,
+        score,
+        correctCount,
+        totalCount: FRUITS.length,
+        level: levelObj.label,
+        edible,
+        peel
+      };
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = '資料上傳中...';
+
+      saveLocalStep1(payload);
+
+      let syncedCloud = false;
+      if (GAS_URL) {
+        try {
+          const res = await fetch(GAS_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          syncedCloud = Boolean(data && data.ok);
+        } catch (err) {
+          syncedCloud = false;
+        }
+      }
+
+      btn.textContent = '送出分類結果 (Send Classification to AI)';
+      renderResult(payload, syncedCloud);
+    }
+
+    function renderResult(payload, syncedCloud) {
+      document.getElementById('taskSection').classList.add('hidden');
+      document.getElementById('resultSection').classList.remove('hidden');
+
+      document.getElementById('resultSeatBadge').textContent = `座號 Seat #${payload.seatNo}`;
+      const saveBadge = document.getElementById('saveStatusBadge');
+      if (GAS_URL && syncedCloud) {
+        saveBadge.textContent = '已同步儲存至 Google Sheet';
+        saveBadge.className = 'px-3 py-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold';
+      } else if (GAS_URL && !syncedCloud) {
+        saveBadge.textContent = '雲端連線失敗（已暫存本機）';
+        saveBadge.className = 'px-3 py-2 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold';
+      } else {
+        saveBadge.textContent = '本機演示模式（已暫存瀏覽器）';
+        saveBadge.className = 'px-3 py-2 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold';
+      }
+
+      document.getElementById('scoreBigText').textContent = `${payload.score} 分 (${payload.correctCount} / ${payload.totalCount})`;
+      const diag = getDiagnosis(payload.score);
+      const diagEl = document.getElementById('diagnosisText');
+      diagEl.textContent = diag.text;
+      diagEl.className = 'text-sm sm:text-base font-bold px-4 py-2 rounded-lg ' + diag.cls;
+
+      // Fill English Scaffold
+      document.getElementById('blankScore').textContent = payload.score;
+      document.getElementById('blankLevel').textContent = payload.level;
+
+      // Render highlighted Level Options
+      const levelGrid = document.getElementById('levelOptionsGrid');
+      levelGrid.innerHTML = '';
+      LEVEL_RULES.forEach(rule => {
+        const isHit = rule.label === payload.level;
+        const cell = document.createElement('div');
+        cell.className = isHit
+          ? 'p-3.5 rounded-xl border-2 border-blue-600 bg-blue-600 text-white shadow-md flex flex-col items-center'
+          : 'p-3.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 flex flex-col items-center';
+        cell.innerHTML = `
+          <div class="text-xs font-bold ${isHit ? 'text-blue-100' : 'text-slate-400'}">Score: ${rule.rangeText}</div>
+          <div class="text-xl font-black mt-0.5">${rule.label}</div>
+          ${isHit ? '<span class="mt-1 px-2 py-0.5 rounded-full bg-white text-blue-700 text-[10px] font-extrabold uppercase">Your Result</span>' : ''}
+        `;
+        levelGrid.appendChild(cell);
+      });
+
+      // Summary chips
+      const renderChips = (ids, containerId) => {
+        const box = document.getElementById(containerId);
+        box.innerHTML = '';
+        ids.forEach(id => {
+          const f = FRUITS.find(x => x.id === id);
+          if (!f) return;
+          const chip = document.createElement('span');
+          chip.className = 'px-3 py-1 rounded-full bg-white border border-slate-200 text-xs font-bold text-slate-700';
+          chip.textContent = `${f.nameEn} (${f.nameZh})`;
+          box.appendChild(chip);
+        });
+      };
+      renderChips(payload.edible, 'summaryEdible');
+      renderChips(payload.peel, 'summaryPeel');
+    }
+
+    // Init
+    window.addEventListener('DOMContentLoaded', () => {
+      if (GAS_URL) {
+        const badge = document.getElementById('syncModeBadge');
+        badge.textContent = 'Google Sheet 雲端連線中';
+        badge.className = 'text-xs px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-200 border border-emerald-400/40 font-semibold';
+      }
+      try {
+        const lastSeat = localStorage.getItem('ai_fruit_lab_last_seat');
+        if (lastSeat) document.getElementById('seatInput').value = lastSeat;
+      } catch (err) {}
+
+      bindDropZones();
+      initState();
+
+      document.getElementById('resetBtn').addEventListener('click', initState);
+      document.getElementById('submitBtn').addEventListener('click', handleSubmit);
+      document.getElementById('editAgainBtn').addEventListener('click', () => {
+        document.getElementById('resultSection').classList.add('hidden');
+        document.getElementById('taskSection').classList.remove('hidden');
+        renderAll();
+      });
+    });
+  </script>
+</body>
+</html>

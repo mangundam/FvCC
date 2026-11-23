@@ -79,19 +79,17 @@
     <section id="taskSection" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6">
       <div class="flex flex-wrap items-start justify-between gap-4 mb-4">
         <div>
-          <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">Step 1: Classify Data (訓練資料分類)</h2>
-          <p class="text-slate-600 text-sm sm:text-base mt-1">
-            你現在是 AI 工程師，請將下方 10 張水果照片分類到「連皮吃」或「去皮吃」。（可直接<strong class="text-slate-800">拖曳</strong>圖片，或<strong class="text-slate-800">點選圖片再點分類框</strong>）
-          </p>
+          <div class="flex flex-wrap items-center gap-2 mb-1">
+            <span id="topicBadge" class="px-3 py-1 rounded-full text-xs font-extrabold"></span>
+            <span class="text-xs text-slate-500 font-semibold">（系統隨機指派兩種題型之一，Step 2 會固定抽另一題型）</span>
+          </div>
+          <h2 id="topicHeading" class="text-xl sm:text-2xl font-extrabold text-slate-900"></h2>
+          <p id="topicSubtitle" class="text-slate-600 text-sm sm:text-base mt-1"></p>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
           <span id="progressPill" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 font-bold text-sm">
             已分類：0 / 10
           </span>
-          <button id="resetBtn" type="button"
-            class="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 text-sm font-semibold">
-            重新分類
-          </button>
         </div>
       </div>
 
@@ -99,43 +97,43 @@
       <div id="poolZone" data-zone="pool"
         class="drop-zone min-h-[138px] p-4 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 mb-5">
         <div class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
-          待分類水果圖片區 (Unclassified Fruits)
+          待分類水果圖片區 (Unclassified Fruits) — 可直接拖曳，或點選圖片再點下方分類框
         </div>
         <div id="poolGrid" class="grid grid-cols-2 sm:grid-cols-5 gap-3"></div>
       </div>
 
       <!-- Two Classification Bins -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <!-- Category 1: Edible Skin -->
-        <div id="edibleZone" data-zone="edible"
+        <!-- Category A -->
+        <div id="catAZone" data-zone="catA"
           class="drop-zone min-h-[210px] p-4 rounded-xl border-2 border-emerald-500 bg-emerald-50/40 cursor-pointer">
           <div class="flex items-center justify-between pb-2 mb-3 border-b border-emerald-200">
             <div>
-              <h3 class="text-lg font-extrabold text-emerald-800">Edible Skin (連皮吃)</h3>
-              <p class="text-xs text-emerald-700">Thin skin, usually washed and eaten directly</p>
+              <h3 id="catATitle" class="text-lg font-extrabold text-emerald-800"></h3>
+              <p id="catADesc" class="text-xs text-emerald-700"></p>
             </div>
-            <span id="edibleCount" class="px-2.5 py-1 rounded-full bg-emerald-600 text-white text-xs font-bold">0 張</span>
+            <span id="catACount" class="px-2.5 py-1 rounded-full bg-emerald-600 text-white text-xs font-bold">0 張</span>
           </div>
-          <div id="edibleGrid" class="grid grid-cols-3 sm:grid-cols-5 gap-2.5"></div>
+          <div id="catAGrid" class="grid grid-cols-3 sm:grid-cols-5 gap-2.5"></div>
         </div>
 
-        <!-- Category 2: Peel to Eat -->
-        <div id="peelZone" data-zone="peel"
+        <!-- Category B -->
+        <div id="catBZone" data-zone="catB"
           class="drop-zone min-h-[210px] p-4 rounded-xl border-2 border-amber-500 bg-amber-50/40 cursor-pointer">
           <div class="flex items-center justify-between pb-2 mb-3 border-b border-amber-200">
             <div>
-              <h3 class="text-lg font-extrabold text-amber-800">Peel to Eat (去皮吃)</h3>
-              <p class="text-xs text-amber-700">Thick or tough peel, usually removed before eating</p>
+              <h3 id="catBTitle" class="text-lg font-extrabold text-amber-800"></h3>
+              <p id="catBDesc" class="text-xs text-amber-700"></p>
             </div>
-            <span id="peelCount" class="px-2.5 py-1 rounded-full bg-amber-600 text-white text-xs font-bold">0 張</span>
+            <span id="catBCount" class="px-2.5 py-1 rounded-full bg-amber-600 text-white text-xs font-bold">0 張</span>
           </div>
-          <div id="peelGrid" class="grid grid-cols-3 sm:grid-cols-5 gap-2.5"></div>
+          <div id="catBGrid" class="grid grid-cols-3 sm:grid-cols-5 gap-2.5"></div>
         </div>
       </div>
 
       <!-- Submit Button -->
       <div class="flex flex-wrap items-center justify-between gap-3">
-        <p class="text-xs text-slate-500">提示：請確認左上角已輸入正確座號，全部 10 張分類完成後即可送出。</p>
+        <p class="text-xs text-slate-500">提示：請確認右上角已輸入正確座號，全部 10 張分類完成後即可送出。</p>
         <button id="submitBtn" type="button"
           class="px-7 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-extrabold text-base shadow-sm transition">
           送出分類結果 (Send Classification to AI)
@@ -143,11 +141,11 @@
       </div>
     </section>
 
-    <!-- Result & Bilingual Speaking Scaffold Panel (Hidden until submitted) -->
+    <!-- Result & Bilingual Speaking Scaffold Panel -->
     <section id="resultSection" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
       <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-6 border-b border-slate-200">
         <div>
-          <span class="inline-block px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold mb-1">Step 1 Completed</span>
+          <span id="resultTopicBadge" class="inline-block px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold mb-1"></span>
           <h2 class="text-2xl font-extrabold text-slate-900">Step 1 分類結果與英文口說分享</h2>
         </div>
         <div class="flex items-center gap-3">
@@ -187,19 +185,19 @@
       <!-- Summary of Student's Classification -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div class="p-4 rounded-xl bg-emerald-50/60 border border-emerald-200">
-          <h3 class="font-extrabold text-emerald-800 text-sm mb-2">你分類為 Edible Skin (連皮吃)</h3>
-          <div id="summaryEdible" class="flex flex-wrap gap-2"></div>
+          <h3 id="summaryCatATitle" class="font-extrabold text-emerald-800 text-sm mb-2"></h3>
+          <div id="summaryCatA" class="flex flex-wrap gap-2"></div>
         </div>
         <div class="p-4 rounded-xl bg-amber-50/60 border border-amber-200">
-          <h3 class="font-extrabold text-amber-800 text-sm mb-2">你分類為 Peel to Eat (去皮吃)</h3>
-          <div id="summaryPeel" class="flex flex-wrap gap-2"></div>
+          <h3 id="summaryCatBTitle" class="font-extrabold text-amber-800 text-sm mb-2"></h3>
+          <div id="summaryCatB" class="flex flex-wrap gap-2"></div>
         </div>
       </div>
 
-      <!-- Pause Reminder for Teacher Pacing -->
+      <!-- Pause Reminder -->
       <div class="rounded-xl bg-slate-900 text-white p-4 flex flex-wrap items-center justify-between gap-3">
         <p class="text-sm sm:text-base font-semibold">
-          已完成 Step 1！請準備分享你的英文句子，並等待老師講解後再開啟 Step 2 網頁。
+          已完成 Step 1！請準備分享你的英文句子，等待老師講解後再開啟 Step 2（系統會自動為你抽出另一種題型）。
         </p>
         <button id="editAgainBtn" type="button"
           class="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-xs font-bold text-slate-100">
@@ -211,24 +209,46 @@
 
   <script>
     // =========================================================================
-    // [老師設定區] 部署 Google Apps Script 後，請將網頁應用程式網址貼在下方引號內
-    // 若留空 ''，網頁會自動以「本機演示模式」運作（資料存於瀏覽器 localStorage）
+    // [老師設定區] 部署 Google Apps Script 後，將網頁應用程式 URL 貼於下方引號內
     // =========================================================================
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbw7Xgo1vGvcgPz6Z9KgnEOdpdU7ngVIIEL0ZkDSP2YqguntUZ0g_FP0t_k7TWXR8P5M/exec';
 
-    // 10 張水果題庫（路徑固定為 fruits/<水果>1.png）
-    const FRUITS = [
-      { id: 'apple1',       nameEn: 'Apple',        nameZh: '蘋果',   img: 'fruits/apple1.png',       truth: 'edible', color: '#dc2626', accent: '#fca5a5' },
-      { id: 'grape1',       nameEn: 'Grape',        nameZh: '葡萄',   img: 'fruits/grape1.png',       truth: 'edible', color: '#7c3aed', accent: '#ddd6fe' },
-      { id: 'strawberry1',  nameEn: 'Strawberry',   nameZh: '草莓',   img: 'fruits/strawberry1.png',  truth: 'edible', color: '#e11d48', accent: '#fecdd3' },
-      { id: 'waxapple1',    nameEn: 'Wax Apple',    nameZh: '蓮霧',   img: 'fruits/waxapple1.png',    truth: 'edible', color: '#be123c', accent: '#fda4af' },
-      { id: 'guava1',       nameEn: 'Guava',        nameZh: '芭樂',   img: 'fruits/guava1.png',       truth: 'edible', color: '#16a34a', accent: '#bbf7d0' },
-      { id: 'banana1',      nameEn: 'Banana',       nameZh: '香蕉',   img: 'fruits/banana1.png',      truth: 'peel',   color: '#eab308', accent: '#fef08a' },
-      { id: 'orange1',      nameEn: 'Orange',       nameZh: '橘子',   img: 'fruits/orange1.png',      truth: 'peel',   color: '#ea580c', accent: '#fed7aa' },
-      { id: 'mango1',       nameEn: 'Mango',        nameZh: '芒果',   img: 'fruits/mango1.png',       truth: 'peel',   color: '#f59e0b', accent: '#fde68a' },
-      { id: 'kiwi1',        nameEn: 'Kiwi',         nameZh: '奇異果', img: 'fruits/kiwi1.png',        truth: 'peel',   color: '#65a30d', accent: '#d9f99d' },
-      { id: 'dragonfruit1', nameEn: 'Dragon Fruit', nameZh: '火龍果', img: 'fruits/dragonfruit1.png', truth: 'peel',   color: '#db2777', accent: '#fbcfe8' }
-    ];
+    // 全部訓練水果資料庫（路徑皆為 fruits/<fruit>1.png）
+    const FRUIT_CATALOG = {
+      apple1:       { id: 'apple1',       nameEn: 'Apple',        nameZh: '蘋果',   img: 'fruits/apple1.png',       color: '#dc2626', accent: '#fca5a5' },
+      grape1:       { id: 'grape1',       nameEn: 'Grape',        nameZh: '葡萄',   img: 'fruits/grape1.png',       color: '#7c3aed', accent: '#ddd6fe' },
+      strawberry1:  { id: 'strawberry1',  nameEn: 'Strawberry',   nameZh: '草莓',   img: 'fruits/strawberry1.png',  color: '#e11d48', accent: '#fecdd3' },
+      waxapple1:    { id: 'waxapple1',    nameEn: 'Wax Apple',    nameZh: '蓮霧',   img: 'fruits/waxapple1.png',    color: '#be123c', accent: '#fda4af' },
+      guava1:       { id: 'guava1',       nameEn: 'Guava',        nameZh: '芭樂',   img: 'fruits/guava1.png',       color: '#16a34a', accent: '#bbf7d0' },
+      banana1:      { id: 'banana1',      nameEn: 'Banana',       nameZh: '香蕉',   img: 'fruits/banana1.png',      color: '#eab308', accent: '#fef08a' },
+      orange1:      { id: 'orange1',      nameEn: 'Orange',       nameZh: '橘子',   img: 'fruits/orange1.png',      color: '#ea580c', accent: '#fed7aa' },
+      mango1:       { id: 'mango1',       nameEn: 'Mango',        nameZh: '芒果',   img: 'fruits/mango1.png',       color: '#f59e0b', accent: '#fde68a' },
+      kiwi1:        { id: 'kiwi1',        nameEn: 'Kiwi',         nameZh: '奇異果', img: 'fruits/kiwi1.png',        color: '#65a30d', accent: '#d9f99d' },
+      dragonfruit1: { id: 'dragonfruit1', nameEn: 'Dragon Fruit', nameZh: '火龍果', img: 'fruits/dragonfruit1.png', color: '#db2777', accent: '#fbcfe8' },
+      peach1:       { id: 'peach1',       nameEn: 'Peach',        nameZh: '水蜜桃', img: 'fruits/peach1.png',       color: '#fb7185', accent: '#ffe4e6' }
+    };
+
+    // 兩種題型定義：skin（連皮吃 vs 去皮吃）、climate（熱帶 vs 溫帶）
+    const TOPICS = {
+      skin: {
+        id: 'skin',
+        badgeText: '題型 A：食用方式分類 (Skin Type)',
+        badgeCls: 'bg-emerald-100 text-emerald-800',
+        heading: 'Step 1: Edible Skin vs. Peel to Eat (連皮吃 vs. 去皮吃)',
+        subtitle: '你現在是 AI 工程師，請將下方 10 張水果分類為「連皮吃」或「去皮吃」。',
+        catA: { title: 'Edible Skin (連皮吃)', desc: 'Thin skin, usually washed and eaten directly', ids: ['apple1', 'grape1', 'strawberry1', 'waxapple1', 'guava1'] },
+        catB: { title: 'Peel to Eat (去皮吃)', desc: 'Thick or tough peel, usually removed before eating', ids: ['banana1', 'orange1', 'mango1', 'kiwi1', 'dragonfruit1'] }
+      },
+      climate: {
+        id: 'climate',
+        badgeText: '題型 B：生長氣候分類 (Climate Zone)',
+        badgeCls: 'bg-sky-100 text-sky-800',
+        heading: 'Step 1: Tropical vs. Temperate Fruits (熱帶水果 vs. 溫帶水果)',
+        subtitle: '你現在是 AI 工程師，請將下方 10 張水果分類為「熱帶水果」或「溫帶水果」。',
+        catA: { title: 'Tropical Fruit (熱帶水果)', desc: 'Grows in warm, humid tropical regions', ids: ['waxapple1', 'guava1', 'banana1', 'mango1', 'dragonfruit1'] },
+        catB: { title: 'Temperate Fruit (溫帶水果)', desc: 'Grows in cooler four-season temperate regions', ids: ['apple1', 'grape1', 'strawberry1', 'kiwi1', 'peach1'] }
+      }
+    };
 
     const LEVEL_RULES = [
       { id: 'perfect',   rangeText: '100',     label: 'perfect',   check: (s) => s === 100 },
@@ -238,7 +258,8 @@
     ];
 
     // State
-    let assignments = {}; // { fruitId: 'pool' | 'edible' | 'peel' }
+    let currentTopicKey = Math.random() < 0.5 ? 'skin' : 'climate';
+    let assignments = {}; // { fruitId: 'pool' | 'catA' | 'catB' }
     let selectedFruitId = null;
     let shuffledOrder = [];
 
@@ -273,10 +294,24 @@
     }
 
     function initState() {
-      shuffledOrder = shuffle(FRUITS.map(f => f.id));
+      const topic = TOPICS[currentTopicKey];
+      const allIds = [...topic.catA.ids, ...topic.catB.ids];
+      shuffledOrder = shuffle(allIds);
       assignments = {};
       shuffledOrder.forEach(id => { assignments[id] = 'pool'; });
       selectedFruitId = null;
+
+      // Render Topic Header & Bin Labels
+      const badge = document.getElementById('topicBadge');
+      badge.textContent = topic.badgeText;
+      badge.className = 'px-3 py-1 rounded-full text-xs font-extrabold ' + topic.badgeCls;
+      document.getElementById('topicHeading').textContent = topic.heading;
+      document.getElementById('topicSubtitle').textContent = topic.subtitle;
+      document.getElementById('catATitle').textContent = topic.catA.title;
+      document.getElementById('catADesc').textContent = topic.catA.desc;
+      document.getElementById('catBTitle').textContent = topic.catB.title;
+      document.getElementById('catBDesc').textContent = topic.catB.desc;
+
       renderAll();
     }
 
@@ -308,13 +343,10 @@
       card.appendChild(labelEn);
       card.appendChild(labelZh);
 
-      // Drag events
       card.addEventListener('dragstart', (e) => {
         e.dataTransfer.setData('text/plain', fruit.id);
         selectedFruitId = fruit.id;
       });
-
-      // Click-to-select (for touchscreens / tablets)
       card.addEventListener('click', (e) => {
         e.stopPropagation();
         selectedFruitId = (selectedFruitId === fruit.id) ? null : fruit.id;
@@ -326,38 +358,39 @@
 
     function renderAll() {
       const poolGrid = document.getElementById('poolGrid');
-      const edibleGrid = document.getElementById('edibleGrid');
-      const peelGrid = document.getElementById('peelGrid');
+      const catAGrid = document.getElementById('catAGrid');
+      const catBGrid = document.getElementById('catBGrid');
       poolGrid.innerHTML = '';
-      edibleGrid.innerHTML = '';
-      peelGrid.innerHTML = '';
+      catAGrid.innerHTML = '';
+      catBGrid.innerHTML = '';
 
-      let edibleCnt = 0;
-      let peelCnt = 0;
+      let cntA = 0;
+      let cntB = 0;
 
       shuffledOrder.forEach(id => {
-        const fruit = FRUITS.find(f => f.id === id);
+        const fruit = FRUIT_CATALOG[id];
+        if (!fruit) return;
         const zone = assignments[id];
         if (zone === 'pool') {
           poolGrid.appendChild(createFruitCard(fruit, false));
-        } else if (zone === 'edible') {
-          edibleCnt++;
-          edibleGrid.appendChild(createFruitCard(fruit, true));
-        } else if (zone === 'peel') {
-          peelCnt++;
-          peelGrid.appendChild(createFruitCard(fruit, true));
+        } else if (zone === 'catA') {
+          cntA++;
+          catAGrid.appendChild(createFruitCard(fruit, true));
+        } else if (zone === 'catB') {
+          cntB++;
+          catBGrid.appendChild(createFruitCard(fruit, true));
         }
       });
 
-      const done = edibleCnt + peelCnt;
-      document.getElementById('edibleCount').textContent = edibleCnt + ' 張';
-      document.getElementById('peelCount').textContent = peelCnt + ' 張';
-      document.getElementById('progressPill').textContent = `已分類：${done} / ${FRUITS.length}`;
-      document.getElementById('submitBtn').disabled = (done < FRUITS.length);
+      const done = cntA + cntB;
+      document.getElementById('catACount').textContent = cntA + ' 張';
+      document.getElementById('catBCount').textContent = cntB + ' 張';
+      document.getElementById('progressPill').textContent = `已分類：${done} / ${shuffledOrder.length}`;
+      document.getElementById('submitBtn').disabled = (done < shuffledOrder.length);
     }
 
     function bindDropZones() {
-      ['poolZone', 'edibleZone', 'peelZone'].forEach(zoneDomId => {
+      ['poolZone', 'catAZone', 'catBZone'].forEach(zoneDomId => {
         const el = document.getElementById(zoneDomId);
         const targetZone = el.dataset.zone;
 
@@ -401,7 +434,7 @@
 
     function saveLocalStep1(payload) {
       try {
-        const key = 'ai_fruit_lab_step1';
+        const key = 'ai_fruit_lab_step1_v2';
         const store = JSON.parse(localStorage.getItem(key) || '{}');
         store[payload.seatNo] = payload;
         localStorage.setItem(key, JSON.stringify(store));
@@ -417,29 +450,32 @@
         return;
       }
 
-      const edible = [];
-      const peel = [];
+      const topic = TOPICS[currentTopicKey];
+      const catA = [];
+      const catB = [];
       let correctCount = 0;
 
-      FRUITS.forEach(f => {
-        const choice = assignments[f.id];
-        if (choice === 'edible') edible.push(f.id);
-        if (choice === 'peel') peel.push(f.id);
-        if (choice === f.truth) correctCount++;
+      shuffledOrder.forEach(id => {
+        const choice = assignments[id];
+        if (choice === 'catA') catA.push(id);
+        if (choice === 'catB') catB.push(id);
+        const truth = topic.catA.ids.includes(id) ? 'catA' : 'catB';
+        if (choice === truth) correctCount++;
       });
 
-      const score = Math.round((correctCount / FRUITS.length) * 100);
+      const score = Math.round((correctCount / shuffledOrder.length) * 100);
       const levelObj = getLevelObj(score);
 
       const payload = {
         action: 'saveStep1',
         seatNo,
+        topic: currentTopicKey,
         score,
         correctCount,
-        totalCount: FRUITS.length,
+        totalCount: shuffledOrder.length,
         level: levelObj.label,
-        edible,
-        peel
+        catA,
+        catB
       };
 
       const btn = document.getElementById('submitBtn');
@@ -468,10 +504,13 @@
     }
 
     function renderResult(payload, syncedCloud) {
+      const topic = TOPICS[payload.topic];
       document.getElementById('taskSection').classList.add('hidden');
       document.getElementById('resultSection').classList.remove('hidden');
 
+      document.getElementById('resultTopicBadge').textContent = `Step 1 Completed — ${topic.badgeText}`;
       document.getElementById('resultSeatBadge').textContent = `座號 Seat #${payload.seatNo}`;
+
       const saveBadge = document.getElementById('saveStatusBadge');
       if (GAS_URL && syncedCloud) {
         saveBadge.textContent = '已同步儲存至 Google Sheet';
@@ -490,11 +529,9 @@
       diagEl.textContent = diag.text;
       diagEl.className = 'text-sm sm:text-base font-bold px-4 py-2 rounded-lg ' + diag.cls;
 
-      // Fill English Scaffold
       document.getElementById('blankScore').textContent = payload.score;
       document.getElementById('blankLevel').textContent = payload.level;
 
-      // Render highlighted Level Options
       const levelGrid = document.getElementById('levelOptionsGrid');
       levelGrid.innerHTML = '';
       LEVEL_RULES.forEach(rule => {
@@ -511,12 +548,14 @@
         levelGrid.appendChild(cell);
       });
 
-      // Summary chips
+      document.getElementById('summaryCatATitle').textContent = `你分類為 ${topic.catA.title}`;
+      document.getElementById('summaryCatBTitle').textContent = `你分類為 ${topic.catB.title}`;
+
       const renderChips = (ids, containerId) => {
         const box = document.getElementById(containerId);
         box.innerHTML = '';
         ids.forEach(id => {
-          const f = FRUITS.find(x => x.id === id);
+          const f = FRUIT_CATALOG[id];
           if (!f) return;
           const chip = document.createElement('span');
           chip.className = 'px-3 py-1 rounded-full bg-white border border-slate-200 text-xs font-bold text-slate-700';
@@ -524,11 +563,10 @@
           box.appendChild(chip);
         });
       };
-      renderChips(payload.edible, 'summaryEdible');
-      renderChips(payload.peel, 'summaryPeel');
+      renderChips(payload.catA, 'summaryCatA');
+      renderChips(payload.catB, 'summaryCatB');
     }
 
-    // Init
     window.addEventListener('DOMContentLoaded', () => {
       if (GAS_URL) {
         const badge = document.getElementById('syncModeBadge');
@@ -543,7 +581,6 @@
       bindDropZones();
       initState();
 
-      document.getElementById('resetBtn').addEventListener('click', initState);
       document.getElementById('submitBtn').addEventListener('click', handleSubmit);
       document.getElementById('editAgainBtn').addEventListener('click', () => {
         document.getElementById('resultSection').classList.add('hidden');

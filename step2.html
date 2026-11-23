@@ -63,17 +63,17 @@
 
   <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-5">
 
-    <!-- Entry Gate: Enter Seat & Fetch Peer Classification -->
+    <!-- Entry Gate -->
     <section id="entrySection" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 max-w-2xl mx-auto mt-6">
       <span class="inline-block px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-xs font-extrabold mb-2">Role Switch: You are the AI Computer</span>
-      <h2 class="text-2xl font-extrabold text-slate-900">Step 2: 讀取同學的分類結果並篩選特徵</h2>
+      <h2 class="text-2xl font-extrabold text-slate-900">Step 2: 抽取與 Step 1 不同題型的同學分類結果</h2>
       <p class="text-slate-600 text-sm sm:text-base mt-2 leading-relaxed">
-        現在換你扮演 AI 電腦！系統會從試算表中<strong class="text-slate-800">隨機抽取另一位同學</strong>在 Step 1 的分類結果（已匿名打散），請觀察他分好的兩組水果，找出最重要的 1 到 3 個視覺特徵。
+        現在換你扮演 AI 電腦！系統會依據你的座號，<strong class="text-indigo-700">固定抽出與你 Step 1 不同的題型</strong>（若 Step 1 是「連皮吃/去皮吃」，這裡就會抽「熱帶/溫帶」，反之亦然），並從試算表隨機撈取另一位同學打散的分類結果；若尚無人上傳該題型，會自動載入系統預設資料讓你體驗。
       </p>
       <div class="mt-6 flex flex-wrap items-center gap-3">
         <button id="loadPeerBtn" type="button"
           class="px-7 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-base shadow-sm transition">
-          抽取隨機同學的分類結果 (Load Peer Data)
+          抽取不同題型的分類結果 (Load Peer Data)
         </button>
       </div>
     </section>
@@ -82,10 +82,12 @@
     <section id="taskSection" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6">
       <div class="flex flex-wrap items-start justify-between gap-4 mb-5">
         <div>
-          <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">Step 2: Extract Features (特徵選擇)</h2>
-          <p class="text-slate-600 text-sm sm:text-base mt-1">
-            觀察左右兩邊同學分好的水果，你覺得最能分辨「連皮吃」與「去皮吃」的關鍵特徵 (Feature) 是什麼？請選擇 <strong class="text-indigo-700">1 ~ 3 個特徵</strong>。
-          </p>
+          <div class="flex flex-wrap items-center gap-2 mb-1">
+            <span id="topicBadge" class="px-3 py-1 rounded-full text-xs font-extrabold"></span>
+            <span id="topicSwitchHint" class="text-xs font-semibold text-indigo-700"></span>
+          </div>
+          <h2 id="topicHeading" class="text-xl sm:text-2xl font-extrabold text-slate-900"></h2>
+          <p id="topicSubtitle" class="text-slate-600 text-sm sm:text-base mt-1"></p>
         </div>
         <div class="flex items-center gap-2">
           <span id="peerSourceBadge" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 font-bold text-xs sm:text-sm"></span>
@@ -96,16 +98,16 @@
         </div>
       </div>
 
-      <!-- 3-Column Layout: Left Edible | Center Features | Right Peel -->
+      <!-- 3-Column Layout: Left Cat A | Center Features | Right Cat B -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-6 items-start">
 
-        <!-- Left: Peer Edible Skin Group -->
+        <!-- Left: Peer Cat A Group -->
         <div class="lg:col-span-4 rounded-xl border-2 border-emerald-400 bg-emerald-50/40 p-4">
           <div class="flex items-center justify-between pb-2 mb-3 border-b border-emerald-200">
-            <h3 class="font-extrabold text-emerald-800 text-base">Edible Skin (連皮吃)</h3>
-            <span id="peerEdibleCount" class="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white text-xs font-bold"></span>
+            <h3 id="peerCatATitle" class="font-extrabold text-emerald-800 text-base"></h3>
+            <span id="peerCatACount" class="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white text-xs font-bold"></span>
           </div>
-          <div id="peerEdibleGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-2.5"></div>
+          <div id="peerCatAGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-2.5"></div>
         </div>
 
         <!-- Center: Feature Selection Checklist -->
@@ -117,13 +119,13 @@
           <div id="featureList" class="space-y-2.5"></div>
         </div>
 
-        <!-- Right: Peer Peel to Eat Group -->
+        <!-- Right: Peer Cat B Group -->
         <div class="lg:col-span-4 rounded-xl border-2 border-amber-400 bg-amber-50/40 p-4">
           <div class="flex items-center justify-between pb-2 mb-3 border-b border-amber-200">
-            <h3 class="font-extrabold text-amber-800 text-base">Peel to Eat (去皮吃)</h3>
-            <span id="peerPeelCount" class="px-2.5 py-0.5 rounded-full bg-amber-600 text-white text-xs font-bold"></span>
+            <h3 id="peerCatBTitle" class="font-extrabold text-amber-800 text-base"></h3>
+            <span id="peerCatBCount" class="px-2.5 py-0.5 rounded-full bg-amber-600 text-white text-xs font-bold"></span>
           </div>
-          <div id="peerPeelGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-2.5"></div>
+          <div id="peerCatBGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-2.5"></div>
         </div>
       </div>
 
@@ -141,7 +143,7 @@
     <section id="resultSection" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
       <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-6 border-b border-slate-200">
         <div>
-          <span class="inline-block px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-xs font-extrabold mb-1">Step 2 Completed</span>
+          <span id="resultTopicBadge" class="inline-block px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-xs font-extrabold mb-1"></span>
           <h2 class="text-2xl font-extrabold text-slate-900">Step 2 特徵選取結果與英文口說分享</h2>
         </div>
         <div class="flex items-center gap-3">
@@ -198,29 +200,66 @@
     // =========================================================================
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbw7Xgo1vGvcgPz6Z9KgnEOdpdU7ngVIIEL0ZkDSP2YqguntUZ0g_FP0t_k7TWXR8P5M/exec';
 
-    const FRUITS = [
-      { id: 'apple1',       nameEn: 'Apple',        nameZh: '蘋果',   img: 'fruits/apple1.png',       color: '#dc2626', accent: '#fca5a5' },
-      { id: 'grape1',       nameEn: 'Grape',        nameZh: '葡萄',   img: 'fruits/grape1.png',       color: '#7c3aed', accent: '#ddd6fe' },
-      { id: 'strawberry1',  nameEn: 'Strawberry',   nameZh: '草莓',   img: 'fruits/strawberry1.png',  color: '#e11d48', accent: '#fecdd3' },
-      { id: 'waxapple1',    nameEn: 'Wax Apple',    nameZh: '蓮霧',   img: 'fruits/waxapple1.png',    color: '#be123c', accent: '#fda4af' },
-      { id: 'guava1',       nameEn: 'Guava',        nameZh: '芭樂',   img: 'fruits/guava1.png',       color: '#16a34a', accent: '#bbf7d0' },
-      { id: 'banana1',      nameEn: 'Banana',       nameZh: '香蕉',   img: 'fruits/banana1.png',      color: '#eab308', accent: '#fef08a' },
-      { id: 'orange1',      nameEn: 'Orange',       nameZh: '橘子',   img: 'fruits/orange1.png',      color: '#ea580c', accent: '#fed7aa' },
-      { id: 'mango1',       nameEn: 'Mango',        nameZh: '芒果',   img: 'fruits/mango1.png',       color: '#f59e0b', accent: '#fde68a' },
-      { id: 'kiwi1',        nameEn: 'Kiwi',         nameZh: '奇異果', img: 'fruits/kiwi1.png',        color: '#65a30d', accent: '#d9f99d' },
-      { id: 'dragonfruit1', nameEn: 'Dragon Fruit', nameZh: '火龍果', img: 'fruits/dragonfruit1.png', color: '#db2777', accent: '#fbcfe8' }
-    ];
+    const FRUIT_CATALOG = {
+      apple1:       { id: 'apple1',       nameEn: 'Apple',        nameZh: '蘋果',   img: 'fruits/apple1.png',       color: '#dc2626', accent: '#fca5a5' },
+      grape1:       { id: 'grape1',       nameEn: 'Grape',        nameZh: '葡萄',   img: 'fruits/grape1.png',       color: '#7c3aed', accent: '#ddd6fe' },
+      strawberry1:  { id: 'strawberry1',  nameEn: 'Strawberry',   nameZh: '草莓',   img: 'fruits/strawberry1.png',  color: '#e11d48', accent: '#fecdd3' },
+      waxapple1:    { id: 'waxapple1',    nameEn: 'Wax Apple',    nameZh: '蓮霧',   img: 'fruits/waxapple1.png',    color: '#be123c', accent: '#fda4af' },
+      guava1:       { id: 'guava1',       nameEn: 'Guava',        nameZh: '芭樂',   img: 'fruits/guava1.png',       color: '#16a34a', accent: '#bbf7d0' },
+      banana1:      { id: 'banana1',      nameEn: 'Banana',       nameZh: '香蕉',   img: 'fruits/banana1.png',      color: '#eab308', accent: '#fef08a' },
+      orange1:      { id: 'orange1',      nameEn: 'Orange',       nameZh: '橘子',   img: 'fruits/orange1.png',      color: '#ea580c', accent: '#fed7aa' },
+      mango1:       { id: 'mango1',       nameEn: 'Mango',        nameZh: '芒果',   img: 'fruits/mango1.png',       color: '#f59e0b', accent: '#fde68a' },
+      kiwi1:        { id: 'kiwi1',        nameEn: 'Kiwi',         nameZh: '奇異果', img: 'fruits/kiwi1.png',        color: '#65a30d', accent: '#d9f99d' },
+      dragonfruit1: { id: 'dragonfruit1', nameEn: 'Dragon Fruit', nameZh: '火龍果', img: 'fruits/dragonfruit1.png', color: '#db2777', accent: '#fbcfe8' },
+      peach1:       { id: 'peach1',       nameEn: 'Peach',        nameZh: '水蜜桃', img: 'fruits/peach1.png',       color: '#fb7185', accent: '#ffe4e6' }
+    };
 
-    const FEATURES = [
-      { id: 'skin_thickness',  nameEn: 'Skin Thickness',  nameZh: '果皮厚薄',         weight: 40, desc: '薄皮 vs. 厚硬外皮' },
-      { id: 'surface_texture', nameEn: 'Surface Texture', nameZh: '表面質感',         weight: 35, desc: '光滑細緻 vs. 粗糙/絨毛/鱗片' },
-      { id: 'peel_pattern',    nameEn: 'Skin Pattern',    nameZh: '果皮紋理與孔洞',   weight: 25, desc: '毛孔、條紋或果鱗結構' },
-      { id: 'shape',           nameEn: 'Fruit Shape',     nameZh: '水果形狀',         weight: 15, desc: '圓形、長形或特殊外型' },
-      { id: 'size',            nameEn: 'Fruit Size',      nameZh: '水果大小',         weight: 10, desc: '大型水果 vs. 小型水果' },
-      { id: 'color',           nameEn: 'Fruit Color',     nameZh: '水果顏色',         weight: 10, desc: '紅、黃、綠、橘等外觀色彩' }
-    ];
+    const TOPICS = {
+      skin: {
+        id: 'skin',
+        badgeText: '題型 A：連皮吃 vs. 去皮吃 (Skin Type)',
+        badgeCls: 'bg-emerald-100 text-emerald-800',
+        heading: 'Step 2: Extract Features — Edible Skin vs. Peel to Eat',
+        subtitle: '觀察左右兩邊同學分好的水果，選出 1 ~ 3 個最能分辨「連皮吃」與「去皮吃」的視覺特徵。',
+        catATitle: 'Edible Skin (連皮吃)',
+        catBTitle: 'Peel to Eat (去皮吃)',
+        defaultPeer: {
+          catA: ['apple1', 'grape1', 'strawberry1', 'waxapple1', 'dragonfruit1'],
+          catB: ['banana1', 'orange1', 'mango1', 'kiwi1', 'guava1']
+        },
+        features: [
+          { id: 'skin_thickness',  nameEn: 'Skin Thickness',  nameZh: '果皮厚薄',       weight: 40, desc: '薄皮 vs. 厚硬外皮' },
+          { id: 'surface_texture', nameEn: 'Surface Texture', nameZh: '表面質感',       weight: 35, desc: '光滑細緻 vs. 粗糙/絨毛/鱗片' },
+          { id: 'peel_pattern',    nameEn: 'Skin Pattern',    nameZh: '果皮紋理與孔洞', weight: 25, desc: '毛孔、條紋或果鱗結構' },
+          { id: 'shape',           nameEn: 'Fruit Shape',     nameZh: '水果形狀',       weight: 15, desc: '圓形、長形或特殊外型' },
+          { id: 'size',            nameEn: 'Fruit Size',      nameZh: '水果大小',       weight: 10, desc: '大型水果 vs. 小型水果' },
+          { id: 'color',           nameEn: 'Fruit Color',     nameZh: '水果顏色',       weight: 10, desc: '紅、黃、綠、橘等外觀色彩' }
+        ]
+      },
+      climate: {
+        id: 'climate',
+        badgeText: '題型 B：熱帶水果 vs. 溫帶水果 (Climate Zone)',
+        badgeCls: 'bg-sky-100 text-sky-800',
+        heading: 'Step 2: Extract Features — Tropical vs. Temperate Fruits',
+        subtitle: '觀察左右兩邊同學分好的水果，選出 1 ~ 3 個最能分辨「熱帶水果」與「溫帶水果」的視覺特徵。',
+        catATitle: 'Tropical Fruit (熱帶水果)',
+        catBTitle: 'Temperate Fruit (溫帶水果)',
+        defaultPeer: {
+          catA: ['waxapple1', 'guava1', 'banana1', 'mango1', 'kiwi1'],
+          catB: ['apple1', 'grape1', 'strawberry1', 'peach1', 'dragonfruit1']
+        },
+        features: [
+          { id: 'skin_structure',  nameEn: 'Special Peel',  nameZh: '厚皮或特殊果鱗', weight: 40, desc: '厚皮、鱗片或保護性硬殼（熱帶常見）' },
+          { id: 'color_vividness', nameEn: 'Exotic Color',  nameZh: '鮮豔熱帶色澤',   weight: 35, desc: '亮黃、桃紅、翠綠等高飽和果皮色澤' },
+          { id: 'fruit_shape',     nameEn: 'Unique Shape',  nameZh: '特殊果形結構',   weight: 25, desc: '彎曲、鐘形、星形 vs. 圓形或小漿果' },
+          { id: 'fruit_size',      nameEn: 'Fruit Size',    nameZh: '果實大小',       weight: 15, desc: '單顆大小差異（部分小果容易混淆）' },
+          { id: 'stem_leaf',       nameEn: 'Stem & Leaf',   nameZh: '蒂頭與葉片',     weight: 10, desc: '果蒂或葉片外觀' },
+          { id: 'glossiness',      nameEn: 'Glossiness',    nameZh: '表面光澤度',     weight: 10, desc: '反光程度（蘋果與蓮霧都很光滑！）' }
+        ]
+      }
+    };
 
-    let peerData = { sourceSeatNo: 'SAMPLE', edible: [], peel: [] };
+    let peerData = { topic: 'climate', myStep1Topic: null, sourceSeatNo: 'DEFAULT', catA: [], catB: [], isFallback: true };
     let selectedFeatureIds = [];
 
     function shuffle(arr) {
@@ -253,25 +292,48 @@
       box._timer = setTimeout(() => box.classList.add('hidden'), 2800);
     }
 
-    function getLocalPeerStep1(mySeat) {
+    function getLocalMyStep1Topic(mySeat) {
       try {
-        const store = JSON.parse(localStorage.getItem('ai_fruit_lab_step1') || '{}');
-        const peers = Object.values(store).filter(r => r && String(r.seatNo) !== String(mySeat));
+        const store = JSON.parse(localStorage.getItem('ai_fruit_lab_step1_v2') || '{}');
+        if (store[mySeat] && store[mySeat].topic) return store[mySeat].topic;
+      } catch (err) {}
+      return null;
+    }
+
+    function getOppositeTopic(topic) {
+      if (topic === 'skin') return 'climate';
+      if (topic === 'climate') return 'skin';
+      return Math.random() < 0.5 ? 'skin' : 'climate';
+    }
+
+    function getLocalPeerStep1(mySeat) {
+      const myTopic = getLocalMyStep1Topic(mySeat);
+      const targetTopic = getOppositeTopic(myTopic);
+      try {
+        const store = JSON.parse(localStorage.getItem('ai_fruit_lab_step1_v2') || '{}');
+        const peers = Object.values(store).filter(
+          r => r && String(r.seatNo) !== String(mySeat) && r.topic === targetTopic
+        );
         if (peers.length > 0) {
           const picked = peers[Math.floor(Math.random() * peers.length)];
           return {
+            topic: targetTopic,
+            myStep1Topic: myTopic,
             sourceSeatNo: picked.seatNo,
-            edible: shuffle(picked.edible || []),
-            peel: shuffle(picked.peel || []),
+            catA: shuffle(picked.catA || []),
+            catB: shuffle(picked.catB || []),
             isFallback: false
           };
         }
       } catch (err) {}
-      // Built-in classroom sample with 1 intentional edge case for rich discussion
+
+      const def = TOPICS[targetTopic].defaultPeer;
       return {
-        sourceSeatNo: 'SAMPLE',
-        edible: shuffle(['apple1', 'grape1', 'strawberry1', 'waxapple1', 'dragonfruit1']),
-        peel: shuffle(['banana1', 'orange1', 'mango1', 'kiwi1', 'guava1']),
+        topic: targetTopic,
+        myStep1Topic: myTopic,
+        sourceSeatNo: 'DEFAULT',
+        catA: shuffle(def.catA),
+        catB: shuffle(def.catB),
         isFallback: true
       };
     }
@@ -286,15 +348,16 @@
 
       const loadBtn = document.getElementById('loadPeerBtn');
       loadBtn.disabled = true;
-      loadBtn.textContent = '載入隨機同學資料中...';
+      loadBtn.textContent = '載入不同題型資料中...';
 
+      const localMyTopic = getLocalMyStep1Topic(seatNo) || '';
       let fetched = null;
       if (GAS_URL) {
         try {
-          const url = `${GAS_URL}?action=getPeerStep1&seatNo=${encodeURIComponent(seatNo)}`;
+          const url = `${GAS_URL}?action=getPeerStep1&seatNo=${encodeURIComponent(seatNo)}&myTopic=${encodeURIComponent(localMyTopic)}`;
           const res = await fetch(url);
           const json = await res.json();
-          if (json && json.ok) {
+          if (json && json.ok && TOPICS[json.topic]) {
             fetched = json;
           }
         } catch (err) {
@@ -303,8 +366,10 @@
       }
 
       peerData = fetched || getLocalPeerStep1(seatNo);
+      selectedFeatureIds = [];
+
       loadBtn.disabled = false;
-      loadBtn.textContent = '抽取隨機同學的分類結果 (Load Peer Data)';
+      loadBtn.textContent = '抽取不同題型的分類結果 (Load Peer Data)';
 
       document.getElementById('entrySection').classList.add('hidden');
       document.getElementById('resultSection').classList.add('hidden');
@@ -315,17 +380,34 @@
     }
 
     function renderPeerImages() {
+      const topic = TOPICS[peerData.topic] || TOPICS.climate;
+      const tBadge = document.getElementById('topicBadge');
+      tBadge.textContent = topic.badgeText;
+      tBadge.className = 'px-3 py-1 rounded-full text-xs font-extrabold ' + topic.badgeCls;
+
+      const hint = document.getElementById('topicSwitchHint');
+      if (peerData.myStep1Topic && TOPICS[peerData.myStep1Topic]) {
+        hint.textContent = `（已依你的 Step 1 題型自動切換為不同題型）`;
+      } else {
+        hint.textContent = `（已為你隨機指派題型）`;
+      }
+
+      document.getElementById('topicHeading').textContent = topic.heading;
+      document.getElementById('topicSubtitle').textContent = topic.subtitle;
+      document.getElementById('peerCatATitle').textContent = topic.catATitle;
+      document.getElementById('peerCatBTitle').textContent = topic.catBTitle;
+
       const badge = document.getElementById('peerSourceBadge');
       badge.textContent = peerData.isFallback
-        ? '目前顯示：系統隨機範例組（尚無其他同學資料）'
-        : '資料來源：隨機抽取之同學分類結果（已匿名打散）';
+        ? '目前尚無人上傳此題型：已載入系統預設範例資料'
+        : '資料來源：隨機同學的分類結果（已匿名打散）';
 
       const renderGroup = (ids, gridId, countId) => {
         const grid = document.getElementById(gridId);
         grid.innerHTML = '';
         document.getElementById(countId).textContent = `${ids.length} 張`;
         ids.forEach(id => {
-          const fruit = FRUITS.find(f => f.id === id);
+          const fruit = FRUIT_CATALOG[id];
           if (!fruit) return;
           const card = document.createElement('div');
           card.className = 'bg-white rounded-lg border border-slate-200 p-2 flex flex-col items-center';
@@ -350,15 +432,16 @@
         });
       };
 
-      renderGroup(peerData.edible || [], 'peerEdibleGrid', 'peerEdibleCount');
-      renderGroup(peerData.peel || [], 'peerPeelGrid', 'peerPeelCount');
+      renderGroup(peerData.catA || [], 'peerCatAGrid', 'peerCatACount');
+      renderGroup(peerData.catB || [], 'peerCatBGrid', 'peerCatBCount');
     }
 
     function renderFeatureChecklist() {
+      const topic = TOPICS[peerData.topic] || TOPICS.climate;
       const list = document.getElementById('featureList');
       list.innerHTML = '';
 
-      FEATURES.forEach(feat => {
+      topic.features.forEach(feat => {
         const isChecked = selectedFeatureIds.includes(feat.id);
         const item = document.createElement('label');
         item.className = 'feature-option flex items-start gap-3 p-3 rounded-xl border-2 cursor-pointer ' +
@@ -409,12 +492,12 @@
       if (score >= 90) return { text: '診斷：選出的特徵辨識度極高，AI 規則非常有效！', cls: 'bg-emerald-100 text-emerald-800' };
       if (score >= 75) return { text: '診斷：特徵選擇不錯，能分辨大多數常見水果。', cls: 'bg-blue-100 text-blue-800' };
       if (score >= 55) return { text: '診斷：部分特徵辨識度較弱，遇到特殊水果時容易誤判。', cls: 'bg-amber-100 text-amber-800' };
-      return { text: '診斷：這些特徵（如顏色或大小）容易讓 AI 產生錯誤聯想！', cls: 'bg-rose-100 text-rose-800' };
+      return { text: '診斷：這些特徵容易讓 AI 產生錯誤聯想，建議重新觀察差異！', cls: 'bg-rose-100 text-rose-800' };
     }
 
     function saveLocalStep2(payload) {
       try {
-        const key = 'ai_fruit_lab_step2';
+        const key = 'ai_fruit_lab_step2_v2';
         const store = JSON.parse(localStorage.getItem(key) || '{}');
         store[payload.seatNo] = payload;
         localStorage.setItem(key, JSON.stringify(store));
@@ -433,7 +516,8 @@
         return;
       }
 
-      const chosenObjs = selectedFeatureIds.map(id => FEATURES.find(f => f.id === id)).filter(Boolean);
+      const topic = TOPICS[peerData.topic] || TOPICS.climate;
+      const chosenObjs = selectedFeatureIds.map(id => topic.features.find(f => f.id === id)).filter(Boolean);
       const rawScore = chosenObjs.reduce((sum, f) => sum + f.weight, 0);
       const featureScore = Math.min(100, rawScore);
       const level = getLevelFromScore(featureScore);
@@ -441,7 +525,8 @@
       const payload = {
         action: 'saveStep2',
         seatNo,
-        sourceSeatNo: peerData.sourceSeatNo || 'SAMPLE',
+        topic: topic.id,
+        sourceSeatNo: peerData.sourceSeatNo || 'DEFAULT',
         featureScore,
         level,
         selectedFeatures: selectedFeatureIds.slice(),
@@ -474,10 +559,13 @@
     }
 
     function renderResult(payload, chosenObjs, syncedCloud) {
+      const topic = TOPICS[payload.topic] || TOPICS.climate;
       document.getElementById('taskSection').classList.add('hidden');
       document.getElementById('resultSection').classList.remove('hidden');
 
+      document.getElementById('resultTopicBadge').textContent = `Step 2 Completed — ${topic.badgeText}`;
       document.getElementById('resultSeatBadge').textContent = `座號 Seat #${payload.seatNo}`;
+
       const saveBadge = document.getElementById('saveStatusBadge');
       if (GAS_URL && syncedCloud) {
         saveBadge.textContent = '已同步儲存至 Google Sheet';
@@ -496,7 +584,6 @@
       diagEl.textContent = diag.text;
       diagEl.className = 'text-sm sm:text-base font-bold px-4 py-2 rounded-lg ' + diag.cls;
 
-      // Build English Speaking Scaffold Sentence 1
       const blanks = chosenObjs.map(f => `<span class="scaffold-blank">${f.nameEn}</span>`);
       let sentence1 = '';
       if (blanks.length === 1) {
@@ -510,10 +597,9 @@
       document.getElementById('blankScore').textContent = payload.featureScore;
       document.getElementById('blankLevel').textContent = payload.level;
 
-      // Highlighted Feature Options Grid
       const grid = document.getElementById('featureOptionsGrid');
       grid.innerHTML = '';
-      FEATURES.forEach(feat => {
+      topic.features.forEach(feat => {
         const isSelected = payload.selectedFeatures.includes(feat.id);
         const card = document.createElement('div');
         card.className = isSelected

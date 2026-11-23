@@ -15,13 +15,13 @@
     .vote-btn {
       transition: all 0.15s ease;
     }
-    .vote-btn.active-edible {
+    .vote-btn.active-catA {
       background-color: #059669;
       color: #ffffff;
       border-color: #059669;
       box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
     }
-    .vote-btn.active-peel {
+    .vote-btn.active-catB {
       background-color: #d97706;
       color: #ffffff;
       border-color: #d97706;
@@ -71,9 +71,9 @@
     <!-- Entry Section -->
     <section id="entrySection" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 max-w-2xl mx-auto mt-6">
       <span class="inline-block px-3 py-1 rounded-full bg-teal-100 text-teal-800 text-xs font-extrabold mb-2">Final Test: Unseen Data</span>
-      <h2 class="text-2xl font-extrabold text-slate-900">Step 3: 載入你的特徵規則並預測新照片</h2>
+      <h2 class="text-2xl font-extrabold text-slate-900">Step 3: 載入你的特徵規則並預測題庫外新水果</h2>
       <p class="text-slate-600 text-sm sm:text-base mt-2 leading-relaxed">
-        輸入你的座號後，系統會載入你在 Step 2 選出的特徵規則，並抽出一張<strong class="text-slate-800">題庫外沒看過的水果照片</strong>。請逐項比對特徵並做出最終預測，最後產生你的座號三類結算表！
+        輸入座號後，系統會自動讀取你在 Step 2 的題型與特徵規則，抽出一張<strong class="text-slate-800">題庫外沒看過的水果照片</strong>。請逐項比對特徵並做出最終預測，完成後即可查看你的座號三類結算表！
       </p>
       <div class="mt-6">
         <button id="startStep3Btn" type="button"
@@ -87,7 +87,8 @@
     <section id="taskSection" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6">
       <div class="flex flex-wrap items-start justify-between gap-3 mb-5">
         <div>
-          <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">Step 3: Make a Prediction (比對特徵並預測)</h2>
+          <span id="topicBadge" class="inline-block px-3 py-1 rounded-full text-xs font-extrabold mb-1"></span>
+          <h2 id="topicHeading" class="text-xl sm:text-2xl font-extrabold text-slate-900"></h2>
           <p class="text-slate-600 text-sm sm:text-base mt-1">
             現在 AI 收到了一張沒看過的題庫外水果照片，請依照你在 Step 2 選出的特徵逐一判斷它偏向哪一類，再做出最終預測。
           </p>
@@ -104,7 +105,7 @@
           <img id="testFruitImg" src="" alt="Unseen fruit test image"
             class="w-full max-h-72 object-contain rounded-xl bg-white border border-slate-200 p-3 shadow-sm" />
           <p class="text-xs text-slate-500 mt-3 text-center">
-            請仔細觀察果皮厚薄、表面質感與紋理，再點選右側判斷按鈕。
+            請仔細觀察圖片特徵，再點選右側判斷按鈕。
           </p>
         </div>
 
@@ -117,13 +118,11 @@
               綜合以上特徵，你的最終預測是？ (Your final prediction is...)
             </h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
-              <button id="finalEdibleBtn" type="button"
+              <button id="finalCatABtn" type="button"
                 class="vote-btn py-4 px-5 rounded-xl border-2 border-emerald-500 bg-white text-emerald-800 font-extrabold text-base hover:bg-emerald-50">
-                Edible Skin (連皮吃)
               </button>
-              <button id="finalPeelBtn" type="button"
+              <button id="finalCatBBtn" type="button"
                 class="vote-btn py-4 px-5 rounded-xl border-2 border-amber-500 bg-white text-amber-800 font-extrabold text-base hover:bg-amber-50">
-                Peel to Eat (去皮吃)
               </button>
             </div>
 
@@ -143,7 +142,7 @@
       <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
         <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-5 border-b border-slate-200">
           <div>
-            <span class="inline-block px-3 py-1 rounded-full bg-teal-100 text-teal-800 text-xs font-extrabold mb-1">Step 3 Completed</span>
+            <span id="resultTopicBadge" class="inline-block px-3 py-1 rounded-full bg-teal-100 text-teal-800 text-xs font-extrabold mb-1"></span>
             <h2 class="text-2xl font-extrabold text-slate-900">Step 3 預測結果與英文口說分享</h2>
           </div>
           <div class="flex items-center gap-3">
@@ -176,11 +175,11 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-5">
             <div>
               <div class="text-xs font-bold text-slate-500 uppercase mb-2">Category Options (你的分類預測)</div>
-              <div id="predCategoryPills" class="flex gap-2"></div>
+              <div id="predCategoryPills" class="flex flex-wrap gap-2"></div>
             </div>
             <div>
               <div class="text-xs font-bold text-slate-500 uppercase mb-2">Outcome Options (推論結果)</div>
-              <div id="predOutcomePills" class="flex gap-2"></div>
+              <div id="predOutcomePills" class="flex flex-wrap gap-2"></div>
             </div>
           </div>
         </div>
@@ -231,70 +230,121 @@
     // =========================================================================
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbw7Xgo1vGvcgPz6Z9KgnEOdpdU7ngVIIEL0ZkDSP2YqguntUZ0g_FP0t_k7TWXR8P5M/exec';
 
-    const FEATURES = [
-      { id: 'skin_thickness',  nameEn: 'Skin Thickness',  nameZh: '果皮厚薄',       weight: 40 },
-      { id: 'surface_texture', nameEn: 'Surface Texture', nameZh: '表面質感',       weight: 35 },
-      { id: 'peel_pattern',    nameEn: 'Skin Pattern',    nameZh: '果皮紋理與孔洞', weight: 25 },
-      { id: 'shape',           nameEn: 'Fruit Shape',     nameZh: '水果形狀',       weight: 15 },
-      { id: 'size',            nameEn: 'Fruit Size',      nameZh: '水果大小',       weight: 10 },
-      { id: 'color',           nameEn: 'Fruit Color',     nameZh: '水果顏色',       weight: 10 }
-    ];
+    const TOPICS = {
+      skin: {
+        id: 'skin',
+        shortZh: '連皮吃 vs. 去皮吃',
+        badgeText: '題型 A：連皮吃 vs. 去皮吃 (Skin Type)',
+        badgeCls: 'bg-emerald-100 text-emerald-800',
+        heading: 'Step 3: Predict — Edible Skin vs. Peel to Eat',
+        catA: { en: 'Edible Skin', zh: '連皮吃' },
+        catB: { en: 'Peel to Eat', zh: '去皮吃' },
+        features: [
+          { id: 'skin_thickness',  nameEn: 'Skin Thickness',  nameZh: '果皮厚薄' },
+          { id: 'surface_texture', nameEn: 'Surface Texture', nameZh: '表面質感' },
+          { id: 'peel_pattern',    nameEn: 'Skin Pattern',    nameZh: '果皮紋理與孔洞' },
+          { id: 'shape',           nameEn: 'Fruit Shape',     nameZh: '水果形狀' },
+          { id: 'size',            nameEn: 'Fruit Size',      nameZh: '水果大小' },
+          { id: 'color',           nameEn: 'Fruit Color',     nameZh: '水果顏色' }
+        ],
+        testPoolIds: ['greenapple1', 'starfruit1', 'lychee1', 'pineapple1']
+      },
+      climate: {
+        id: 'climate',
+        shortZh: '熱帶 vs. 溫帶',
+        badgeText: '題型 B：熱帶水果 vs. 溫帶水果 (Climate Zone)',
+        badgeCls: 'bg-sky-100 text-sky-800',
+        heading: 'Step 3: Predict — Tropical vs. Temperate Fruits',
+        catA: { en: 'Tropical Fruit',  zh: '熱帶水果' },
+        catB: { en: 'Temperate Fruit', zh: '溫帶水果' },
+        features: [
+          { id: 'skin_structure',  nameEn: 'Special Peel',  nameZh: '厚皮或特殊果鱗' },
+          { id: 'color_vividness', nameEn: 'Exotic Color',  nameZh: '鮮豔熱帶色澤' },
+          { id: 'fruit_shape',     nameEn: 'Unique Shape',  nameZh: '特殊果形結構' },
+          { id: 'fruit_size',      nameEn: 'Fruit Size',    nameZh: '果實大小' },
+          { id: 'stem_leaf',       nameEn: 'Stem & Leaf',   nameZh: '蒂頭與葉片' },
+          { id: 'glossiness',      nameEn: 'Glossiness',    nameZh: '表面光澤度' }
+        ],
+        testPoolIds: ['greenapple1', 'cherry1', 'starfruit1', 'lychee1', 'pineapple1']
+      }
+    };
 
-    // 題庫外的新水果照片池（皆未出現在 Step 1 的 10 張訓練圖中）
-    const TEST_FRUITS = [
-      {
+    // 題庫外測試水果（均未出現在 Step 1 的訓練題庫中）
+    const TEST_FRUITS = {
+      greenapple1: {
         id: 'greenapple1',
         nameEn: 'Green Apple',
         nameZh: '青蘋果',
         img: 'fruits/greenapple1.png',
-        truth: 'edible',
+        truthByTopic: { skin: 'catA', climate: 'catB' },
         color: '#65a30d',
         accent: '#ecfccb',
-        note: '果皮薄且光滑，雖是綠色但仍屬於連皮吃（破除只看顏色的迷思！）'
+        noteByTopic: {
+          skin: '果皮薄且光滑，雖是綠色但仍屬於連皮吃（破除只看顏色的迷思！）',
+          climate: '蘋果屬於經典溫帶水果，適合較涼爽的四季氣候生長'
+        }
       },
-      {
+      starfruit1: {
         id: 'starfruit1',
         nameEn: 'Starfruit',
         nameZh: '楊桃',
         img: 'fruits/starfruit1.png',
-        truth: 'edible',
+        truthByTopic: { skin: 'catA', climate: 'catA' },
         color: '#ca8a04',
         accent: '#fef9c3',
-        note: '形狀特殊呈星形，但果皮薄且光滑，洗淨切片即可連皮食用'
+        noteByTopic: {
+          skin: '形狀特殊呈星形，但果皮薄且光滑，洗淨切片即可連皮食用',
+          climate: '原產東南亞與台灣常見的熱帶水果，具有獨特五稜星形外觀'
+        }
       },
-      {
+      lychee1: {
         id: 'lychee1',
         nameEn: 'Lychee',
         nameZh: '荔枝',
         img: 'fruits/lychee1.png',
-        truth: 'peel',
+        truthByTopic: { skin: 'catB', climate: 'catA' },
         color: '#be123c',
         accent: '#ffe4e6',
-        note: '雖與草莓、蓮霧一樣呈紅色小果，但外殼粗糙帶硬顆粒，必須去皮吃'
+        noteByTopic: {
+          skin: '雖與草莓、蓮霧一樣呈紅色小果，但外殼粗糙帶硬顆粒，必須去皮吃',
+          climate: '荔枝屬於典型熱帶／亞熱帶水果，具有特殊顆粒狀外殼'
+        }
       },
-      {
+      pineapple1: {
         id: 'pineapple1',
         nameEn: 'Pineapple',
         nameZh: '鳳梨',
         img: 'fruits/pineapple1.png',
-        truth: 'peel',
+        truthByTopic: { skin: 'catB', climate: 'catA' },
         color: '#d97706',
         accent: '#fef3c7',
-        note: '果皮厚實且具明顯尖刺鱗片紋理，屬於典型的去皮吃水果'
+        noteByTopic: {
+          skin: '果皮厚實且具明顯尖刺鱗片紋理，屬於典型的去皮吃水果',
+          climate: '鳳梨是極具代表性的熱帶水果，帶有厚實鱗片外皮與冠芽葉片'
+        }
+      },
+      cherry1: {
+        id: 'cherry1',
+        nameEn: 'Cherry',
+        nameZh: '櫻桃',
+        img: 'fruits/cherry1.png',
+        truthByTopic: { skin: 'catA', climate: 'catB' },
+        color: '#9f1239',
+        accent: '#ffe4e6',
+        noteByTopic: {
+          skin: '櫻桃果皮極薄光滑，洗淨後直接連皮食用',
+          climate: '櫻桃需要低溫休眠期，屬於經典的溫帶水果'
+        }
       }
-    ];
-
-    const CATEGORY_LABELS = {
-      edible: { en: 'Edible Skin', zh: '連皮吃' },
-      peel:   { en: 'Peel to Eat', zh: '去皮吃' }
     };
 
     // State
     let studentRecord = { seatNo: '', step1: null, step2: null };
+    let activeTopicKey = 'climate';
     let activeFeatures = [];
     let currentTestFruit = null;
-    let featureVotes = {}; // { featureId: 'edible' | 'peel' }
-    let finalPrediction = null; // 'edible' | 'peel'
+    let featureVotes = {}; // { featureId: 'catA' | 'catB' }
+    let finalPrediction = null; // 'catA' | 'catB'
     let lastReportData = null;
 
     function makeFallbackSvg(fruit, hideName) {
@@ -323,11 +373,11 @@
       let step1 = null;
       let step2 = null;
       try {
-        const s1 = JSON.parse(localStorage.getItem('ai_fruit_lab_step1') || '{}');
+        const s1 = JSON.parse(localStorage.getItem('ai_fruit_lab_step1_v2') || '{}');
         if (s1[seatNo]) step1 = s1[seatNo];
       } catch (err) {}
       try {
-        const s2 = JSON.parse(localStorage.getItem('ai_fruit_lab_step2') || '{}');
+        const s2 = JSON.parse(localStorage.getItem('ai_fruit_lab_step2_v2') || '{}');
         if (s2[seatNo]) step2 = s2[seatNo];
       } catch (err) {}
       return { seatNo, step1, step2 };
@@ -368,16 +418,27 @@
 
       try { localStorage.setItem('ai_fruit_lab_last_seat', seatNo); } catch (err) {}
 
-      // Determine active features from Step 2 (fallback to 3 default features if student skipped Step 2)
+      // Determine topic from Step 2 (if missing, use opposite of Step 1, else default 'skin')
+      if (studentRecord.step2 && TOPICS[studentRecord.step2.topic]) {
+        activeTopicKey = studentRecord.step2.topic;
+      } else if (studentRecord.step1 && TOPICS[studentRecord.step1.topic]) {
+        activeTopicKey = (studentRecord.step1.topic === 'skin') ? 'climate' : 'skin';
+      } else {
+        activeTopicKey = 'skin';
+      }
+
+      const topic = TOPICS[activeTopicKey];
       const featIds = (studentRecord.step2 && Array.isArray(studentRecord.step2.selectedFeatures) && studentRecord.step2.selectedFeatures.length > 0)
         ? studentRecord.step2.selectedFeatures
-        : ['skin_thickness', 'surface_texture', 'color'];
+        : topic.features.slice(0, 3).map(f => f.id);
 
-      activeFeatures = featIds.map(id => FEATURES.find(f => f.id === id)).filter(Boolean);
-      if (activeFeatures.length === 0) activeFeatures = FEATURES.slice(0, 3);
+      activeFeatures = featIds.map(id => topic.features.find(f => f.id === id)).filter(Boolean);
+      if (activeFeatures.length === 0) activeFeatures = topic.features.slice(0, 3);
 
-      // Randomly draw 1 unseen test fruit
-      currentTestFruit = TEST_FRUITS[Math.floor(Math.random() * TEST_FRUITS.length)];
+      // Randomly draw 1 unseen test fruit for this topic
+      const poolIds = topic.testPoolIds;
+      const pickedId = poolIds[Math.floor(Math.random() * poolIds.length)];
+      currentTestFruit = TEST_FRUITS[pickedId];
       featureVotes = {};
       finalPrediction = null;
 
@@ -392,6 +453,13 @@
     }
 
     function renderPredictionWorkspace() {
+      const topic = TOPICS[activeTopicKey];
+
+      const tBadge = document.getElementById('topicBadge');
+      tBadge.textContent = topic.badgeText;
+      tBadge.className = 'inline-block px-3 py-1 rounded-full text-xs font-extrabold mb-1 ' + topic.badgeCls;
+      document.getElementById('topicHeading').textContent = topic.heading;
+
       const noteEl = document.getElementById('loadedFeatureNote');
       noteEl.textContent = studentRecord.step2
         ? `已載入座號 #${studentRecord.seatNo} 在 Step 2 選出的 ${activeFeatures.length} 個特徵`
@@ -419,40 +487,41 @@
         const btnRow = document.createElement('div');
         btnRow.className = 'grid grid-cols-2 gap-3';
 
-        const btnEdible = document.createElement('button');
-        btnEdible.type = 'button';
-        btnEdible.className = 'vote-btn py-2.5 px-4 rounded-lg border-2 font-bold text-sm ' +
-          (currentVote === 'edible' ? 'active-edible' : 'border-emerald-300 bg-white text-emerald-800 hover:bg-emerald-50');
-        btnEdible.textContent = 'Edible Skin (連皮吃)';
-        btnEdible.addEventListener('click', () => {
-          featureVotes[feat.id] = 'edible';
+        const btnA = document.createElement('button');
+        btnA.type = 'button';
+        btnA.className = 'vote-btn py-2.5 px-4 rounded-lg border-2 font-bold text-sm ' +
+          (currentVote === 'catA' ? 'active-catA' : 'border-emerald-300 bg-white text-emerald-800 hover:bg-emerald-50');
+        btnA.textContent = `${topic.catA.en} (${topic.catA.zh})`;
+        btnA.addEventListener('click', () => {
+          featureVotes[feat.id] = 'catA';
           renderPredictionWorkspace();
         });
 
-        const btnPeel = document.createElement('button');
-        btnPeel.type = 'button';
-        btnPeel.className = 'vote-btn py-2.5 px-4 rounded-lg border-2 font-bold text-sm ' +
-          (currentVote === 'peel' ? 'active-peel' : 'border-amber-300 bg-white text-amber-800 hover:bg-amber-50');
-        btnPeel.textContent = 'Peel to Eat (去皮吃)';
-        btnPeel.addEventListener('click', () => {
-          featureVotes[feat.id] = 'peel';
+        const btnB = document.createElement('button');
+        btnB.type = 'button';
+        btnB.className = 'vote-btn py-2.5 px-4 rounded-lg border-2 font-bold text-sm ' +
+          (currentVote === 'catB' ? 'active-catB' : 'border-amber-300 bg-white text-amber-800 hover:bg-amber-50');
+        btnB.textContent = `${topic.catB.en} (${topic.catB.zh})`;
+        btnB.addEventListener('click', () => {
+          featureVotes[feat.id] = 'catB';
           renderPredictionWorkspace();
         });
 
-        btnRow.appendChild(btnEdible);
-        btnRow.appendChild(btnPeel);
+        btnRow.appendChild(btnA);
+        btnRow.appendChild(btnB);
         block.appendChild(title);
         block.appendChild(btnRow);
         qList.appendChild(block);
       });
 
-      // Final prediction buttons
-      const fEdible = document.getElementById('finalEdibleBtn');
-      const fPeel = document.getElementById('finalPeelBtn');
-      fEdible.className = 'vote-btn py-4 px-5 rounded-xl border-2 font-extrabold text-base ' +
-        (finalPrediction === 'edible' ? 'active-edible' : 'border-emerald-500 bg-white text-emerald-800 hover:bg-emerald-50');
-      fPeel.className = 'vote-btn py-4 px-5 rounded-xl border-2 font-extrabold text-base ' +
-        (finalPrediction === 'peel' ? 'active-peel' : 'border-amber-500 bg-white text-amber-800 hover:bg-amber-50');
+      const fBtnA = document.getElementById('finalCatABtn');
+      const fBtnB = document.getElementById('finalCatBBtn');
+      fBtnA.textContent = `${topic.catA.en} (${topic.catA.zh})`;
+      fBtnB.textContent = `${topic.catB.en} (${topic.catB.zh})`;
+      fBtnA.className = 'vote-btn py-4 px-5 rounded-xl border-2 font-extrabold text-base ' +
+        (finalPrediction === 'catA' ? 'active-catA' : 'border-emerald-500 bg-white text-emerald-800 hover:bg-emerald-50');
+      fBtnB.className = 'vote-btn py-4 px-5 rounded-xl border-2 font-extrabold text-base ' +
+        (finalPrediction === 'catB' ? 'active-catB' : 'border-amber-500 bg-white text-amber-800 hover:bg-amber-50');
 
       const allVoted = activeFeatures.every(f => Boolean(featureVotes[f.id]));
       document.getElementById('submitBtn').disabled = !(allVoted && finalPrediction);
@@ -480,7 +549,9 @@
     }
 
     async function handleSubmit() {
-      const isCorrect = (finalPrediction === currentTestFruit.truth);
+      const topic = TOPICS[activeTopicKey];
+      const truthKey = currentTestFruit.truthByTopic[activeTopicKey];
+      const isCorrect = (finalPrediction === truthKey);
       const step1Score = studentRecord.step1 ? Number(studentRecord.step1.score) : null;
       const step2Score = studentRecord.step2 ? Number(studentRecord.step2.featureScore) : null;
       const advice = buildAdvice(step1Score, step2Score, isCorrect);
@@ -488,12 +559,14 @@
       const payload = {
         action: 'saveStep3',
         seatNo: studentRecord.seatNo,
+        topic: activeTopicKey,
         testFruitId: currentTestFruit.id,
         testFruitName: `${currentTestFruit.nameEn} (${currentTestFruit.nameZh})`,
-        trueLabel: CATEGORY_LABELS[currentTestFruit.truth].en,
-        studentPrediction: CATEGORY_LABELS[finalPrediction].en,
+        trueLabel: topic[truthKey].en,
+        studentPrediction: topic[finalPrediction].en,
         isCorrect,
         featureVotes,
+        step1Topic: studentRecord.step1 ? studentRecord.step1.topic : '',
         step1Score,
         step2Score,
         overallAdvice: advice.en
@@ -504,7 +577,7 @@
       btn.textContent = '資料上傳並產生結算表中...';
 
       try {
-        const key = 'ai_fruit_lab_step3';
+        const key = 'ai_fruit_lab_step3_v2';
         const store = JSON.parse(localStorage.getItem(key) || '{}');
         store[payload.seatNo] = payload;
         localStorage.setItem(key, JSON.stringify(store));
@@ -526,17 +599,21 @@
       }
 
       btn.textContent = '送出預測並產生三類結算表 (Submit & View Summary)';
-      lastReportData = { payload, advice, step1: studentRecord.step1, step2: studentRecord.step2, testFruit: currentTestFruit };
+      lastReportData = { payload, advice, step1: studentRecord.step1, step2: studentRecord.step2, testFruit: currentTestFruit, topicKey: activeTopicKey };
       renderSummary(lastReportData, syncedCloud);
     }
 
     function renderSummary(report, syncedCloud) {
-      const { payload, advice, step1, step2, testFruit } = report;
+      const { payload, advice, step1, step2, testFruit, topicKey } = report;
+      const topic = TOPICS[topicKey];
+      const truthKey = testFruit.truthByTopic[topicKey];
 
       document.getElementById('taskSection').classList.add('hidden');
       document.getElementById('resultSection').classList.remove('hidden');
 
+      document.getElementById('resultTopicBadge').textContent = `Step 3 Completed — ${topic.badgeText}`;
       document.getElementById('resultSeatBadge').textContent = `座號 Seat #${payload.seatNo}`;
+
       const saveBadge = document.getElementById('saveStatusBadge');
       if (GAS_URL && syncedCloud) {
         saveBadge.textContent = '已同步儲存至 Google Sheet';
@@ -549,15 +626,14 @@
         saveBadge.className = 'px-3 py-2 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold';
       }
 
-      // Reveal fruit
       const revImg = document.getElementById('revealFruitImg');
       revImg.src = testFruit.img;
       revImg.onerror = function () {
         this.onerror = null;
         this.src = makeFallbackSvg(testFruit, false);
       };
-      document.getElementById('revealFruitTitle').textContent = `${testFruit.nameEn} (${testFruit.nameZh}) — ${CATEGORY_LABELS[testFruit.truth].en} (${CATEGORY_LABELS[testFruit.truth].zh})`;
-      document.getElementById('revealFruitNote').textContent = testFruit.note;
+      document.getElementById('revealFruitTitle').textContent = `${testFruit.nameEn} (${testFruit.nameZh}) — ${topic[truthKey].en} (${topic[truthKey].zh})`;
+      document.getElementById('revealFruitNote').textContent = testFruit.noteByTopic[topicKey];
 
       const verdict = document.getElementById('predictionVerdictBadge');
       if (payload.isCorrect) {
@@ -568,24 +644,21 @@
         verdict.className = 'px-5 py-3 rounded-xl font-black text-lg bg-rose-600 text-white';
       }
 
-      // Fill Step 3 Speaking Scaffold
       document.getElementById('blankPred').textContent = payload.studentPrediction;
       document.getElementById('blankOutcome').textContent = payload.isCorrect ? 'correct' : 'wrong';
 
-      // Highlighted Category Pills
       const catPills = document.getElementById('predCategoryPills');
       catPills.innerHTML = '';
-      ['edible', 'peel'].forEach(key => {
+      ['catA', 'catB'].forEach(key => {
         const hit = (finalPrediction === key);
         const pill = document.createElement('span');
         pill.className = hit
           ? 'px-4 py-2 rounded-lg bg-teal-600 text-white font-extrabold text-sm shadow-sm'
           : 'px-4 py-2 rounded-lg bg-slate-100 text-slate-400 font-bold text-sm';
-        pill.textContent = `${CATEGORY_LABELS[key].en} (${CATEGORY_LABELS[key].zh})`;
+        pill.textContent = `${topic[key].en} (${topic[key].zh})`;
         catPills.appendChild(pill);
       });
 
-      // Highlighted Outcome Pills
       const outPills = document.getElementById('predOutcomePills');
       outPills.innerHTML = '';
       [
@@ -600,22 +673,21 @@
         outPills.appendChild(pill);
       });
 
-      // Build 3-Category Summary Table
-      const tbody = document.getElementById('summaryTableBody');
+      const s1TopicName = (step1 && TOPICS[step1.topic]) ? TOPICS[step1.topic].shortZh : '未紀錄';
       const s1ScoreText = step1 ? `${step1.score} 分 (${step1.level || ''})` : '尚無紀錄';
       const s1Detail = step1
-        ? `答對 ${step1.correctCount ?? '-'} / ${step1.totalCount ?? 10} 張訓練圖片`
+        ? `題型：${s1TopicName}｜答對 ${step1.correctCount ?? '-'} / ${step1.totalCount ?? 10} 張訓練圖片`
         : '未在試算表找到此座號的 Step 1 紀錄';
 
       const s2ScoreText = step2 ? `${step2.featureScore} 分 (${step2.level || ''})` : '尚無紀錄';
       const s2Detail = step2
-        ? `選取特徵：${(step2.selectedLabels || activeFeatures.map(f => f.nameEn)).join('、')}`
-        : `使用預設特徵：${activeFeatures.map(f => f.nameEn).join('、')}`;
+        ? `題型：${topic.shortZh}｜選取特徵：${(step2.selectedLabels || activeFeatures.map(f => f.nameEn)).join('、')}`
+        : `題型：${topic.shortZh}｜使用預設特徵：${activeFeatures.map(f => f.nameEn).join('、')}`;
 
       const s3ScoreText = payload.isCorrect ? '正確 (Correct)' : '錯誤 (Wrong)';
       const s3Detail = `測試題：${testFruit.nameEn} (${testFruit.nameZh})｜你的預測：${payload.studentPrediction}｜真實答案：${payload.trueLabel}`;
 
-      tbody.innerHTML = `
+      document.getElementById('summaryTableBody').innerHTML = `
         <tr>
           <td class="py-4 px-4 font-extrabold text-slate-900">1. 規則穩定性<div class="text-xs font-semibold text-slate-500">Rule Stability (Step 1)</div></td>
           <td class="py-4 px-4 font-black text-blue-700">${s1ScoreText}</td>
@@ -639,18 +711,18 @@
 
     function downloadSummaryPng() {
       if (!lastReportData) return;
-      const { payload, advice, step1, step2, testFruit } = lastReportData;
+      const { payload, advice, step1, step2, testFruit, topicKey } = lastReportData;
+      const topic = TOPICS[topicKey];
+      const s1TopicName = (step1 && TOPICS[step1.topic]) ? TOPICS[step1.topic].shortZh : 'N/A';
 
       const canvas = document.createElement('canvas');
       canvas.width = 1040;
       canvas.height = 640;
       const ctx = canvas.getContext('2d');
 
-      // Background
       ctx.fillStyle = '#f8fafc';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Header bar
       ctx.fillStyle = '#0f172a';
       ctx.fillRect(0, 0, canvas.width, 96);
       ctx.fillStyle = '#ffffff';
@@ -662,18 +734,17 @@
       ctx.fillText(`Seat #${payload.seatNo}`, 1000, 56);
       ctx.textAlign = 'left';
 
-      // 3 Summary Cards
       const rows = [
         {
           title: '1. Rule Stability (Step 1 分類準確度)',
           val: step1 ? `${step1.score} / 100 (${step1.level || ''})` : 'N/A',
-          sub: step1 ? `Correct: ${step1.correctCount}/${step1.totalCount}` : 'No Step 1 record found',
+          sub: step1 ? `Topic: ${s1TopicName} | Correct: ${step1.correctCount}/${step1.totalCount}` : 'No Step 1 record found',
           color: '#1d4ed8'
         },
         {
           title: '2. Feature Efficiency (Step 2 特徵效率)',
           val: step2 ? `${step2.featureScore} / 100 (${step2.level || ''})` : 'N/A',
-          sub: `Features: ${activeFeatures.map(f => f.nameEn).join(', ')}`,
+          sub: `Topic: ${topic.shortZh} | Features: ${activeFeatures.map(f => f.nameEn).join(', ')}`,
           color: '#4338ca'
         },
         {
@@ -711,7 +782,6 @@
         y += 128;
       });
 
-      // Advice box
       ctx.fillStyle = '#eff6ff';
       ctx.strokeStyle = '#3b82f6';
       ctx.lineWidth = 2;
@@ -745,12 +815,12 @@
       } catch (err) {}
 
       document.getElementById('startStep3Btn').addEventListener('click', startStep3);
-      document.getElementById('finalEdibleBtn').addEventListener('click', () => {
-        finalPrediction = 'edible';
+      document.getElementById('finalCatABtn').addEventListener('click', () => {
+        finalPrediction = 'catA';
         renderPredictionWorkspace();
       });
-      document.getElementById('finalPeelBtn').addEventListener('click', () => {
-        finalPrediction = 'peel';
+      document.getElementById('finalCatBBtn').addEventListener('click', () => {
+        finalPrediction = 'catB';
         renderPredictionWorkspace();
       });
       document.getElementById('submitBtn').addEventListener('click', handleSubmit);

@@ -196,22 +196,23 @@
 
   <script>
     // =========================================================================
-    // [老師設定區] 請貼上與 step1.html 相同的 Google Apps Script 網頁應用程式網址
+    // [老師設定區] Google Apps Script 部署網址
     // =========================================================================
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbw7Xgo1vGvcgPz6Z9KgnEOdpdU7ngVIIEL0ZkDSP2YqguntUZ0g_FP0t_k7TWXR8P5M/exec';
 
-    const FRUIT_CATALOG = {
-      apple1:       { id: 'apple1',       nameEn: 'Apple',        nameZh: '蘋果',   img: 'fruits/apple1.png',       color: '#dc2626', accent: '#fca5a5' },
-      grape1:       { id: 'grape1',       nameEn: 'Grape',        nameZh: '葡萄',   img: 'fruits/grape1.png',       color: '#7c3aed', accent: '#ddd6fe' },
-      strawberry1:  { id: 'strawberry1',  nameEn: 'Strawberry',   nameZh: '草莓',   img: 'fruits/strawberry1.png',  color: '#e11d48', accent: '#fecdd3' },
-      waxapple1:    { id: 'waxapple1',    nameEn: 'Wax Apple',    nameZh: '蓮霧',   img: 'fruits/waxapple1.png',    color: '#be123c', accent: '#fda4af' },
-      guava1:       { id: 'guava1',       nameEn: 'Guava',        nameZh: '芭樂',   img: 'fruits/guava1.png',       color: '#16a34a', accent: '#bbf7d0' },
-      banana1:      { id: 'banana1',      nameEn: 'Banana',       nameZh: '香蕉',   img: 'fruits/banana1.png',      color: '#eab308', accent: '#fef08a' },
-      orange1:      { id: 'orange1',      nameEn: 'Orange',       nameZh: '橘子',   img: 'fruits/orange1.png',      color: '#ea580c', accent: '#fed7aa' },
-      mango1:       { id: 'mango1',       nameEn: 'Mango',        nameZh: '芒果',   img: 'fruits/mango1.png',       color: '#f59e0b', accent: '#fde68a' },
-      kiwi1:        { id: 'kiwi1',        nameEn: 'Kiwi',         nameZh: '奇異果', img: 'fruits/kiwi1.png',        color: '#65a30d', accent: '#d9f99d' },
-      dragonfruit1: { id: 'dragonfruit1', nameEn: 'Dragon Fruit', nameZh: '火龍果', img: 'fruits/dragonfruit1.png', color: '#db2777', accent: '#fbcfe8' },
-      peach1:       { id: 'peach1',       nameEn: 'Peach',        nameZh: '水蜜桃', img: 'fruits/peach1.png',       color: '#fb7185', accent: '#ffe4e6' }
+    // 支援 fruits/<key>01.png ~ fruits/<key>10.png（亦相容舊版單數位編號）
+    const FRUIT_SPECIES = {
+      apple:       { key: 'apple',       nameEn: 'Apple',        nameZh: '蘋果',   count: 10, color: '#dc2626', accent: '#fca5a5' },
+      grape:       { key: 'grape',       nameEn: 'Grape',        nameZh: '葡萄',   count: 10, color: '#7c3aed', accent: '#ddd6fe' },
+      strawberry:  { key: 'strawberry',  nameEn: 'Strawberry',   nameZh: '草莓',   count: 10, color: '#e11d48', accent: '#fecdd3' },
+      waxapple:    { key: 'waxapple',    nameEn: 'Wax Apple',    nameZh: '蓮霧',   count: 10, color: '#be123c', accent: '#fda4af' },
+      guava:       { key: 'guava',       nameEn: 'Guava',        nameZh: '芭樂',   count: 10, color: '#16a34a', accent: '#bbf7d0' },
+      banana:      { key: 'banana',      nameEn: 'Banana',       nameZh: '香蕉',   count: 10, color: '#eab308', accent: '#fef08a' },
+      orange:      { key: 'orange',      nameEn: 'Orange',       nameZh: '橘子',   count: 10, color: '#ea580c', accent: '#fed7aa' },
+      mango:       { key: 'mango',       nameEn: 'Mango',        nameZh: '芒果',   count: 10, color: '#f59e0b', accent: '#fde68a' },
+      kiwi:        { key: 'kiwi',        nameEn: 'Kiwi',         nameZh: '奇異果', count: 10, color: '#65a30d', accent: '#d9f99d' },
+      dragonfruit: { key: 'dragonfruit', nameEn: 'Dragon Fruit', nameZh: '火龍果', count: 10, color: '#db2777', accent: '#fbcfe8' },
+      peach:       { key: 'peach',       nameEn: 'Peach',        nameZh: '水蜜桃', count: 10, color: '#fb7185', accent: '#ffe4e6' }
     };
 
     const TOPICS = {
@@ -224,8 +225,8 @@
         catATitle: 'Edible Skin (連皮吃)',
         catBTitle: 'Peel to Eat (去皮吃)',
         defaultPeer: {
-          catA: ['apple1', 'grape1', 'strawberry1', 'waxapple1', 'dragonfruit1'],
-          catB: ['banana1', 'orange1', 'mango1', 'kiwi1', 'guava1']
+          catA: ['apple01', 'apple04', 'grape02', 'waxapple03', 'dragonfruit05'],
+          catB: ['banana02', 'orange01', 'mango03', 'kiwi04', 'guava02']
         },
         features: [
           { id: 'skin_thickness',  nameEn: 'Skin Thickness',  nameZh: '果皮厚薄',       weight: 40, desc: '薄皮 vs. 厚硬外皮' },
@@ -245,8 +246,8 @@
         catATitle: 'Tropical Fruit (熱帶水果)',
         catBTitle: 'Temperate Fruit (溫帶水果)',
         defaultPeer: {
-          catA: ['waxapple1', 'guava1', 'banana1', 'mango1', 'kiwi1'],
-          catB: ['apple1', 'grape1', 'strawberry1', 'peach1', 'dragonfruit1']
+          catA: ['waxapple02', 'guava03', 'banana01', 'mango05', 'kiwi02'],
+          catB: ['apple02', 'grape03', 'strawberry01', 'peach04', 'dragonfruit02']
         },
         features: [
           { id: 'skin_structure',  nameEn: 'Special Peel',  nameZh: '厚皮或特殊果鱗', weight: 40, desc: '厚皮、鱗片或保護性硬殼（熱帶常見）' },
@@ -271,13 +272,27 @@
       return a;
     }
 
+    function resolveFruitImage(imageId) {
+      const speciesKey = String(imageId || '').replace(/\d+$/, '');
+      const sp = FRUIT_SPECIES[speciesKey] || { key: speciesKey, nameEn: speciesKey, nameZh: '', color: '#64748b', accent: '#e2e8f0' };
+      return {
+        id: imageId,
+        speciesKey,
+        nameEn: sp.nameEn,
+        nameZh: sp.nameZh,
+        img: `fruits/${imageId}.png`,
+        color: sp.color,
+        accent: sp.accent
+      };
+    }
+
     function makeFallbackSvg(fruit) {
       const svg = `
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120">
           <rect width="160" height="120" rx="14" fill="${fruit.accent}"/>
           <circle cx="80" cy="54" r="26" fill="${fruit.color}" opacity="0.92"/>
           <path d="M80 28 C86 16, 98 16, 94 26 C90 31, 84 30, 80 28 Z" fill="#15803d"/>
-          <text x="80" y="102" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#1e293b">${fruit.img}</text>
+          <text x="80" y="102" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#1e293b">${fruit.img}</text>
         </svg>`;
       return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg.trim());
     }
@@ -406,9 +421,8 @@
         const grid = document.getElementById(gridId);
         grid.innerHTML = '';
         document.getElementById(countId).textContent = `${ids.length} 張`;
-        ids.forEach(id => {
-          const fruit = FRUIT_CATALOG[id];
-          if (!fruit) return;
+        ids.forEach(imageId => {
+          const fruit = resolveFruitImage(imageId);
           const card = document.createElement('div');
           card.className = 'bg-white rounded-lg border border-slate-200 p-2 flex flex-col items-center';
           const img = document.createElement('img');

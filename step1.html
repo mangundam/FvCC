@@ -93,9 +93,9 @@
         </div>
       </div>
 
-      <!-- Unclassified Fruit Pool -->
+      <!-- Unclassified Fruit Pool (Images Only) -->
       <div id="poolZone" data-zone="pool"
-        class="drop-zone min-h-[138px] p-4 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 mb-5">
+        class="drop-zone min-h-[144px] p-4 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 mb-5">
         <div class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
           待分類水果圖片區 (Unclassified Fruits) — 可直接拖曳，或點選圖片再點下方分類框
         </div>
@@ -182,15 +182,15 @@
         </div>
       </div>
 
-      <!-- Summary of Student's Classification -->
+      <!-- Summary of Student's Classification (Thumbnails) -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div class="p-4 rounded-xl bg-emerald-50/60 border border-emerald-200">
-          <h3 id="summaryCatATitle" class="font-extrabold text-emerald-800 text-sm mb-2"></h3>
-          <div id="summaryCatA" class="flex flex-wrap gap-2"></div>
+          <h3 id="summaryCatATitle" class="font-extrabold text-emerald-800 text-sm mb-3"></h3>
+          <div id="summaryCatA" class="grid grid-cols-5 gap-2"></div>
         </div>
         <div class="p-4 rounded-xl bg-amber-50/60 border border-amber-200">
-          <h3 id="summaryCatBTitle" class="font-extrabold text-amber-800 text-sm mb-2"></h3>
-          <div id="summaryCatB" class="flex flex-wrap gap-2"></div>
+          <h3 id="summaryCatBTitle" class="font-extrabold text-amber-800 text-sm mb-3"></h3>
+          <div id="summaryCatB" class="grid grid-cols-5 gap-2"></div>
         </div>
       </div>
 
@@ -209,44 +209,44 @@
 
   <script>
     // =========================================================================
-    // [老師設定區] 部署 Google Apps Script 後，將網頁應用程式 URL 貼於下方引號內
+    // [老師設定區] Google Apps Script 部署網址與各水果圖片數量（預設各 10 張：01 ~ 10）
     // =========================================================================
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbw7Xgo1vGvcgPz6Z9KgnEOdpdU7ngVIIEL0ZkDSP2YqguntUZ0g_FP0t_k7TWXR8P5M/exec';
 
-    // 全部訓練水果資料庫（路徑皆為 fruits/<fruit>1.png）
-    const FRUIT_CATALOG = {
-      apple1:       { id: 'apple1',       nameEn: 'Apple',        nameZh: '蘋果',   img: 'fruits/apple1.png',       color: '#dc2626', accent: '#fca5a5' },
-      grape1:       { id: 'grape1',       nameEn: 'Grape',        nameZh: '葡萄',   img: 'fruits/grape1.png',       color: '#7c3aed', accent: '#ddd6fe' },
-      strawberry1:  { id: 'strawberry1',  nameEn: 'Strawberry',   nameZh: '草莓',   img: 'fruits/strawberry1.png',  color: '#e11d48', accent: '#fecdd3' },
-      waxapple1:    { id: 'waxapple1',    nameEn: 'Wax Apple',    nameZh: '蓮霧',   img: 'fruits/waxapple1.png',    color: '#be123c', accent: '#fda4af' },
-      guava1:       { id: 'guava1',       nameEn: 'Guava',        nameZh: '芭樂',   img: 'fruits/guava1.png',       color: '#16a34a', accent: '#bbf7d0' },
-      banana1:      { id: 'banana1',      nameEn: 'Banana',       nameZh: '香蕉',   img: 'fruits/banana1.png',      color: '#eab308', accent: '#fef08a' },
-      orange1:      { id: 'orange1',      nameEn: 'Orange',       nameZh: '橘子',   img: 'fruits/orange1.png',      color: '#ea580c', accent: '#fed7aa' },
-      mango1:       { id: 'mango1',       nameEn: 'Mango',        nameZh: '芒果',   img: 'fruits/mango1.png',       color: '#f59e0b', accent: '#fde68a' },
-      kiwi1:        { id: 'kiwi1',        nameEn: 'Kiwi',         nameZh: '奇異果', img: 'fruits/kiwi1.png',        color: '#65a30d', accent: '#d9f99d' },
-      dragonfruit1: { id: 'dragonfruit1', nameEn: 'Dragon Fruit', nameZh: '火龍果', img: 'fruits/dragonfruit1.png', color: '#db2777', accent: '#fbcfe8' },
-      peach1:       { id: 'peach1',       nameEn: 'Peach',        nameZh: '水蜜桃', img: 'fruits/peach1.png',       color: '#fb7185', accent: '#ffe4e6' }
+    // 圖檔命名：fruits/<key>01.png ~ fruits/<key>10.png（可依實際圖庫數量調整 count）
+    const FRUIT_SPECIES = {
+      apple:       { key: 'apple',       nameEn: 'Apple',        nameZh: '蘋果',   count: 10, color: '#dc2626', accent: '#fca5a5' },
+      grape:       { key: 'grape',       nameEn: 'Grape',        nameZh: '葡萄',   count: 10, color: '#7c3aed', accent: '#ddd6fe' },
+      strawberry:  { key: 'strawberry',  nameEn: 'Strawberry',   nameZh: '草莓',   count: 10, color: '#e11d48', accent: '#fecdd3' },
+      waxapple:    { key: 'waxapple',    nameEn: 'Wax Apple',    nameZh: '蓮霧',   count: 10, color: '#be123c', accent: '#fda4af' },
+      guava:       { key: 'guava',       nameEn: 'Guava',        nameZh: '芭樂',   count: 10, color: '#16a34a', accent: '#bbf7d0' },
+      banana:      { key: 'banana',      nameEn: 'Banana',       nameZh: '香蕉',   count: 10, color: '#eab308', accent: '#fef08a' },
+      orange:      { key: 'orange',      nameEn: 'Orange',       nameZh: '橘子',   count: 10, color: '#ea580c', accent: '#fed7aa' },
+      mango:       { key: 'mango',       nameEn: 'Mango',        nameZh: '芒果',   count: 10, color: '#f59e0b', accent: '#fde68a' },
+      kiwi:        { key: 'kiwi',        nameEn: 'Kiwi',         nameZh: '奇異果', count: 10, color: '#65a30d', accent: '#d9f99d' },
+      dragonfruit: { key: 'dragonfruit', nameEn: 'Dragon Fruit', nameZh: '火龍果', count: 10, color: '#db2777', accent: '#fbcfe8' },
+      peach:       { key: 'peach',       nameEn: 'Peach',        nameZh: '水蜜桃', count: 10, color: '#fb7185', accent: '#ffe4e6' }
     };
 
-    // 兩種題型定義：skin（連皮吃 vs 去皮吃）、climate（熱帶 vs 溫帶）
+    // 兩種題型定義：每類別抽 5 張，且每類別保證至少涵蓋 3 種不同水果（共 10 張，至少 6 種水果）
     const TOPICS = {
       skin: {
         id: 'skin',
         badgeText: '題型 A：食用方式分類 (Skin Type)',
         badgeCls: 'bg-emerald-100 text-emerald-800',
         heading: 'Step 1: Edible Skin vs. Peel to Eat (連皮吃 vs. 去皮吃)',
-        subtitle: '你現在是 AI 工程師，請將下方 10 張水果分類為「連皮吃」或「去皮吃」。',
-        catA: { title: 'Edible Skin (連皮吃)', desc: 'Thin skin, usually washed and eaten directly', ids: ['apple1', 'grape1', 'strawberry1', 'waxapple1', 'guava1'] },
-        catB: { title: 'Peel to Eat (去皮吃)', desc: 'Thick or tough peel, usually removed before eating', ids: ['banana1', 'orange1', 'mango1', 'kiwi1', 'dragonfruit1'] }
+        subtitle: '你現在是 AI 工程師，請觀察圖片將下方 10 張水果分類為「連皮吃」或「去皮吃」。',
+        catA: { title: 'Edible Skin (連皮吃)', desc: 'Thin skin, usually washed and eaten directly', species: ['apple', 'grape', 'strawberry', 'waxapple', 'guava'] },
+        catB: { title: 'Peel to Eat (去皮吃)', desc: 'Thick or tough peel, usually removed before eating', species: ['banana', 'orange', 'mango', 'kiwi', 'dragonfruit'] }
       },
       climate: {
         id: 'climate',
         badgeText: '題型 B：生長氣候分類 (Climate Zone)',
         badgeCls: 'bg-sky-100 text-sky-800',
         heading: 'Step 1: Tropical vs. Temperate Fruits (熱帶水果 vs. 溫帶水果)',
-        subtitle: '你現在是 AI 工程師，請將下方 10 張水果分類為「熱帶水果」或「溫帶水果」。',
-        catA: { title: 'Tropical Fruit (熱帶水果)', desc: 'Grows in warm, humid tropical regions', ids: ['waxapple1', 'guava1', 'banana1', 'mango1', 'dragonfruit1'] },
-        catB: { title: 'Temperate Fruit (溫帶水果)', desc: 'Grows in cooler four-season temperate regions', ids: ['apple1', 'grape1', 'strawberry1', 'kiwi1', 'peach1'] }
+        subtitle: '你現在是 AI 工程師，請觀察圖片將下方 10 張水果分類為「熱帶水果」或「溫帶水果」。',
+        catA: { title: 'Tropical Fruit (熱帶水果)', desc: 'Grows in warm, humid tropical regions', species: ['waxapple', 'guava', 'banana', 'mango', 'dragonfruit'] },
+        catB: { title: 'Temperate Fruit (溫帶水果)', desc: 'Grows in cooler four-season temperate regions', species: ['apple', 'grape', 'strawberry', 'kiwi', 'peach'] }
       }
     };
 
@@ -259,7 +259,7 @@
 
     // State
     let currentTopicKey = Math.random() < 0.5 ? 'skin' : 'climate';
-    let assignments = {}; // { fruitId: 'pool' | 'catA' | 'catB' }
+    let assignments = {}; // { imageId: 'pool' | 'catA' | 'catB' }
     let selectedFruitId = null;
     let shuffledOrder = [];
 
@@ -272,13 +272,76 @@
       return a;
     }
 
+    function parseSpeciesKey(imageId) {
+      return String(imageId || '').replace(/\d+$/, '');
+    }
+
+    function formatImageId(speciesKey, indexNum) {
+      return speciesKey + String(indexNum).padStart(2, '0');
+    }
+
+    function resolveFruitImage(imageId) {
+      const speciesKey = parseSpeciesKey(imageId);
+      const sp = FRUIT_SPECIES[speciesKey] || { key: speciesKey, nameEn: speciesKey, nameZh: '', color: '#64748b', accent: '#e2e8f0' };
+      return {
+        id: imageId,
+        speciesKey,
+        nameEn: sp.nameEn,
+        nameZh: sp.nameZh,
+        img: `fruits/${imageId}.png`,
+        color: sp.color,
+        accent: sp.accent
+      };
+    }
+
+    /**
+     * 從指定類別的水果清單中抽出 targetCount 張圖片，保證：
+     * 1. 不會抽到重複的圖片檔名
+     * 2. 至少包含 minDistinct 種不同水果（預設至少 3 種）
+     */
+    function sampleCategoryImages(speciesList, targetCount = 5, minDistinct = 3) {
+      const usedIds = new Set();
+      const picked = [];
+
+      const drawOneFromSpecies = (spKey) => {
+        const maxCount = (FRUIT_SPECIES[spKey] && FRUIT_SPECIES[spKey].count) || 10;
+        const candidates = [];
+        for (let i = 1; i <= maxCount; i++) {
+          const id = formatImageId(spKey, i);
+          if (!usedIds.has(id)) candidates.push(id);
+        }
+        if (candidates.length === 0) return null;
+        const chosen = candidates[Math.floor(Math.random() * candidates.length)];
+        usedIds.add(chosen);
+        return chosen;
+      };
+
+      // 先確保至少抽出 minDistinct 種不同水果各 1 張
+      const guaranteedSpecies = shuffle(speciesList).slice(0, Math.min(minDistinct, speciesList.length));
+      guaranteedSpecies.forEach(spKey => {
+        const id = drawOneFromSpecies(spKey);
+        if (id) picked.push(id);
+      });
+
+      // 剩餘張數隨機從該類別的所有水果與編號中補齊
+      let guard = 0;
+      while (picked.length < targetCount && guard < 100) {
+        guard++;
+        const spKey = speciesList[Math.floor(Math.random() * speciesList.length)];
+        const id = drawOneFromSpecies(spKey);
+        if (id) picked.push(id);
+      }
+
+      return picked;
+    }
+
     function makeFallbackSvg(fruit) {
       const svg = `
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120">
           <rect width="160" height="120" rx="14" fill="${fruit.accent}"/>
           <circle cx="80" cy="54" r="28" fill="${fruit.color}" opacity="0.92"/>
           <path d="M80 26 C86 14, 100 14, 96 24 C92 30, 84 28, 80 26 Z" fill="#15803d"/>
-          <text x="80" y="102" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#1e293b">${fruit.img}</text>
+          <text x="80" y="102" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#1e293b">${fruit.img}</text>
         </svg>`;
       return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg.trim());
     }
@@ -295,13 +358,13 @@
 
     function initState() {
       const topic = TOPICS[currentTopicKey];
-      const allIds = [...topic.catA.ids, ...topic.catB.ids];
-      shuffledOrder = shuffle(allIds);
+      const catAIds = sampleCategoryImages(topic.catA.species, 5, 3);
+      const catBIds = sampleCategoryImages(topic.catB.species, 5, 3);
+      shuffledOrder = shuffle([...catAIds, ...catBIds]);
       assignments = {};
       shuffledOrder.forEach(id => { assignments[id] = 'pool'; });
       selectedFruitId = null;
 
-      // Render Topic Header & Bin Labels
       const badge = document.getElementById('topicBadge');
       badge.textContent = topic.badgeText;
       badge.className = 'px-3 py-1 rounded-full text-xs font-extrabold ' + topic.badgeCls;
@@ -315,33 +378,25 @@
       renderAll();
     }
 
-    function createFruitCard(fruit, compact) {
+    // Step 1 僅顯示圖片，不顯示任何中英文水果名稱
+    function createFruitCard(imageId, compact) {
+      const fruit = resolveFruitImage(imageId);
       const card = document.createElement('div');
-      card.className = 'fruit-card bg-white rounded-xl border border-slate-200 p-2 flex flex-col items-center cursor-grab active:cursor-grabbing' +
+      card.className = 'fruit-card bg-white rounded-xl border border-slate-200 p-1.5 flex items-center justify-center cursor-grab active:cursor-grabbing' +
         (selectedFruitId === fruit.id ? ' selected' : '');
       card.draggable = true;
       card.dataset.id = fruit.id;
 
       const img = document.createElement('img');
       img.src = fruit.img;
-      img.alt = fruit.nameEn;
-      img.className = (compact ? 'h-16' : 'h-20') + ' w-full object-contain rounded-lg bg-slate-50 pointer-events-none';
+      img.alt = 'Fruit image';
+      img.className = (compact ? 'h-20' : 'h-24') + ' w-full object-contain rounded-lg bg-slate-50 pointer-events-none';
       img.onerror = function () {
         this.onerror = null;
         this.src = makeFallbackSvg(fruit);
       };
 
-      const labelEn = document.createElement('div');
-      labelEn.className = 'mt-1.5 text-xs sm:text-sm font-extrabold text-slate-800 text-center leading-tight';
-      labelEn.textContent = fruit.nameEn;
-
-      const labelZh = document.createElement('div');
-      labelZh.className = 'text-[11px] font-medium text-slate-500 text-center';
-      labelZh.textContent = fruit.nameZh;
-
       card.appendChild(img);
-      card.appendChild(labelEn);
-      card.appendChild(labelZh);
 
       card.addEventListener('dragstart', (e) => {
         e.dataTransfer.setData('text/plain', fruit.id);
@@ -368,17 +423,15 @@
       let cntB = 0;
 
       shuffledOrder.forEach(id => {
-        const fruit = FRUIT_CATALOG[id];
-        if (!fruit) return;
         const zone = assignments[id];
         if (zone === 'pool') {
-          poolGrid.appendChild(createFruitCard(fruit, false));
+          poolGrid.appendChild(createFruitCard(id, false));
         } else if (zone === 'catA') {
           cntA++;
-          catAGrid.appendChild(createFruitCard(fruit, true));
+          catAGrid.appendChild(createFruitCard(id, true));
         } else if (zone === 'catB') {
           cntB++;
-          catBGrid.appendChild(createFruitCard(fruit, true));
+          catBGrid.appendChild(createFruitCard(id, true));
         }
       });
 
@@ -455,11 +508,12 @@
       const catB = [];
       let correctCount = 0;
 
-      shuffledOrder.forEach(id => {
-        const choice = assignments[id];
-        if (choice === 'catA') catA.push(id);
-        if (choice === 'catB') catB.push(id);
-        const truth = topic.catA.ids.includes(id) ? 'catA' : 'catB';
+      shuffledOrder.forEach(imageId => {
+        const choice = assignments[imageId];
+        if (choice === 'catA') catA.push(imageId);
+        if (choice === 'catB') catB.push(imageId);
+        const speciesKey = parseSpeciesKey(imageId);
+        const truth = topic.catA.species.includes(speciesKey) ? 'catA' : 'catB';
         if (choice === truth) correctCount++;
       });
 
@@ -551,20 +605,27 @@
       document.getElementById('summaryCatATitle').textContent = `你分類為 ${topic.catA.title}`;
       document.getElementById('summaryCatBTitle').textContent = `你分類為 ${topic.catB.title}`;
 
-      const renderChips = (ids, containerId) => {
+      const renderThumbnails = (ids, containerId) => {
         const box = document.getElementById(containerId);
         box.innerHTML = '';
-        ids.forEach(id => {
-          const f = FRUIT_CATALOG[id];
-          if (!f) return;
-          const chip = document.createElement('span');
-          chip.className = 'px-3 py-1 rounded-full bg-white border border-slate-200 text-xs font-bold text-slate-700';
-          chip.textContent = `${f.nameEn} (${f.nameZh})`;
-          box.appendChild(chip);
+        ids.forEach(imageId => {
+          const f = resolveFruitImage(imageId);
+          const wrap = document.createElement('div');
+          wrap.className = 'bg-white rounded-lg border border-slate-200 p-1 flex items-center justify-center';
+          const img = document.createElement('img');
+          img.src = f.img;
+          img.alt = 'Fruit image';
+          img.className = 'h-14 w-full object-contain rounded';
+          img.onerror = function () {
+            this.onerror = null;
+            this.src = makeFallbackSvg(f);
+          };
+          wrap.appendChild(img);
+          box.appendChild(wrap);
         });
       };
-      renderChips(payload.catA, 'summaryCatA');
-      renderChips(payload.catB, 'summaryCatB');
+      renderThumbnails(payload.catA, 'summaryCatA');
+      renderThumbnails(payload.catB, 'summaryCatB');
     }
 
     window.addEventListener('DOMContentLoaded', () => {

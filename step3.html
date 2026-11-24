@@ -226,7 +226,7 @@
 
   <script>
     // =========================================================================
-    // [老師設定區] 請貼上與 step1.html、step2.html 相同的 Google Apps Script 網址
+    // [老師設定區] Google Apps Script 部署網址
     // =========================================================================
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbw7Xgo1vGvcgPz6Z9KgnEOdpdU7ngVIIEL0ZkDSP2YqguntUZ0g_FP0t_k7TWXR8P5M/exec';
 
@@ -247,7 +247,7 @@
           { id: 'size',            nameEn: 'Fruit Size',      nameZh: '水果大小' },
           { id: 'color',           nameEn: 'Fruit Color',     nameZh: '水果顏色' }
         ],
-        testPoolIds: ['greenapple1', 'starfruit1', 'lychee1', 'pineapple1']
+        testPoolKeys: ['greenapple', 'starfruit', 'lychee', 'pineapple']
       },
       climate: {
         id: 'climate',
@@ -265,17 +265,17 @@
           { id: 'stem_leaf',       nameEn: 'Stem & Leaf',   nameZh: '蒂頭與葉片' },
           { id: 'glossiness',      nameEn: 'Glossiness',    nameZh: '表面光澤度' }
         ],
-        testPoolIds: ['greenapple1', 'cherry1', 'starfruit1', 'lychee1', 'pineapple1']
+        testPoolKeys: ['greenapple', 'cherry', 'starfruit', 'lychee', 'pineapple']
       }
     };
 
-    // 題庫外測試水果（均未出現在 Step 1 的訓練題庫中）
-    const TEST_FRUITS = {
-      greenapple1: {
-        id: 'greenapple1',
+    // 題庫外測試水果（支援 fruits/<key>01.png ~ 10.png，可依實際張數調整 count）
+    const TEST_FRUIT_SPECIES = {
+      greenapple: {
+        key: 'greenapple',
         nameEn: 'Green Apple',
         nameZh: '青蘋果',
-        img: 'fruits/greenapple1.png',
+        count: 10,
         truthByTopic: { skin: 'catA', climate: 'catB' },
         color: '#65a30d',
         accent: '#ecfccb',
@@ -284,11 +284,11 @@
           climate: '蘋果屬於經典溫帶水果，適合較涼爽的四季氣候生長'
         }
       },
-      starfruit1: {
-        id: 'starfruit1',
+      starfruit: {
+        key: 'starfruit',
         nameEn: 'Starfruit',
         nameZh: '楊桃',
-        img: 'fruits/starfruit1.png',
+        count: 10,
         truthByTopic: { skin: 'catA', climate: 'catA' },
         color: '#ca8a04',
         accent: '#fef9c3',
@@ -297,11 +297,11 @@
           climate: '原產東南亞與台灣常見的熱帶水果，具有獨特五稜星形外觀'
         }
       },
-      lychee1: {
-        id: 'lychee1',
+      lychee: {
+        key: 'lychee',
         nameEn: 'Lychee',
         nameZh: '荔枝',
-        img: 'fruits/lychee1.png',
+        count: 10,
         truthByTopic: { skin: 'catB', climate: 'catA' },
         color: '#be123c',
         accent: '#ffe4e6',
@@ -310,11 +310,11 @@
           climate: '荔枝屬於典型熱帶／亞熱帶水果，具有特殊顆粒狀外殼'
         }
       },
-      pineapple1: {
-        id: 'pineapple1',
+      pineapple: {
+        key: 'pineapple',
         nameEn: 'Pineapple',
         nameZh: '鳳梨',
-        img: 'fruits/pineapple1.png',
+        count: 10,
         truthByTopic: { skin: 'catB', climate: 'catA' },
         color: '#d97706',
         accent: '#fef3c7',
@@ -323,11 +323,11 @@
           climate: '鳳梨是極具代表性的熱帶水果，帶有厚實鱗片外皮與冠芽葉片'
         }
       },
-      cherry1: {
-        id: 'cherry1',
+      cherry: {
+        key: 'cherry',
         nameEn: 'Cherry',
         nameZh: '櫻桃',
-        img: 'fruits/cherry1.png',
+        count: 10,
         truthByTopic: { skin: 'catA', climate: 'catB' },
         color: '#9f1239',
         accent: '#ffe4e6',
@@ -347,6 +347,18 @@
     let finalPrediction = null; // 'catA' | 'catB'
     let lastReportData = null;
 
+    function drawTestFruitInstance(speciesKey) {
+      const sp = TEST_FRUIT_SPECIES[speciesKey];
+      const maxCount = sp.count || 10;
+      const num = Math.floor(Math.random() * maxCount) + 1;
+      const imageId = sp.key + String(num).padStart(2, '0');
+      return {
+        ...sp,
+        id: imageId,
+        img: `fruits/${imageId}.png`
+      };
+    }
+
     function makeFallbackSvg(fruit, hideName) {
       const labelText = hideName ? fruit.img : `${fruit.nameEn} (${fruit.img})`;
       const svg = `
@@ -354,7 +366,7 @@
           <rect width="280" height="200" rx="18" fill="${fruit.accent}"/>
           <circle cx="140" cy="88" r="46" fill="${fruit.color}" opacity="0.92"/>
           <path d="M140 42 C152 24, 174 24, 168 40 C160 48, 148 46, 140 42 Z" fill="#15803d"/>
-          <text x="140" y="168" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" font-weight="700" fill="#1e293b">${labelText}</text>
+          <text x="140" y="168" text-anchor="middle" font-family="Inter, sans-serif" font-size="13" font-weight="700" fill="#1e293b">${labelText}</text>
         </svg>`;
       return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg.trim());
     }
@@ -418,7 +430,6 @@
 
       try { localStorage.setItem('ai_fruit_lab_last_seat', seatNo); } catch (err) {}
 
-      // Determine topic from Step 2 (if missing, use opposite of Step 1, else default 'skin')
       if (studentRecord.step2 && TOPICS[studentRecord.step2.topic]) {
         activeTopicKey = studentRecord.step2.topic;
       } else if (studentRecord.step1 && TOPICS[studentRecord.step1.topic]) {
@@ -435,10 +446,9 @@
       activeFeatures = featIds.map(id => topic.features.find(f => f.id === id)).filter(Boolean);
       if (activeFeatures.length === 0) activeFeatures = topic.features.slice(0, 3);
 
-      // Randomly draw 1 unseen test fruit for this topic
-      const poolIds = topic.testPoolIds;
-      const pickedId = poolIds[Math.floor(Math.random() * poolIds.length)];
-      currentTestFruit = TEST_FRUITS[pickedId];
+      const poolKeys = topic.testPoolKeys;
+      const pickedKey = poolKeys[Math.floor(Math.random() * poolKeys.length)];
+      currentTestFruit = drawTestFruitInstance(pickedKey);
       featureVotes = {};
       finalPrediction = null;
 

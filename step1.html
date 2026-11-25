@@ -54,16 +54,14 @@
     <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center gap-3">
         <span class="px-3 py-1 rounded-full bg-emerald-500 text-slate-950 text-xs font-extrabold tracking-wide uppercase">Step 1 of 3</span>
-        <h1 class="text-lg sm:text-xl font-extrabold tracking-tight">AI Model Designer: Fruit Classification (水果分類)</h1>
+        <h1 class="text-lg sm:text-xl font-extrabold tracking-tight">AI Model Designer: Fruit Classification</h1>
       </div>
       <div class="flex items-center gap-3">
-        <span id="syncModeBadge" class="text-xs px-3 py-1 rounded-full bg-amber-500/20 text-amber-200 border border-amber-400/40 font-semibold">
-          本機演示模式
-        </span>
+        <span id="statusDot" title="連線狀態" class="w-3.5 h-3.5 rounded-full bg-rose-500 ring-2 ring-slate-700 shrink-0"></span>
         <div class="flex items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
-          <label for="seatInput" class="text-xs sm:text-sm font-semibold text-slate-300">座號 Seat No.</label>
-          <input id="seatInput" type="text" inputmode="numeric" maxlength="6" placeholder="例如 05"
-            class="w-20 px-2 py-1 text-center font-bold text-slate-900 bg-white rounded border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+          <label for="studentIdInput" class="text-xs sm:text-sm font-semibold text-slate-300">學號 ID</label>
+          <input id="studentIdInput" type="text" maxlength="16" placeholder="請輸入學號"
+            class="w-28 px-2 py-1 text-center font-bold text-slate-900 bg-white rounded border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-400" />
         </div>
       </div>
     </div>
@@ -75,14 +73,31 @@
   <!-- Main Workspace -->
   <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-5">
 
+    <!-- Entry Gate: Enter Student ID First -->
+    <section id="entrySection" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 max-w-lg mx-auto mt-10">
+      <span class="inline-block px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold mb-2">Step 1: Classify Data</span>
+      <h2 class="text-2xl font-extrabold text-slate-900">請先輸入你的學號</h2>
+      <p class="text-slate-600 text-sm sm:text-base mt-2">
+        你現在是 AI 工程師，請輸入學號後開始將水果圖片分類。
+      </p>
+      <div class="mt-5 space-y-4">
+        <div>
+          <label for="entryStudentId" class="block text-sm font-bold text-slate-700 mb-1.5">學號 (Student ID)</label>
+          <input id="entryStudentId" type="text" maxlength="16" placeholder="例如：113001"
+            class="w-full px-4 py-3 text-lg font-bold text-slate-900 bg-slate-50 rounded-xl border-2 border-slate-300 focus:outline-none focus:border-emerald-500 focus:bg-white" />
+        </div>
+        <button id="startStep1Btn" type="button"
+          class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-base shadow-sm transition">
+          開始分類 (Start)
+        </button>
+      </div>
+    </section>
+
     <!-- Task Panel (Step 1 Interactive Area) -->
-    <section id="taskSection" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6">
+    <section id="taskSection" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6">
       <div class="flex flex-wrap items-start justify-between gap-4 mb-4">
         <div>
-          <div class="flex flex-wrap items-center gap-2 mb-1">
-            <span id="topicBadge" class="px-3 py-1 rounded-full text-xs font-extrabold"></span>
-            <span class="text-xs text-slate-500 font-semibold">（系統隨機指派兩種題型之一，Step 2 會固定抽另一題型）</span>
-          </div>
+          <span id="topicBadge" class="inline-block px-3 py-1 rounded-full text-xs font-extrabold mb-1"></span>
           <h2 id="topicHeading" class="text-xl sm:text-2xl font-extrabold text-slate-900"></h2>
           <p id="topicSubtitle" class="text-slate-600 text-sm sm:text-base mt-1"></p>
         </div>
@@ -97,7 +112,7 @@
       <div id="poolZone" data-zone="pool"
         class="drop-zone min-h-[144px] p-4 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 mb-5">
         <div class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
-          待分類水果圖片區 (Unclassified Fruits) — 可直接拖曳，或點選圖片再點下方分類框
+          待分類水果圖片區 (Unclassified Fruits) — 拖曳圖片，或點選圖片再點分類框
         </div>
         <div id="poolGrid" class="grid grid-cols-2 sm:grid-cols-5 gap-3"></div>
       </div>
@@ -132,8 +147,7 @@
       </div>
 
       <!-- Submit Button -->
-      <div class="flex flex-wrap items-center justify-between gap-3">
-        <p class="text-xs text-slate-500">提示：請確認右上角已輸入正確座號，全部 10 張分類完成後即可送出。</p>
+      <div class="flex justify-end">
         <button id="submitBtn" type="button"
           class="px-7 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-extrabold text-base shadow-sm transition">
           送出分類結果 (Send Classification to AI)
@@ -141,17 +155,14 @@
       </div>
     </section>
 
-    <!-- Result & Bilingual Speaking Scaffold Panel -->
+    <!-- Result & Speaking Scaffold Panel -->
     <section id="resultSection" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
       <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-6 border-b border-slate-200">
         <div>
           <span id="resultTopicBadge" class="inline-block px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold mb-1"></span>
-          <h2 class="text-2xl font-extrabold text-slate-900">Step 1 分類結果與英文口說分享</h2>
+          <h2 class="text-2xl font-extrabold text-slate-900">Step 1 分類結果</h2>
         </div>
-        <div class="flex items-center gap-3">
-          <span id="resultSeatBadge" class="px-4 py-2 rounded-xl bg-slate-900 text-white font-extrabold text-base"></span>
-          <span id="saveStatusBadge" class="px-3 py-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold"></span>
-        </div>
+        <span id="resultStudentBadge" class="px-4 py-2 rounded-xl bg-slate-900 text-white font-extrabold text-base"></span>
       </div>
 
       <!-- Score Banner -->
@@ -166,18 +177,14 @@
       <!-- English Speaking Scaffold -->
       <div class="rounded-2xl border-2 border-blue-600 bg-gradient-to-br from-blue-50/70 to-white p-6 mb-6">
         <div class="text-xs font-extrabold uppercase tracking-wider text-blue-700 mb-3">
-          English Speaking Scaffold (請練習用這句英文分享你的結果)
+          English Speaking
         </div>
         <p class="text-2xl sm:text-3xl font-bold text-slate-900 leading-relaxed">
           My classification score is <span id="blankScore" class="scaffold-blank"></span>.
           That is <span id="blankLevel" class="scaffold-blank"></span>.
         </p>
 
-        <!-- Highlighted Level Options Table -->
         <div class="mt-6">
-          <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-            Score &amp; Level Options (下方已標示你的分數對應等級)
-          </div>
           <div id="levelOptionsGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
         </div>
       </div>
@@ -197,7 +204,7 @@
       <!-- Pause Reminder -->
       <div class="rounded-xl bg-slate-900 text-white p-4 flex flex-wrap items-center justify-between gap-3">
         <p class="text-sm sm:text-base font-semibold">
-          已完成 Step 1！請準備分享你的英文句子，等待老師講解後再開啟 Step 2（系統會自動為你抽出另一種題型）。
+          已完成 Step 1！請等待老師指示再進入 Step 2。
         </p>
         <button id="editAgainBtn" type="button"
           class="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-xs font-bold text-slate-100">
@@ -208,12 +215,10 @@
   </main>
 
   <script>
-    // =========================================================================
-    // [老師設定區] Google Apps Script 部署網址與各水果圖片數量（預設各 10 張：01 ~ 10）
-    // =========================================================================
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbw7Xgo1vGvcgPz6Z9KgnEOdpdU7ngVIIEL0ZkDSP2YqguntUZ0g_FP0t_k7TWXR8P5M/exec';
+    const STUDENT_ID_KEY = 'ai_fruit_lab_student_id';
 
-    // 圖檔命名：fruits/<key>01.png ~ fruits/<key>10.png（可依實際圖庫數量調整 count）
+    // 圖檔命名：fruits/<key>01.png ~ fruits/<key>10.png
     const FRUIT_SPECIES = {
       apple:       { key: 'apple',       nameEn: 'Apple',        nameZh: '蘋果',   count: 10, color: '#dc2626', accent: '#fca5a5' },
       grape:       { key: 'grape',       nameEn: 'Grape',        nameZh: '葡萄',   count: 10, color: '#7c3aed', accent: '#ddd6fe' },
@@ -228,23 +233,22 @@
       peach:       { key: 'peach',       nameEn: 'Peach',        nameZh: '水蜜桃', count: 10, color: '#fb7185', accent: '#ffe4e6' }
     };
 
-    // 兩種題型定義：每類別抽 5 張，且每類別保證至少涵蓋 3 種不同水果（共 10 張，至少 6 種水果）
     const TOPICS = {
       skin: {
         id: 'skin',
-        badgeText: '題型 A：食用方式分類 (Skin Type)',
+        badgeText: 'Edible Skin vs. Peel to Eat',
         badgeCls: 'bg-emerald-100 text-emerald-800',
         heading: 'Step 1: Edible Skin vs. Peel to Eat (連皮吃 vs. 去皮吃)',
-        subtitle: '你現在是 AI 工程師，請觀察圖片將下方 10 張水果分類為「連皮吃」或「去皮吃」。',
+        subtitle: '請觀察圖片，將下方 10 張水果分類為「連皮吃」或「去皮吃」。',
         catA: { title: 'Edible Skin (連皮吃)', desc: 'Thin skin, usually washed and eaten directly', species: ['apple', 'grape', 'strawberry', 'waxapple', 'guava'] },
         catB: { title: 'Peel to Eat (去皮吃)', desc: 'Thick or tough peel, usually removed before eating', species: ['banana', 'orange', 'mango', 'kiwi', 'dragonfruit'] }
       },
       climate: {
         id: 'climate',
-        badgeText: '題型 B：生長氣候分類 (Climate Zone)',
+        badgeText: 'Tropical vs. Temperate',
         badgeCls: 'bg-sky-100 text-sky-800',
         heading: 'Step 1: Tropical vs. Temperate Fruits (熱帶水果 vs. 溫帶水果)',
-        subtitle: '你現在是 AI 工程師，請觀察圖片將下方 10 張水果分類為「熱帶水果」或「溫帶水果」。',
+        subtitle: '請觀察圖片，將下方 10 張水果分類為「熱帶水果」或「溫帶水果」。',
         catA: { title: 'Tropical Fruit (熱帶水果)', desc: 'Grows in warm, humid tropical regions', species: ['waxapple', 'guava', 'banana', 'mango', 'dragonfruit'] },
         catB: { title: 'Temperate Fruit (溫帶水果)', desc: 'Grows in cooler four-season temperate regions', species: ['apple', 'grape', 'strawberry', 'kiwi', 'peach'] }
       }
@@ -257,11 +261,30 @@
       { id: 'low',       rangeText: '< 60',    label: 'low',       check: (s) => s < 60 }
     ];
 
-    // State
     let currentTopicKey = Math.random() < 0.5 ? 'skin' : 'climate';
-    let assignments = {}; // { imageId: 'pool' | 'catA' | 'catB' }
+    let assignments = {};
     let selectedFruitId = null;
     let shuffledOrder = [];
+
+    function setStatusDot(online) {
+      const dot = document.getElementById('statusDot');
+      dot.className = 'w-3.5 h-3.5 rounded-full ring-2 ring-slate-700 shrink-0 ' + (online ? 'bg-emerald-400' : 'bg-rose-500');
+      dot.title = online ? 'Online' : 'Offline';
+    }
+
+    async function checkConnection() {
+      if (!GAS_URL) {
+        setStatusDot(false);
+        return;
+      }
+      try {
+        const res = await fetch(`${GAS_URL}?action=ping`);
+        const json = await res.json();
+        setStatusDot(Boolean(json && json.ok));
+      } catch (err) {
+        setStatusDot(false);
+      }
+    }
 
     function shuffle(arr) {
       const a = arr.slice();
@@ -294,11 +317,6 @@
       };
     }
 
-    /**
-     * 從指定類別的水果清單中抽出 targetCount 張圖片，保證：
-     * 1. 不會抽到重複的圖片檔名
-     * 2. 至少包含 minDistinct 種不同水果（預設至少 3 種）
-     */
     function sampleCategoryImages(speciesList, targetCount = 5, minDistinct = 3) {
       const usedIds = new Set();
       const picked = [];
@@ -316,14 +334,12 @@
         return chosen;
       };
 
-      // 先確保至少抽出 minDistinct 種不同水果各 1 張
       const guaranteedSpecies = shuffle(speciesList).slice(0, Math.min(minDistinct, speciesList.length));
       guaranteedSpecies.forEach(spKey => {
         const id = drawOneFromSpecies(spKey);
         if (id) picked.push(id);
       });
 
-      // 剩餘張數隨機從該類別的所有水果與編號中補齊
       let guard = 0;
       while (picked.length < targetCount && guard < 100) {
         guard++;
@@ -356,7 +372,7 @@
       box._timer = setTimeout(() => box.classList.add('hidden'), 2800);
     }
 
-    function initState() {
+    function initTask() {
       const topic = TOPICS[currentTopicKey];
       const catAIds = sampleCategoryImages(topic.catA.species, 5, 3);
       const catBIds = sampleCategoryImages(topic.catB.species, 5, 3);
@@ -367,7 +383,7 @@
 
       const badge = document.getElementById('topicBadge');
       badge.textContent = topic.badgeText;
-      badge.className = 'px-3 py-1 rounded-full text-xs font-extrabold ' + topic.badgeCls;
+      badge.className = 'inline-block px-3 py-1 rounded-full text-xs font-extrabold mb-1 ' + topic.badgeCls;
       document.getElementById('topicHeading').textContent = topic.heading;
       document.getElementById('topicSubtitle').textContent = topic.subtitle;
       document.getElementById('catATitle').textContent = topic.catA.title;
@@ -378,7 +394,6 @@
       renderAll();
     }
 
-    // Step 1 僅顯示圖片，不顯示任何中英文水果名稱
     function createFruitCard(imageId, compact) {
       const fruit = resolveFruitImage(imageId);
       const card = document.createElement('div');
@@ -485,21 +500,39 @@
       return { text: '診斷：分類準確度偏低，可能會讓 AI 學到錯誤規則！', cls: 'bg-rose-100 text-rose-800' };
     }
 
+    function saveStudentId(id) {
+      try { localStorage.setItem(STUDENT_ID_KEY, id); } catch (err) {}
+    }
+
     function saveLocalStep1(payload) {
       try {
         const key = 'ai_fruit_lab_step1_v2';
         const store = JSON.parse(localStorage.getItem(key) || '{}');
-        store[payload.seatNo] = payload;
+        store[payload.studentId] = payload;
         localStorage.setItem(key, JSON.stringify(store));
-        localStorage.setItem('ai_fruit_lab_last_seat', payload.seatNo);
+        saveStudentId(payload.studentId);
       } catch (err) {}
     }
 
+    function handleStartStep1() {
+      const studentId = document.getElementById('entryStudentId').value.trim();
+      if (!studentId) {
+        showToast('請先輸入你的學號！', true);
+        document.getElementById('entryStudentId').focus();
+        return;
+      }
+      saveStudentId(studentId);
+      document.getElementById('studentIdInput').value = studentId;
+      document.getElementById('entrySection').classList.add('hidden');
+      document.getElementById('taskSection').classList.remove('hidden');
+      initTask();
+    }
+
     async function handleSubmit() {
-      const seatNo = document.getElementById('seatInput').value.trim();
-      if (!seatNo) {
-        showToast('請先在右上角輸入你的座號！', true);
-        document.getElementById('seatInput').focus();
+      const studentId = document.getElementById('studentIdInput').value.trim();
+      if (!studentId) {
+        showToast('請先在右上角輸入你的學號！', true);
+        document.getElementById('studentIdInput').focus();
         return;
       }
 
@@ -522,7 +555,8 @@
 
       const payload = {
         action: 'saveStep1',
-        seatNo,
+        seatNo: studentId,
+        studentId,
         topic: currentTopicKey,
         score,
         correctCount,
@@ -538,7 +572,6 @@
 
       saveLocalStep1(payload);
 
-      let syncedCloud = false;
       if (GAS_URL) {
         try {
           const res = await fetch(GAS_URL, {
@@ -547,35 +580,23 @@
             body: JSON.stringify(payload)
           });
           const data = await res.json();
-          syncedCloud = Boolean(data && data.ok);
+          setStatusDot(Boolean(data && data.ok));
         } catch (err) {
-          syncedCloud = false;
+          setStatusDot(false);
         }
       }
 
       btn.textContent = '送出分類結果 (Send Classification to AI)';
-      renderResult(payload, syncedCloud);
+      renderResult(payload);
     }
 
-    function renderResult(payload, syncedCloud) {
+    function renderResult(payload) {
       const topic = TOPICS[payload.topic];
       document.getElementById('taskSection').classList.add('hidden');
       document.getElementById('resultSection').classList.remove('hidden');
 
-      document.getElementById('resultTopicBadge').textContent = `Step 1 Completed — ${topic.badgeText}`;
-      document.getElementById('resultSeatBadge').textContent = `座號 Seat #${payload.seatNo}`;
-
-      const saveBadge = document.getElementById('saveStatusBadge');
-      if (GAS_URL && syncedCloud) {
-        saveBadge.textContent = '已同步儲存至 Google Sheet';
-        saveBadge.className = 'px-3 py-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold';
-      } else if (GAS_URL && !syncedCloud) {
-        saveBadge.textContent = '雲端連線失敗（已暫存本機）';
-        saveBadge.className = 'px-3 py-2 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold';
-      } else {
-        saveBadge.textContent = '本機演示模式（已暫存瀏覽器）';
-        saveBadge.className = 'px-3 py-2 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold';
-      }
+      document.getElementById('resultTopicBadge').textContent = topic.badgeText;
+      document.getElementById('resultStudentBadge').textContent = `學號 ${payload.studentId}`;
 
       document.getElementById('scoreBigText').textContent = `${payload.score} 分 (${payload.correctCount} / ${payload.totalCount})`;
       const diag = getDiagnosis(payload.score);
@@ -629,18 +650,28 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      if (GAS_URL) {
-        const badge = document.getElementById('syncModeBadge');
-        badge.textContent = 'Google Sheet 雲端連線中';
-        badge.className = 'text-xs px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-200 border border-emerald-400/40 font-semibold';
-      }
+      checkConnection();
       try {
-        const lastSeat = localStorage.getItem('ai_fruit_lab_last_seat');
-        if (lastSeat) document.getElementById('seatInput').value = lastSeat;
+        const savedId = localStorage.getItem(STUDENT_ID_KEY);
+        if (savedId) {
+          document.getElementById('entryStudentId').value = savedId;
+          document.getElementById('studentIdInput').value = savedId;
+        }
       } catch (err) {}
 
+      // 右上角修改學號時即時同步儲存
+      document.getElementById('studentIdInput').addEventListener('input', (e) => {
+        const v = e.target.value.trim();
+        document.getElementById('entryStudentId').value = v;
+        if (v) saveStudentId(v);
+      });
+
+      document.getElementById('entryStudentId').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') handleStartStep1();
+      });
+      document.getElementById('startStep1Btn').addEventListener('click', handleStartStep1);
+
       bindDropZones();
-      initState();
 
       document.getElementById('submitBtn').addEventListener('click', handleSubmit);
       document.getElementById('editAgainBtn').addEventListener('click', () => {

@@ -43,16 +43,14 @@
     <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center gap-3">
         <span class="px-3 py-1 rounded-full bg-indigo-400 text-slate-950 text-xs font-extrabold tracking-wide uppercase">Step 2 of 3</span>
-        <h1 class="text-lg sm:text-xl font-extrabold tracking-tight">AI Model Designer: Extract Features (特徵篩選)</h1>
+        <h1 class="text-lg sm:text-xl font-extrabold tracking-tight">AI Model Designer: Extract Features</h1>
       </div>
       <div class="flex items-center gap-3">
-        <span id="syncModeBadge" class="text-xs px-3 py-1 rounded-full bg-amber-500/20 text-amber-200 border border-amber-400/40 font-semibold">
-          本機演示模式
-        </span>
+        <span id="statusDot" title="連線狀態" class="w-3.5 h-3.5 rounded-full bg-rose-500 ring-2 ring-slate-700 shrink-0"></span>
         <div class="flex items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
-          <label for="seatInput" class="text-xs sm:text-sm font-semibold text-slate-300">座號 Seat No.</label>
-          <input id="seatInput" type="text" inputmode="numeric" maxlength="6" placeholder="例如 05"
-            class="w-20 px-2 py-1 text-center font-bold text-slate-900 bg-white rounded border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+          <label for="studentIdInput" class="text-xs sm:text-sm font-semibold text-slate-300">學號 ID</label>
+          <input id="studentIdInput" type="text" maxlength="16" placeholder="請輸入學號"
+            class="w-28 px-2 py-1 text-center font-bold text-slate-900 bg-white rounded border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-400" />
         </div>
       </div>
     </div>
@@ -64,16 +62,16 @@
   <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-5">
 
     <!-- Entry Gate -->
-    <section id="entrySection" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 max-w-2xl mx-auto mt-6">
-      <span class="inline-block px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-xs font-extrabold mb-2">Role Switch: You are the AI Computer</span>
-      <h2 class="text-2xl font-extrabold text-slate-900">Step 2: 抽取與 Step 1 不同題型的同學分類結果</h2>
+    <section id="entrySection" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 max-w-xl mx-auto mt-10">
+      <span class="inline-block px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-xs font-extrabold mb-2">Step 2: Extract Features</span>
+      <h2 class="text-2xl font-extrabold text-slate-900">扮演 AI 電腦，找出關鍵特徵</h2>
       <p class="text-slate-600 text-sm sm:text-base mt-2 leading-relaxed">
-        現在換你扮演 AI 電腦！系統會依據你的座號，<strong class="text-indigo-700">固定抽出與你 Step 1 不同的題型</strong>（若 Step 1 是「連皮吃/去皮吃」，這裡就會抽「熱帶/溫帶」，反之亦然），並從試算表隨機撈取另一位同學打散的分類結果；若尚無人上傳該題型，會自動載入系統預設資料讓你體驗。
+        請確認右上角學號無誤後，按下開始按鈕，觀察同學分好的水果並選出最重要的 1 ~ 3 個特徵。
       </p>
-      <div class="mt-6 flex flex-wrap items-center gap-3">
+      <div class="mt-6">
         <button id="loadPeerBtn" type="button"
           class="px-7 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-base shadow-sm transition">
-          抽取不同題型的分類結果 (Load Peer Data)
+          開始篩選特徵 (Start)
         </button>
       </div>
     </section>
@@ -82,23 +80,17 @@
     <section id="taskSection" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6">
       <div class="flex flex-wrap items-start justify-between gap-4 mb-5">
         <div>
-          <div class="flex flex-wrap items-center gap-2 mb-1">
-            <span id="topicBadge" class="px-3 py-1 rounded-full text-xs font-extrabold"></span>
-            <span id="topicSwitchHint" class="text-xs font-semibold text-indigo-700"></span>
-          </div>
+          <span id="topicBadge" class="inline-block px-3 py-1 rounded-full text-xs font-extrabold mb-1"></span>
           <h2 id="topicHeading" class="text-xl sm:text-2xl font-extrabold text-slate-900"></h2>
           <p id="topicSubtitle" class="text-slate-600 text-sm sm:text-base mt-1"></p>
         </div>
-        <div class="flex items-center gap-2">
-          <span id="peerSourceBadge" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 font-bold text-xs sm:text-sm"></span>
-          <button id="reloadPeerBtn" type="button"
-            class="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 text-xs sm:text-sm font-semibold">
-            換一組隨機資料
-          </button>
-        </div>
+        <button id="reloadPeerBtn" type="button"
+          class="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 text-xs sm:text-sm font-semibold">
+          換一組資料
+        </button>
       </div>
 
-      <!-- 3-Column Layout: Left Cat A | Center Features | Right Cat B -->
+      <!-- 3-Column Layout -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-6 items-start">
 
         <!-- Left: Peer Cat A Group -->
@@ -130,8 +122,7 @@
       </div>
 
       <!-- Submit Row -->
-      <div class="flex flex-wrap items-center justify-between gap-3">
-        <p class="text-xs text-slate-500">提示：思考哪些視覺特徵在面對「沒看過的新水果」時最不容易誤判。</p>
+      <div class="flex justify-end">
         <button id="submitBtn" type="button" disabled
           class="px-7 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-extrabold text-base shadow-sm transition">
           完成特徵選取 (Confirm Selected Features)
@@ -139,17 +130,14 @@
       </div>
     </section>
 
-    <!-- Result & Bilingual Speaking Scaffold Panel -->
+    <!-- Result & Speaking Scaffold Panel -->
     <section id="resultSection" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
       <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-6 border-b border-slate-200">
         <div>
           <span id="resultTopicBadge" class="inline-block px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-xs font-extrabold mb-1"></span>
-          <h2 class="text-2xl font-extrabold text-slate-900">Step 2 特徵選取結果與英文口說分享</h2>
+          <h2 class="text-2xl font-extrabold text-slate-900">Step 2 特徵選取結果</h2>
         </div>
-        <div class="flex items-center gap-3">
-          <span id="resultSeatBadge" class="px-4 py-2 rounded-xl bg-slate-900 text-white font-extrabold text-base"></span>
-          <span id="saveStatusBadge" class="px-3 py-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold"></span>
-        </div>
+        <span id="resultStudentBadge" class="px-4 py-2 rounded-xl bg-slate-900 text-white font-extrabold text-base"></span>
       </div>
 
       <!-- Feature Score Banner -->
@@ -164,7 +152,7 @@
       <!-- English Speaking Scaffold -->
       <div class="rounded-2xl border-2 border-indigo-600 bg-gradient-to-br from-indigo-50/70 to-white p-6 mb-6">
         <div class="text-xs font-extrabold uppercase tracking-wider text-indigo-700 mb-3">
-          English Speaking Scaffold (請練習用這兩句英文分享你選的特徵)
+          English Speaking
         </div>
         <p id="scaffoldSentence1" class="text-xl sm:text-2xl font-bold text-slate-900 leading-relaxed"></p>
         <p class="text-xl sm:text-2xl font-bold text-slate-900 leading-relaxed mt-3">
@@ -172,11 +160,7 @@
           That is <span id="blankLevel" class="scaffold-blank"></span>.
         </p>
 
-        <!-- All 6 Feature Options Grid with Student's Choices Highlighted -->
         <div class="mt-6">
-          <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-            Feature Options (下方已反白強調你選中的特徵)
-          </div>
           <div id="featureOptionsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"></div>
         </div>
       </div>
@@ -184,7 +168,7 @@
       <!-- Pause Reminder -->
       <div class="rounded-xl bg-slate-900 text-white p-4 flex flex-wrap items-center justify-between gap-3">
         <p class="text-sm sm:text-base font-semibold">
-          已完成 Step 2！請準備分享你的英文句子，並等待老師講解後再開啟 Step 3 網頁。
+          已完成 Step 2！請等待老師指示再進入 Step 3。
         </p>
         <button id="editAgainBtn" type="button"
           class="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-xs font-bold text-slate-100">
@@ -195,12 +179,9 @@
   </main>
 
   <script>
-    // =========================================================================
-    // [老師設定區] Google Apps Script 部署網址
-    // =========================================================================
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbw7Xgo1vGvcgPz6Z9KgnEOdpdU7ngVIIEL0ZkDSP2YqguntUZ0g_FP0t_k7TWXR8P5M/exec';
+    const STUDENT_ID_KEY = 'ai_fruit_lab_student_id';
 
-    // 支援 fruits/<key>01.png ~ fruits/<key>10.png（亦相容舊版單數位編號）
     const FRUIT_SPECIES = {
       apple:       { key: 'apple',       nameEn: 'Apple',        nameZh: '蘋果',   count: 10, color: '#dc2626', accent: '#fca5a5' },
       grape:       { key: 'grape',       nameEn: 'Grape',        nameZh: '葡萄',   count: 10, color: '#7c3aed', accent: '#ddd6fe' },
@@ -218,10 +199,10 @@
     const TOPICS = {
       skin: {
         id: 'skin',
-        badgeText: '題型 A：連皮吃 vs. 去皮吃 (Skin Type)',
+        badgeText: 'Edible Skin vs. Peel to Eat',
         badgeCls: 'bg-emerald-100 text-emerald-800',
         heading: 'Step 2: Extract Features — Edible Skin vs. Peel to Eat',
-        subtitle: '觀察左右兩邊同學分好的水果，選出 1 ~ 3 個最能分辨「連皮吃」與「去皮吃」的視覺特徵。',
+        subtitle: '觀察左右兩邊的水果，選出 1 ~ 3 個最能分辨「連皮吃」與「去皮吃」的特徵。',
         catATitle: 'Edible Skin (連皮吃)',
         catBTitle: 'Peel to Eat (去皮吃)',
         defaultPeer: {
@@ -239,10 +220,10 @@
       },
       climate: {
         id: 'climate',
-        badgeText: '題型 B：熱帶水果 vs. 溫帶水果 (Climate Zone)',
+        badgeText: 'Tropical vs. Temperate',
         badgeCls: 'bg-sky-100 text-sky-800',
         heading: 'Step 2: Extract Features — Tropical vs. Temperate Fruits',
-        subtitle: '觀察左右兩邊同學分好的水果，選出 1 ~ 3 個最能分辨「熱帶水果」與「溫帶水果」的視覺特徵。',
+        subtitle: '觀察左右兩邊的水果，選出 1 ~ 3 個最能分辨「熱帶水果」與「溫帶水果」的特徵。',
         catATitle: 'Tropical Fruit (熱帶水果)',
         catBTitle: 'Temperate Fruit (溫帶水果)',
         defaultPeer: {
@@ -255,13 +236,33 @@
           { id: 'fruit_shape',     nameEn: 'Unique Shape',  nameZh: '特殊果形結構',   weight: 25, desc: '彎曲、鐘形、星形 vs. 圓形或小漿果' },
           { id: 'fruit_size',      nameEn: 'Fruit Size',    nameZh: '果實大小',       weight: 15, desc: '單顆大小差異（部分小果容易混淆）' },
           { id: 'stem_leaf',       nameEn: 'Stem & Leaf',   nameZh: '蒂頭與葉片',     weight: 10, desc: '果蒂或葉片外觀' },
-          { id: 'glossiness',      nameEn: 'Glossiness',    nameZh: '表面光澤度',     weight: 10, desc: '反光程度（蘋果與蓮霧都很光滑！）' }
+          { id: 'glossiness',      nameEn: 'Glossiness',    nameZh: '表面光澤度',     weight: 10, desc: '反光程度' }
         ]
       }
     };
 
     let peerData = { topic: 'climate', myStep1Topic: null, sourceSeatNo: 'DEFAULT', catA: [], catB: [], isFallback: true };
     let selectedFeatureIds = [];
+
+    function setStatusDot(online) {
+      const dot = document.getElementById('statusDot');
+      dot.className = 'w-3.5 h-3.5 rounded-full ring-2 ring-slate-700 shrink-0 ' + (online ? 'bg-emerald-400' : 'bg-rose-500');
+      dot.title = online ? 'Online' : 'Offline';
+    }
+
+    async function checkConnection() {
+      if (!GAS_URL) {
+        setStatusDot(false);
+        return;
+      }
+      try {
+        const res = await fetch(`${GAS_URL}?action=ping`);
+        const json = await res.json();
+        setStatusDot(Boolean(json && json.ok));
+      } catch (err) {
+        setStatusDot(false);
+      }
+    }
 
     function shuffle(arr) {
       const a = arr.slice();
@@ -307,10 +308,10 @@
       box._timer = setTimeout(() => box.classList.add('hidden'), 2800);
     }
 
-    function getLocalMyStep1Topic(mySeat) {
+    function getLocalMyStep1Topic(myId) {
       try {
         const store = JSON.parse(localStorage.getItem('ai_fruit_lab_step1_v2') || '{}');
-        if (store[mySeat] && store[mySeat].topic) return store[mySeat].topic;
+        if (store[myId] && store[myId].topic) return store[myId].topic;
       } catch (err) {}
       return null;
     }
@@ -321,20 +322,20 @@
       return Math.random() < 0.5 ? 'skin' : 'climate';
     }
 
-    function getLocalPeerStep1(mySeat) {
-      const myTopic = getLocalMyStep1Topic(mySeat);
+    function getLocalPeerStep1(myId) {
+      const myTopic = getLocalMyStep1Topic(myId);
       const targetTopic = getOppositeTopic(myTopic);
       try {
         const store = JSON.parse(localStorage.getItem('ai_fruit_lab_step1_v2') || '{}');
         const peers = Object.values(store).filter(
-          r => r && String(r.seatNo) !== String(mySeat) && r.topic === targetTopic
+          r => r && String(r.studentId || r.seatNo) !== String(myId) && r.topic === targetTopic
         );
         if (peers.length > 0) {
           const picked = peers[Math.floor(Math.random() * peers.length)];
           return {
             topic: targetTopic,
             myStep1Topic: myTopic,
-            sourceSeatNo: picked.seatNo,
+            sourceSeatNo: picked.studentId || picked.seatNo,
             catA: shuffle(picked.catA || []),
             catB: shuffle(picked.catB || []),
             isFallback: false
@@ -354,37 +355,41 @@
     }
 
     async function loadPeerClassification() {
-      const seatNo = document.getElementById('seatInput').value.trim();
-      if (!seatNo) {
-        showToast('請先在右上角輸入你的座號！', true);
-        document.getElementById('seatInput').focus();
+      const studentId = document.getElementById('studentIdInput').value.trim();
+      if (!studentId) {
+        showToast('請先在右上角輸入你的學號！', true);
+        document.getElementById('studentIdInput').focus();
         return;
       }
 
+      try { localStorage.setItem(STUDENT_ID_KEY, studentId); } catch (err) {}
+
       const loadBtn = document.getElementById('loadPeerBtn');
       loadBtn.disabled = true;
-      loadBtn.textContent = '載入不同題型資料中...';
+      loadBtn.textContent = '載入資料中...';
 
-      const localMyTopic = getLocalMyStep1Topic(seatNo) || '';
+      const localMyTopic = getLocalMyStep1Topic(studentId) || '';
       let fetched = null;
       if (GAS_URL) {
         try {
-          const url = `${GAS_URL}?action=getPeerStep1&seatNo=${encodeURIComponent(seatNo)}&myTopic=${encodeURIComponent(localMyTopic)}`;
+          const url = `${GAS_URL}?action=getPeerStep1&seatNo=${encodeURIComponent(studentId)}&myTopic=${encodeURIComponent(localMyTopic)}`;
           const res = await fetch(url);
           const json = await res.json();
           if (json && json.ok && TOPICS[json.topic]) {
             fetched = json;
+            setStatusDot(true);
           }
         } catch (err) {
           fetched = null;
+          setStatusDot(false);
         }
       }
 
-      peerData = fetched || getLocalPeerStep1(seatNo);
+      peerData = fetched || getLocalPeerStep1(studentId);
       selectedFeatureIds = [];
 
       loadBtn.disabled = false;
-      loadBtn.textContent = '抽取不同題型的分類結果 (Load Peer Data)';
+      loadBtn.textContent = '開始篩選特徵 (Start)';
 
       document.getElementById('entrySection').classList.add('hidden');
       document.getElementById('resultSection').classList.add('hidden');
@@ -398,24 +403,12 @@
       const topic = TOPICS[peerData.topic] || TOPICS.climate;
       const tBadge = document.getElementById('topicBadge');
       tBadge.textContent = topic.badgeText;
-      tBadge.className = 'px-3 py-1 rounded-full text-xs font-extrabold ' + topic.badgeCls;
-
-      const hint = document.getElementById('topicSwitchHint');
-      if (peerData.myStep1Topic && TOPICS[peerData.myStep1Topic]) {
-        hint.textContent = `（已依你的 Step 1 題型自動切換為不同題型）`;
-      } else {
-        hint.textContent = `（已為你隨機指派題型）`;
-      }
+      tBadge.className = 'inline-block px-3 py-1 rounded-full text-xs font-extrabold mb-1 ' + topic.badgeCls;
 
       document.getElementById('topicHeading').textContent = topic.heading;
       document.getElementById('topicSubtitle').textContent = topic.subtitle;
       document.getElementById('peerCatATitle').textContent = topic.catATitle;
       document.getElementById('peerCatBTitle').textContent = topic.catBTitle;
-
-      const badge = document.getElementById('peerSourceBadge');
-      badge.textContent = peerData.isFallback
-        ? '目前尚無人上傳此題型：已載入系統預設範例資料'
-        : '資料來源：隨機同學的分類結果（已匿名打散）';
 
       const renderGroup = (ids, gridId, countId) => {
         const grid = document.getElementById(gridId);
@@ -513,16 +506,16 @@
       try {
         const key = 'ai_fruit_lab_step2_v2';
         const store = JSON.parse(localStorage.getItem(key) || '{}');
-        store[payload.seatNo] = payload;
+        store[payload.studentId] = payload;
         localStorage.setItem(key, JSON.stringify(store));
-        localStorage.setItem('ai_fruit_lab_last_seat', payload.seatNo);
+        localStorage.setItem(STUDENT_ID_KEY, payload.studentId);
       } catch (err) {}
     }
 
     async function handleSubmit() {
-      const seatNo = document.getElementById('seatInput').value.trim();
-      if (!seatNo) {
-        showToast('請確認座號已填寫！', true);
+      const studentId = document.getElementById('studentIdInput').value.trim();
+      if (!studentId) {
+        showToast('請確認學號已填寫！', true);
         return;
       }
       if (selectedFeatureIds.length === 0) {
@@ -538,7 +531,8 @@
 
       const payload = {
         action: 'saveStep2',
-        seatNo,
+        seatNo: studentId,
+        studentId,
         topic: topic.id,
         sourceSeatNo: peerData.sourceSeatNo || 'DEFAULT',
         featureScore,
@@ -553,7 +547,6 @@
 
       saveLocalStep2(payload);
 
-      let syncedCloud = false;
       if (GAS_URL) {
         try {
           const res = await fetch(GAS_URL, {
@@ -562,35 +555,23 @@
             body: JSON.stringify(payload)
           });
           const data = await res.json();
-          syncedCloud = Boolean(data && data.ok);
+          setStatusDot(Boolean(data && data.ok));
         } catch (err) {
-          syncedCloud = false;
+          setStatusDot(false);
         }
       }
 
       btn.textContent = '完成特徵選取 (Confirm Selected Features)';
-      renderResult(payload, chosenObjs, syncedCloud);
+      renderResult(payload, chosenObjs);
     }
 
-    function renderResult(payload, chosenObjs, syncedCloud) {
+    function renderResult(payload, chosenObjs) {
       const topic = TOPICS[payload.topic] || TOPICS.climate;
       document.getElementById('taskSection').classList.add('hidden');
       document.getElementById('resultSection').classList.remove('hidden');
 
-      document.getElementById('resultTopicBadge').textContent = `Step 2 Completed — ${topic.badgeText}`;
-      document.getElementById('resultSeatBadge').textContent = `座號 Seat #${payload.seatNo}`;
-
-      const saveBadge = document.getElementById('saveStatusBadge');
-      if (GAS_URL && syncedCloud) {
-        saveBadge.textContent = '已同步儲存至 Google Sheet';
-        saveBadge.className = 'px-3 py-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold';
-      } else if (GAS_URL && !syncedCloud) {
-        saveBadge.textContent = '雲端連線失敗（已暫存本機）';
-        saveBadge.className = 'px-3 py-2 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold';
-      } else {
-        saveBadge.textContent = '本機演示模式（已暫存瀏覽器）';
-        saveBadge.className = 'px-3 py-2 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold';
-      }
+      document.getElementById('resultTopicBadge').textContent = topic.badgeText;
+      document.getElementById('resultStudentBadge').textContent = `學號 ${payload.studentId}`;
 
       document.getElementById('scoreBigText').textContent = `${payload.featureScore} / 100 分`;
       const diag = getFeatureDiagnosis(payload.featureScore);
@@ -634,15 +615,18 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      if (GAS_URL) {
-        const badge = document.getElementById('syncModeBadge');
-        badge.textContent = 'Google Sheet 雲端連線中';
-        badge.className = 'text-xs px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-200 border border-emerald-400/40 font-semibold';
-      }
+      checkConnection();
       try {
-        const lastSeat = localStorage.getItem('ai_fruit_lab_last_seat');
-        if (lastSeat) document.getElementById('seatInput').value = lastSeat;
+        const savedId = localStorage.getItem(STUDENT_ID_KEY);
+        if (savedId) document.getElementById('studentIdInput').value = savedId;
       } catch (err) {}
+
+      document.getElementById('studentIdInput').addEventListener('input', (e) => {
+        const v = e.target.value.trim();
+        if (v) {
+          try { localStorage.setItem(STUDENT_ID_KEY, v); } catch (err) {}
+        }
+      });
 
       document.getElementById('loadPeerBtn').addEventListener('click', loadPeerClassification);
       document.getElementById('reloadPeerBtn').addEventListener('click', loadPeerClassification);

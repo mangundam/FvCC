@@ -48,16 +48,14 @@
     <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center gap-3">
         <span class="px-3 py-1 rounded-full bg-teal-400 text-slate-950 text-xs font-extrabold tracking-wide uppercase">Step 3 of 3</span>
-        <h1 class="text-lg sm:text-xl font-extrabold tracking-tight">AI Model Designer: Prediction &amp; Final Report (比對預測與結算)</h1>
+        <h1 class="text-lg sm:text-xl font-extrabold tracking-tight">AI Model Designer: Prediction &amp; Summary</h1>
       </div>
       <div class="flex items-center gap-3">
-        <span id="syncModeBadge" class="text-xs px-3 py-1 rounded-full bg-amber-500/20 text-amber-200 border border-amber-400/40 font-semibold">
-          本機演示模式
-        </span>
+        <span id="statusDot" title="連線狀態" class="w-3.5 h-3.5 rounded-full bg-rose-500 ring-2 ring-slate-700 shrink-0"></span>
         <div class="flex items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
-          <label for="seatInput" class="text-xs sm:text-sm font-semibold text-slate-300">座號 Seat No.</label>
-          <input id="seatInput" type="text" inputmode="numeric" maxlength="6" placeholder="例如 05"
-            class="w-20 px-2 py-1 text-center font-bold text-slate-900 bg-white rounded border border-slate-300 focus:outline-none focus:ring-2 focus:ring-teal-400" />
+          <label for="studentIdInput" class="text-xs sm:text-sm font-semibold text-slate-300">學號 ID</label>
+          <input id="studentIdInput" type="text" maxlength="16" placeholder="請輸入學號"
+            class="w-28 px-2 py-1 text-center font-bold text-slate-900 bg-white rounded border border-slate-300 focus:outline-none focus:ring-2 focus:ring-teal-400" />
         </div>
       </div>
     </div>
@@ -69,44 +67,38 @@
   <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-5">
 
     <!-- Entry Section -->
-    <section id="entrySection" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 max-w-2xl mx-auto mt-6">
-      <span class="inline-block px-3 py-1 rounded-full bg-teal-100 text-teal-800 text-xs font-extrabold mb-2">Final Test: Unseen Data</span>
-      <h2 class="text-2xl font-extrabold text-slate-900">Step 3: 載入你的特徵規則並預測題庫外新水果</h2>
+    <section id="entrySection" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 max-w-xl mx-auto mt-10">
+      <span class="inline-block px-3 py-1 rounded-full bg-teal-100 text-teal-800 text-xs font-extrabold mb-2">Step 3: Make a Prediction</span>
+      <h2 class="text-2xl font-extrabold text-slate-900">比對特徵並預測新照片</h2>
       <p class="text-slate-600 text-sm sm:text-base mt-2 leading-relaxed">
-        輸入座號後，系統會自動讀取你在 Step 2 的題型與特徵規則，抽出一張<strong class="text-slate-800">題庫外沒看過的水果照片</strong>。請逐項比對特徵並做出最終預測，完成後即可查看你的座號三類結算表！
+        請確認右上角學號無誤後，依照你在 Step 2 選出的特徵預測一張新水果照片，並查看你的最終結算表。
       </p>
       <div class="mt-6">
         <button id="startStep3Btn" type="button"
           class="px-7 py-3.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-extrabold text-base shadow-sm transition">
-          開始特徵比對與預測 (Start Prediction)
+          開始預測 (Start)
         </button>
       </div>
     </section>
 
     <!-- Prediction Workspace -->
     <section id="taskSection" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6">
-      <div class="flex flex-wrap items-start justify-between gap-3 mb-5">
-        <div>
-          <span id="topicBadge" class="inline-block px-3 py-1 rounded-full text-xs font-extrabold mb-1"></span>
-          <h2 id="topicHeading" class="text-xl sm:text-2xl font-extrabold text-slate-900"></h2>
-          <p class="text-slate-600 text-sm sm:text-base mt-1">
-            現在 AI 收到了一張沒看過的題庫外水果照片，請依照你在 Step 2 選出的特徵逐一判斷它偏向哪一類，再做出最終預測。
-          </p>
-        </div>
-        <span id="loadedFeatureNote" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold"></span>
+      <div class="mb-5">
+        <span id="topicBadge" class="inline-block px-3 py-1 rounded-full text-xs font-extrabold mb-1"></span>
+        <h2 id="topicHeading" class="text-xl sm:text-2xl font-extrabold text-slate-900"></h2>
+        <p class="text-slate-600 text-sm sm:text-base mt-1">
+          請依照你在 Step 2 選出的特徵，逐一判斷這張照片偏向哪一類，再做出最終預測。
+        </p>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <!-- Left: Unseen Fruit Image -->
         <div class="lg:col-span-5 rounded-2xl border-2 border-slate-200 bg-slate-50 p-5 flex flex-col items-center">
           <span class="px-3 py-1 rounded-full bg-slate-800 text-white text-xs font-bold mb-3">
-            Unseen Test Image (題庫外測試照片)
+            Test Image (測試照片)
           </span>
           <img id="testFruitImg" src="" alt="Unseen fruit test image"
             class="w-full max-h-72 object-contain rounded-xl bg-white border border-slate-200 p-3 shadow-sm" />
-          <p class="text-xs text-slate-500 mt-3 text-center">
-            請仔細觀察圖片特徵，再點選右側判斷按鈕。
-          </p>
         </div>
 
         <!-- Right: Feature Matching & Final Prediction -->
@@ -115,7 +107,7 @@
 
           <div class="pt-4 border-t-2 border-slate-200">
             <h3 class="text-lg font-extrabold text-slate-900 mb-3">
-              綜合以上特徵，你的最終預測是？ (Your final prediction is...)
+              你的最終預測是？ (Your final prediction is...)
             </h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
               <button id="finalCatABtn" type="button"
@@ -128,14 +120,14 @@
 
             <button id="submitBtn" type="button" disabled
               class="w-full py-4 rounded-xl bg-teal-600 hover:bg-teal-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-extrabold text-base shadow-sm transition">
-              送出預測並產生三類結算表 (Submit &amp; View Summary)
+              送出預測並查看結算表 (Submit)
             </button>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Result: Step 3 Speaking Scaffold + 3-Category Seat Summary Table -->
+    <!-- Result: Step 3 Speaking Scaffold + 3-Category Summary Table -->
     <section id="resultSection" class="hidden space-y-6">
 
       <!-- Card 1: Step 3 Result & Speaking Scaffold -->
@@ -143,19 +135,16 @@
         <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-5 border-b border-slate-200">
           <div>
             <span id="resultTopicBadge" class="inline-block px-3 py-1 rounded-full bg-teal-100 text-teal-800 text-xs font-extrabold mb-1"></span>
-            <h2 class="text-2xl font-extrabold text-slate-900">Step 3 預測結果與英文口說分享</h2>
+            <h2 class="text-2xl font-extrabold text-slate-900">Step 3 預測結果</h2>
           </div>
-          <div class="flex items-center gap-3">
-            <span id="resultSeatBadge" class="px-4 py-2 rounded-xl bg-slate-900 text-white font-extrabold text-base"></span>
-            <span id="saveStatusBadge" class="px-3 py-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold"></span>
-          </div>
+          <span id="resultStudentBadge" class="px-4 py-2 rounded-xl bg-slate-900 text-white font-extrabold text-base"></span>
         </div>
 
         <!-- Revealed Fruit Info -->
         <div class="flex flex-wrap items-center gap-5 p-4 rounded-xl bg-slate-50 border border-slate-200 mb-6">
           <img id="revealFruitImg" src="" alt="Revealed fruit" class="w-24 h-24 object-contain rounded-xl bg-white border border-slate-200 p-2" />
           <div class="flex-1 min-w-[200px]">
-            <div class="text-xs font-bold uppercase tracking-wider text-slate-500">Test Fruit Revealed (測試水果揭曉)</div>
+            <div class="text-xs font-bold uppercase tracking-wider text-slate-500">Test Fruit Revealed</div>
             <div id="revealFruitTitle" class="text-2xl font-black text-slate-900 mt-0.5"></div>
             <div id="revealFruitNote" class="text-sm text-slate-600 mt-1"></div>
           </div>
@@ -165,36 +154,34 @@
         <!-- Step 3 English Speaking Scaffold -->
         <div class="rounded-2xl border-2 border-teal-600 bg-gradient-to-br from-teal-50/70 to-white p-6">
           <div class="text-xs font-extrabold uppercase tracking-wider text-teal-700 mb-3">
-            English Speaking Scaffold (請練習用這句英文分享你的預測結果)
+            English Speaking
           </div>
           <p class="text-xl sm:text-2xl font-bold text-slate-900 leading-relaxed">
             I think it is <span id="blankPred" class="scaffold-blank"></span>, and my prediction is <span id="blankOutcome" class="scaffold-blank"></span>.
           </p>
 
-          <!-- Highlighted Options Below -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-5">
             <div>
-              <div class="text-xs font-bold text-slate-500 uppercase mb-2">Category Options (你的分類預測)</div>
+              <div class="text-xs font-bold text-slate-500 uppercase mb-2">Category</div>
               <div id="predCategoryPills" class="flex flex-wrap gap-2"></div>
             </div>
             <div>
-              <div class="text-xs font-bold text-slate-500 uppercase mb-2">Outcome Options (推論結果)</div>
+              <div class="text-xs font-bold text-slate-500 uppercase mb-2">Result</div>
               <div id="predOutcomePills" class="flex flex-wrap gap-2"></div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Card 2: Three-Category Seat Summary Table (座號三類結算表) -->
+      <!-- Card 2: Three-Category Summary Table -->
       <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
         <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
           <div>
             <h2 class="text-2xl font-extrabold text-slate-900">個人 AI 模型三類結算表 (AI Diagnosis Summary)</h2>
-            <p class="text-sm text-slate-600 mt-0.5">彙整你在 Step 1、Step 2、Step 3 的三項表現指標與優化建議</p>
           </div>
           <button id="downloadPngBtn" type="button"
             class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-sm shadow-sm transition">
-            下載座號結算圖卡 (.png)
+            下載結算圖卡 (.png)
           </button>
         </div>
 
@@ -204,7 +191,7 @@
               <tr class="bg-slate-100 text-slate-700 text-xs sm:text-sm uppercase">
                 <th class="py-3.5 px-4 font-extrabold border-b border-slate-200">評量類別 Category</th>
                 <th class="py-3.5 px-4 font-extrabold border-b border-slate-200">成績 / 結果 Result</th>
-                <th class="py-3.5 px-4 font-extrabold border-b border-slate-200">詳細紀錄與診斷 Details &amp; Diagnosis</th>
+                <th class="py-3.5 px-4 font-extrabold border-b border-slate-200">詳細紀錄 Details</th>
               </tr>
             </thead>
             <tbody id="summaryTableBody" class="divide-y divide-slate-200 text-sm sm:text-base"></tbody>
@@ -225,16 +212,14 @@
   </main>
 
   <script>
-    // =========================================================================
-    // [老師設定區] Google Apps Script 部署網址
-    // =========================================================================
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbw7Xgo1vGvcgPz6Z9KgnEOdpdU7ngVIIEL0ZkDSP2YqguntUZ0g_FP0t_k7TWXR8P5M/exec';
+    const STUDENT_ID_KEY = 'ai_fruit_lab_student_id';
 
     const TOPICS = {
       skin: {
         id: 'skin',
         shortZh: '連皮吃 vs. 去皮吃',
-        badgeText: '題型 A：連皮吃 vs. 去皮吃 (Skin Type)',
+        badgeText: 'Edible Skin vs. Peel to Eat',
         badgeCls: 'bg-emerald-100 text-emerald-800',
         heading: 'Step 3: Predict — Edible Skin vs. Peel to Eat',
         catA: { en: 'Edible Skin', zh: '連皮吃' },
@@ -252,7 +237,7 @@
       climate: {
         id: 'climate',
         shortZh: '熱帶 vs. 溫帶',
-        badgeText: '題型 B：熱帶水果 vs. 溫帶水果 (Climate Zone)',
+        badgeText: 'Tropical vs. Temperate',
         badgeCls: 'bg-sky-100 text-sky-800',
         heading: 'Step 3: Predict — Tropical vs. Temperate Fruits',
         catA: { en: 'Tropical Fruit',  zh: '熱帶水果' },
@@ -269,7 +254,6 @@
       }
     };
 
-    // 題庫外測試水果（支援 fruits/<key>01.png ~ 10.png，可依實際張數調整 count）
     const TEST_FRUIT_SPECIES = {
       greenapple: {
         key: 'greenapple',
@@ -280,7 +264,7 @@
         color: '#65a30d',
         accent: '#ecfccb',
         noteByTopic: {
-          skin: '果皮薄且光滑，雖是綠色但仍屬於連皮吃（破除只看顏色的迷思！）',
+          skin: '果皮薄且光滑，雖是綠色但仍屬於連皮吃',
           climate: '蘋果屬於經典溫帶水果，適合較涼爽的四季氣候生長'
         }
       },
@@ -306,7 +290,7 @@
         color: '#be123c',
         accent: '#ffe4e6',
         noteByTopic: {
-          skin: '雖與草莓、蓮霧一樣呈紅色小果，但外殼粗糙帶硬顆粒，必須去皮吃',
+          skin: '雖呈紅色小果，但外殼粗糙帶硬顆粒，必須去皮吃',
           climate: '荔枝屬於典型熱帶／亞熱帶水果，具有特殊顆粒狀外殼'
         }
       },
@@ -338,14 +322,33 @@
       }
     };
 
-    // State
-    let studentRecord = { seatNo: '', step1: null, step2: null };
+    let studentRecord = { studentId: '', step1: null, step2: null };
     let activeTopicKey = 'climate';
     let activeFeatures = [];
     let currentTestFruit = null;
-    let featureVotes = {}; // { featureId: 'catA' | 'catB' }
-    let finalPrediction = null; // 'catA' | 'catB'
+    let featureVotes = {};
+    let finalPrediction = null;
     let lastReportData = null;
+
+    function setStatusDot(online) {
+      const dot = document.getElementById('statusDot');
+      dot.className = 'w-3.5 h-3.5 rounded-full ring-2 ring-slate-700 shrink-0 ' + (online ? 'bg-emerald-400' : 'bg-rose-500');
+      dot.title = online ? 'Online' : 'Offline';
+    }
+
+    async function checkConnection() {
+      if (!GAS_URL) {
+        setStatusDot(false);
+        return;
+      }
+      try {
+        const res = await fetch(`${GAS_URL}?action=ping`);
+        const json = await res.json();
+        setStatusDot(Boolean(json && json.ok));
+      } catch (err) {
+        setStatusDot(false);
+      }
+    }
 
     function drawTestFruitInstance(speciesKey) {
       const sp = TEST_FRUIT_SPECIES[speciesKey];
@@ -381,54 +384,56 @@
       box._timer = setTimeout(() => box.classList.add('hidden'), 2800);
     }
 
-    function getLocalStudentSummary(seatNo) {
+    function getLocalStudentSummary(studentId) {
       let step1 = null;
       let step2 = null;
       try {
         const s1 = JSON.parse(localStorage.getItem('ai_fruit_lab_step1_v2') || '{}');
-        if (s1[seatNo]) step1 = s1[seatNo];
+        if (s1[studentId]) step1 = s1[studentId];
       } catch (err) {}
       try {
         const s2 = JSON.parse(localStorage.getItem('ai_fruit_lab_step2_v2') || '{}');
-        if (s2[seatNo]) step2 = s2[seatNo];
+        if (s2[studentId]) step2 = s2[studentId];
       } catch (err) {}
-      return { seatNo, step1, step2 };
+      return { studentId, step1, step2 };
     }
 
     async function startStep3() {
-      const seatNo = document.getElementById('seatInput').value.trim();
-      if (!seatNo) {
-        showToast('請先在右上角輸入你的座號！', true);
-        document.getElementById('seatInput').focus();
+      const studentId = document.getElementById('studentIdInput').value.trim();
+      if (!studentId) {
+        showToast('請先在右上角輸入你的學號！', true);
+        document.getElementById('studentIdInput').focus();
         return;
       }
 
+      try { localStorage.setItem(STUDENT_ID_KEY, studentId); } catch (err) {}
+
       const btn = document.getElementById('startStep3Btn');
       btn.disabled = true;
-      btn.textContent = '載入你的 Step 1 & Step 2 紀錄中...';
+      btn.textContent = '載入資料中...';
 
       let fetched = null;
       if (GAS_URL) {
         try {
-          const url = `${GAS_URL}?action=getStudentSummary&seatNo=${encodeURIComponent(seatNo)}`;
+          const url = `${GAS_URL}?action=getStudentSummary&seatNo=${encodeURIComponent(studentId)}`;
           const res = await fetch(url);
           const json = await res.json();
           if (json && json.ok) {
             fetched = json;
+            setStatusDot(true);
           }
         } catch (err) {
           fetched = null;
+          setStatusDot(false);
         }
       }
 
-      const local = getLocalStudentSummary(seatNo);
+      const local = getLocalStudentSummary(studentId);
       studentRecord = {
-        seatNo,
+        studentId,
         step1: (fetched && fetched.step1) ? fetched.step1 : local.step1,
         step2: (fetched && fetched.step2) ? fetched.step2 : local.step2
       };
-
-      try { localStorage.setItem('ai_fruit_lab_last_seat', seatNo); } catch (err) {}
 
       if (studentRecord.step2 && TOPICS[studentRecord.step2.topic]) {
         activeTopicKey = studentRecord.step2.topic;
@@ -453,7 +458,7 @@
       finalPrediction = null;
 
       btn.disabled = false;
-      btn.textContent = '開始特徵比對與預測 (Start Prediction)';
+      btn.textContent = '開始預測 (Start)';
 
       document.getElementById('entrySection').classList.add('hidden');
       document.getElementById('resultSection').classList.add('hidden');
@@ -469,11 +474,6 @@
       tBadge.textContent = topic.badgeText;
       tBadge.className = 'inline-block px-3 py-1 rounded-full text-xs font-extrabold mb-1 ' + topic.badgeCls;
       document.getElementById('topicHeading').textContent = topic.heading;
-
-      const noteEl = document.getElementById('loadedFeatureNote');
-      noteEl.textContent = studentRecord.step2
-        ? `已載入座號 #${studentRecord.seatNo} 在 Step 2 選出的 ${activeFeatures.length} 個特徵`
-        : `未找到 Step 2 紀錄，暫以預設 ${activeFeatures.length} 個特徵進行測試`;
 
       const img = document.getElementById('testFruitImg');
       img.src = currentTestFruit.img;
@@ -568,7 +568,8 @@
 
       const payload = {
         action: 'saveStep3',
-        seatNo: studentRecord.seatNo,
+        seatNo: studentRecord.studentId,
+        studentId: studentRecord.studentId,
         topic: activeTopicKey,
         testFruitId: currentTestFruit.id,
         testFruitName: `${currentTestFruit.nameEn} (${currentTestFruit.nameZh})`,
@@ -584,16 +585,15 @@
 
       const btn = document.getElementById('submitBtn');
       btn.disabled = true;
-      btn.textContent = '資料上傳並產生結算表中...';
+      btn.textContent = '資料上傳中...';
 
       try {
         const key = 'ai_fruit_lab_step3_v2';
         const store = JSON.parse(localStorage.getItem(key) || '{}');
-        store[payload.seatNo] = payload;
+        store[payload.studentId] = payload;
         localStorage.setItem(key, JSON.stringify(store));
       } catch (err) {}
 
-      let syncedCloud = false;
       if (GAS_URL) {
         try {
           const res = await fetch(GAS_URL, {
@@ -602,18 +602,18 @@
             body: JSON.stringify(payload)
           });
           const data = await res.json();
-          syncedCloud = Boolean(data && data.ok);
+          setStatusDot(Boolean(data && data.ok));
         } catch (err) {
-          syncedCloud = false;
+          setStatusDot(false);
         }
       }
 
-      btn.textContent = '送出預測並產生三類結算表 (Submit & View Summary)';
+      btn.textContent = '送出預測並查看結算表 (Submit)';
       lastReportData = { payload, advice, step1: studentRecord.step1, step2: studentRecord.step2, testFruit: currentTestFruit, topicKey: activeTopicKey };
-      renderSummary(lastReportData, syncedCloud);
+      renderSummary(lastReportData);
     }
 
-    function renderSummary(report, syncedCloud) {
+    function renderSummary(report) {
       const { payload, advice, step1, step2, testFruit, topicKey } = report;
       const topic = TOPICS[topicKey];
       const truthKey = testFruit.truthByTopic[topicKey];
@@ -621,20 +621,8 @@
       document.getElementById('taskSection').classList.add('hidden');
       document.getElementById('resultSection').classList.remove('hidden');
 
-      document.getElementById('resultTopicBadge').textContent = `Step 3 Completed — ${topic.badgeText}`;
-      document.getElementById('resultSeatBadge').textContent = `座號 Seat #${payload.seatNo}`;
-
-      const saveBadge = document.getElementById('saveStatusBadge');
-      if (GAS_URL && syncedCloud) {
-        saveBadge.textContent = '已同步儲存至 Google Sheet';
-        saveBadge.className = 'px-3 py-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold';
-      } else if (GAS_URL && !syncedCloud) {
-        saveBadge.textContent = '雲端連線失敗（已暫存本機）';
-        saveBadge.className = 'px-3 py-2 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold';
-      } else {
-        saveBadge.textContent = '本機演示模式（已暫存瀏覽器）';
-        saveBadge.className = 'px-3 py-2 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold';
-      }
+      document.getElementById('resultTopicBadge').textContent = topic.badgeText;
+      document.getElementById('resultStudentBadge').textContent = `學號 ${payload.studentId}`;
 
       const revImg = document.getElementById('revealFruitImg');
       revImg.src = testFruit.img;
@@ -683,16 +671,16 @@
         outPills.appendChild(pill);
       });
 
-      const s1TopicName = (step1 && TOPICS[step1.topic]) ? TOPICS[step1.topic].shortZh : '未紀錄';
+      const s1TopicName = (step1 && TOPICS[step1.topic]) ? TOPICS[step1.topic].shortZh : '—';
       const s1ScoreText = step1 ? `${step1.score} 分 (${step1.level || ''})` : '尚無紀錄';
       const s1Detail = step1
-        ? `題型：${s1TopicName}｜答對 ${step1.correctCount ?? '-'} / ${step1.totalCount ?? 10} 張訓練圖片`
-        : '未在試算表找到此座號的 Step 1 紀錄';
+        ? `題型：${s1TopicName}｜答對 ${step1.correctCount ?? '-'} / ${step1.totalCount ?? 10} 張`
+        : '尚無紀錄';
 
       const s2ScoreText = step2 ? `${step2.featureScore} 分 (${step2.level || ''})` : '尚無紀錄';
       const s2Detail = step2
         ? `題型：${topic.shortZh}｜選取特徵：${(step2.selectedLabels || activeFeatures.map(f => f.nameEn)).join('、')}`
-        : `題型：${topic.shortZh}｜使用預設特徵：${activeFeatures.map(f => f.nameEn).join('、')}`;
+        : `題型：${topic.shortZh}｜特徵：${activeFeatures.map(f => f.nameEn).join('、')}`;
 
       const s3ScoreText = payload.isCorrect ? '正確 (Correct)' : '錯誤 (Wrong)';
       const s3Detail = `測試題：${testFruit.nameEn} (${testFruit.nameZh})｜你的預測：${payload.studentPrediction}｜真實答案：${payload.trueLabel}`;
@@ -741,14 +729,14 @@
       ctx.fillStyle = '#5eead4';
       ctx.font = 'bold 26px Inter, "Noto Sans TC", sans-serif';
       ctx.textAlign = 'right';
-      ctx.fillText(`Seat #${payload.seatNo}`, 1000, 56);
+      ctx.fillText(`ID: ${payload.studentId}`, 1000, 56);
       ctx.textAlign = 'left';
 
       const rows = [
         {
           title: '1. Rule Stability (Step 1 分類準確度)',
           val: step1 ? `${step1.score} / 100 (${step1.level || ''})` : 'N/A',
-          sub: step1 ? `Topic: ${s1TopicName} | Correct: ${step1.correctCount}/${step1.totalCount}` : 'No Step 1 record found',
+          sub: step1 ? `Topic: ${s1TopicName} | Correct: ${step1.correctCount}/${step1.totalCount}` : 'No Step 1 record',
           color: '#1d4ed8'
         },
         {
@@ -808,21 +796,24 @@
       ctx.fillText(advice.zh, 66, 592);
 
       const link = document.createElement('a');
-      link.download = `AI_Fruit_Report_Seat${payload.seatNo}.png`;
+      link.download = `AI_Fruit_Report_${payload.studentId}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      if (GAS_URL) {
-        const badge = document.getElementById('syncModeBadge');
-        badge.textContent = 'Google Sheet 雲端連線中';
-        badge.className = 'text-xs px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-200 border border-emerald-400/40 font-semibold';
-      }
+      checkConnection();
       try {
-        const lastSeat = localStorage.getItem('ai_fruit_lab_last_seat');
-        if (lastSeat) document.getElementById('seatInput').value = lastSeat;
+        const savedId = localStorage.getItem(STUDENT_ID_KEY);
+        if (savedId) document.getElementById('studentIdInput').value = savedId;
       } catch (err) {}
+
+      document.getElementById('studentIdInput').addEventListener('input', (e) => {
+        const v = e.target.value.trim();
+        if (v) {
+          try { localStorage.setItem(STUDENT_ID_KEY, v); } catch (err) {}
+        }
+      });
 
       document.getElementById('startStep3Btn').addEventListener('click', startStep3);
       document.getElementById('finalCatABtn').addEventListener('click', () => {
